@@ -55,149 +55,154 @@
         .progress-fill { height: 100%; background: linear-gradient(90deg, #48bb78, #38a169); transition: width 0.4s ease; }
         .toolbar { padding: 15px 30px; display: flex; gap: 10px; flex-wrap: wrap; border-bottom: 1px solid #e2e8f0; background: #fff; }
 
-        /* ===== МИНИ-НАВИГАЦИЯ ===== */
-        .mini-nav {
-            padding: 12px 30px;
-            background: #f7fafc;
-            border-bottom: 1px solid #e2e8f0;
-            position: sticky;
-            top: 0;
-            z-index: 50;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-            overflow: visible;
-        }
-        .mini-nav-wrapper {
-            display: flex;
-            gap: 4px;
-            flex-wrap: wrap;
-            max-height: 80px;
-            overflow-y: auto;
-            padding: 4px 0;
-            justify-content: center;
-            position: relative;
-        }
-        .mini-nav-wrapper::-webkit-scrollbar {
-            width: 4px;
-            height: 4px;
-        }
-        .mini-nav-wrapper::-webkit-scrollbar-thumb {
-            background: #cbd5e0;
-            border-radius: 4px;
-        }
-        .mini-nav-item {
-            width: 28px;
-            height: 28px;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 9px;
-            font-weight: 700;
-            color: #718096;
-            background: #edf2f7;
-            border: 2px solid transparent;
-            cursor: pointer;
-            transition: all 0.2s;
-            position: relative;
-            flex-shrink: 0;
-            z-index: 5;
-        }
-        .mini-nav-item:hover {
-            transform: scale(1.15);
-            z-index: 100;
-            border-color: #667eea;
-        }
-        .mini-nav-item.completed {
-            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
-            color: #fff;
-            border-color: #2f855a;
-        }
-        .mini-nav-item.completed:hover {
-            border-color: #2f855a;
-        }
-        .mini-nav-item.active {
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
-        }
+       /* ===== МИНИ-НАВИГАЦИЯ ===== */
+.mini-nav {
+    padding: 12px 30px;
+    background: #f7fafc;
+    border-bottom: 1px solid #e2e8f0;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    overflow: visible !important; /* принудительно видимый */
+}
 
-        /* ===== ТУЛТИПЫ ===== */
-        .mini-nav-item .tooltip {
-            display: none;
-            position: absolute;
-            bottom: calc(100% + 12px);
-            left: 50%;
-            transform: translateX(-50%);
-            background: #1a202c;
-            color: #fff;
-            padding: 10px 12px;
-            border-radius: 10px;
-            font-size: 11px;
-            font-weight: 400;
-            z-index: 9999;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.5);
-            min-width: 130px;
-            pointer-events: none;
-            white-space: normal;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-        .mini-nav-item .tooltip::after {
-            content: '';
-            position: absolute;
-            top: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            border: 6px solid transparent;
-            border-top-color: #1a202c;
-        }
-        .mini-nav-item:hover .tooltip {
-            display: block;
-        }
-        /* Отключаем тултип, если нет места снизу */
-        .mini-nav-item .tooltip .tip-title {
-            font-weight: 700;
-            margin-bottom: 5px;
-            text-align: center;
-            font-size: 12px;
-            color: #ffd700;
-            letter-spacing: 0.5px;
-        }
-        .mini-nav-item .tooltip .tip-tasks {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 3px;
-            margin-top: 4px;
-        }
-        .mini-nav-item .tooltip .tip-task {
-            width: 20px;
-            height: 20px;
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 8px;
-            font-weight: 700;
-            color: #a0aec0;
-            border: 1px solid rgba(255,255,255,0.05);
-        }
-        .mini-nav-item .tooltip .tip-task.done {
-            background: #48bb78;
-            color: #fff;
-        }
-        .mini-nav-item .tooltip .tip-task.attention {
-            background: #ed8936;
-            color: #fff;
-        }
-        .mini-nav-item .tooltip .tip-task.none {
-            background: #4a5568;
-            color: #718096;
-        }
+.mini-nav-wrapper {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    max-height: 80px;
+    overflow-y: auto;
+    padding: 4px 0;
+    justify-content: center;
+    position: relative;
+    overflow-x: visible !important; /* чтобы тултипы не обрезались по горизонтали */
+}
+
+/* каждый элемент навигации */
+.mini-nav-item {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    font-weight: 700;
+    color: #718096;
+    background: #edf2f7;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    flex-shrink: 0;
+    z-index: 5;
+}
+
+/* при наведении поднимаем элемент выше */
+.mini-nav-item:hover {
+    z-index: 99999 !important;
+    transform: scale(1.15);
+}
+
+/* ТУЛТИП */
+.mini-nav-item .tooltip {
+    display: none;
+    position: absolute;
+    bottom: calc(100% + 12px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1a202c;
+    color: #fff;
+    padding: 10px 12px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 400;
+    z-index: 99999;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+    min-width: 130px;
+    pointer-events: none;
+    white-space: normal;
+    border: 1px solid rgba(255,255,255,0.1);
+    /* чтобы тултип не убегал за пределы экрана, добавим max-width */
+    max-width: 200px;
+    word-wrap: break-word;
+}
+
+/* стрелка */
+.mini-nav-item .tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: #1a202c;
+}
+
+/* показываем тултип при наведении */
+.mini-nav-item:hover .tooltip {
+    display: block;
+}
+
+/* если тултип не помещается снизу, показываем сверху (можно добавить класс через JS) */
+.mini-nav-item .tooltip.top {
+    bottom: auto;
+    top: calc(100% + 12px);
+}
+.mini-nav-item .tooltip.top::after {
+    top: auto;
+    bottom: 100%;
+    border-top-color: transparent;
+    border-bottom-color: #1a202c;
+}
+
+/* остальные стили тултипа */
+.mini-nav-item .tooltip .tip-title {
+    font-weight: 700;
+    margin-bottom: 5px;
+    text-align: center;
+    font-size: 12px;
+    color: #ffd700;
+    letter-spacing: 0.5px;
+}
+.mini-nav-item .tooltip .tip-tasks {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 3px;
+    margin-top: 4px;
+}
+.mini-nav-item .tooltip .tip-task {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 8px;
+    font-weight: 700;
+    color: #a0aec0;
+    border: 1px solid rgba(255,255,255,0.05);
+}
+.mini-nav-item .tooltip .tip-task.done {
+    background: #48bb78;
+    color: #fff;
+}
+.mini-nav-item .tooltip .tip-task.attention {
+    background: #ed8936;
+    color: #fff;
+}
+.mini-nav-item .tooltip .tip-task.none {
+    background: #4a5568;
+    color: #718096;
+}
 
         /* ===== СЕТКА ВАРИАНТОВ ===== */
         .variants-grid { padding: 20px 30px 30px; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; max-height: 70vh; overflow-y: auto; }
         .variant-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 15px; transition: all 0.2s; position: relative; overflow: hidden; scroll-margin-top: 120px; }
         .variant-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
         .variant-card.completed { background: linear-gradient(135deg, #c6f6d5 0%, #9ae6b4 100%); border-color: #68d391; }
-        .variant-card .variant-id-badge { position: absolute; top: 8px; right: 8px; font-size: 10px; color: #a0aec0; font-weight: 600; background: rgba(0,0,0,0.05); padding: 2px 8px; border-radius: 10px; }
+        .variant-card .variant-id-badge {display:none; position: absolute; top: 8px; right: 8px; font-size: 10px; color: #a0aec0; font-weight: 600; background: rgba(0,0,0,0.05); padding: 2px 8px; border-radius: 10px; }
         .variant-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
         .variant-title { font-weight: 600; font-size: 15px; color: #2d3748; }
         .variant-progress { font-size: 12px; color: #718096; font-weight: 500; }
