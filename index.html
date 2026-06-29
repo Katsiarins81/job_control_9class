@@ -926,7 +926,7 @@
         }
 
         // ===============================
-        // 6. Загрузка / сохранение
+        // 6. Загрузка / сохранение (ИСПРАВЛЕНО: фильтрация пустых имён)
         // ===============================
 
         async function loadAllChildrenFromSupabase() {
@@ -939,7 +939,7 @@
                     console.error('Supabase select error:', error);
                     return [];
                 }
-                return rows.map(row => row.child_name);
+                return rows.map(row => row.child_name).filter(name => name && name.trim() !== '');
             } catch (e) {
                 console.error('Ошибка при загрузке списка детей из Supabase:', e);
                 return [];
@@ -966,7 +966,7 @@
                     const parsed = JSON.parse(saved);
                     if (parsed.children && parsed.children.length > 0) {
                         parsed.children.forEach(name => {
-                            if (!data.children.includes(name)) {
+                            if (name && name.trim() !== '' && !data.children.includes(name)) {
                                 data.children.push(name);
                             }
                         });
@@ -975,6 +975,9 @@
                     data.progress = parsed.progress || {};
                 } catch (e) { /* ignore */ }
             }
+
+            // Очищаем от пустых имён
+            data.children = data.children.filter(name => name && name.trim() !== '');
 
             if (supabaseEnabled) {
                 for (const childName of data.children) {
@@ -1066,7 +1069,7 @@
         };
 
         // ===============================
-        // 7. Работа с UI
+        // 7. Работа с UI (ИСПРАВЛЕНО: фильтрация пустых имён)
         // ===============================
 
         function renderChildSelect() {
@@ -1081,11 +1084,13 @@
                 sel.appendChild(opt);
                 return;
             }
-            if (data.children.length === 0) {
+            // Фильтруем пустые имена
+            const validChildren = data.children.filter(name => name && name.trim() !== '');
+            if (validChildren.length === 0) {
                 sel.innerHTML = '<option value="">— Нет учеников —</option>';
                 return;
             }
-            data.children.forEach(name => {
+            validChildren.forEach(name => {
                 const opt = document.createElement('option');
                 opt.value = name;
                 opt.textContent = name;
@@ -1377,7 +1382,7 @@
         };
 
         // ===============================
-        // 10. Действия
+        // 10. Действия (ИСПРАВЛЕНО: удаление + фильтрация)
         // ===============================
 
         window.deleteChild = async function() {
@@ -1386,24 +1391,26 @@
                 alert('У вас нет прав на удаление');
                 return;
             }
-            if (!confirm(`Удалить ученика "${data.current}" и весь его прогресс?`)) return;
+            const nameToDelete = data.current;
+            if (!confirm(`Удалить ученика "${nameToDelete}" и весь его прогресс?`)) return;
 
             if (supabaseEnabled) {
                 try {
                     const { error } = await supabaseClient
                         .from('tasks_progress')
                         .delete()
-                        .eq('child_name', data.current);
+                        .eq('child_name', nameToDelete);
                     if (error) console.error('Supabase delete error:', error);
                 } catch (e) {
                     console.error('Ошибка при удалении из Supabase:', e);
                 }
             }
 
-            deleteUser(data.current);
-            delete data.progress[data.current];
-            data.children = data.children.filter(c => c !== data.current);
-            data.current = data.children[0] || null;
+            deleteUser(nameToDelete);
+            delete data.progress[nameToDelete];
+            // Фильтруем массив, удаляем пустые строки
+            data.children = data.children.filter(c => c !== nameToDelete && c && c.trim() !== '');
+            data.current = data.children.length > 0 ? data.children[0] : null;
             await saveData();
             renderChildSelect();
             renderGrid();
@@ -1708,8 +1715,6 @@
                 const pwd = document.getElementById('loginPassword');
                 if (pwd) pwd.focus();
             }, 500);
-
-           
         });
     </script>
 </body>
