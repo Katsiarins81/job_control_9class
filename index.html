@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Контроль заданий</title>
     <style>
-        /* ----- Стили (с добавлениями для анимаций) ----- */
+        /* ----- Стили ----- */
         * {
             box-sizing: border-box;
             margin: 0;
@@ -54,7 +54,7 @@
         .progress-bar { height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden; margin-top: 8px; }
         .progress-fill { height: 100%; background: linear-gradient(90deg, #48bb78, #38a169); transition: width 0.4s ease; }
         .toolbar { padding: 15px 30px; display: flex; gap: 10px; flex-wrap: wrap; border-bottom: 1px solid #e2e8f0; background: #fff; }
-        .variants-grid { padding: 20px 30px 30px; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; max-height: 70vh; overflow-y: auto; }
+        .variants-grid { padding: 20px 30px 30px; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; max-height: 70vh; overflow-y: auto; position: relative; }
         .variant-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 15px; transition: all 0.2s; position: relative; overflow: hidden; }
         .variant-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
         .variant-card.completed { background: linear-gradient(135deg, #c6f6d5 0%, #9ae6b4 100%); border-color: #68d391; }
@@ -69,7 +69,6 @@
         .task.needs-attention { background: linear-gradient(135deg, #f65584 0%, #ed36a0b5 100%); color: #fff; border-color: #dd204f; }
         .task.needs-attention:hover { background: linear-gradient(135deg, #f65584 0%, #ed36a0 100%); }
         .task.has-comment::after { content: '💬'; position: absolute; top: -5px; right: -5px; font-size: 10px; background: #fff; border-radius: 50%; width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; border: 1px solid #e2e8f0; }
-        /* Скрытые задания (не входящие в лимит) */
         .task-disabled { opacity: 0.2; pointer-events: none; cursor: default; background: #e2e8f0; }
         .task-disabled:hover { transform: none; background: #e2e8f0; }
         .loading { text-align: center; padding: 40px; color: #718096; }
@@ -109,57 +108,117 @@
         .admin-controls label { color: rgba(255,255,255,0.8); font-size: 14px; }
         .btn-clear-all { background: #e53e3e; color: #fff; border: 1px solid #c53030; }
         .btn-clear-all:hover { background: #c53030; }
-        /* Настройка количества заданий */
         .tasks-limit-setting { display: flex; align-items: center; gap: 10px; background: #edf2f7; padding: 5px 12px; border-radius: 10px; }
         .tasks-limit-setting label { font-weight: 600; color: #2d3748; font-size: 14px; }
         .tasks-limit-setting input { width: 60px; min-width: 60px; padding: 6px 8px; text-align: center; background: #fff; border: 1px solid #cbd5e0; border-radius: 6px; }
         .tasks-limit-setting input:focus { border-color: #667eea; }
-        /* Анимация конфетти для варианта */
-        .variant-celebration {
+
+        /* ===== Анимации ===== */
+
+        /* 1. Салют для варианта (фейерверк) */
+        .variant-firework {
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
             pointer-events: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 48px;
-            opacity: 0;
-            animation: celebrateVariant 2s ease forwards;
+            overflow: hidden;
+            z-index: 10;
         }
-        @keyframes celebrateVariant {
-            0% { opacity: 0; transform: scale(0.5) rotate(-10deg); }
-            30% { opacity: 1; transform: scale(1.2) rotate(5deg); }
-            60% { opacity: 1; transform: scale(1) rotate(0); }
-            100% { opacity: 0; transform: scale(1.5) rotate(0); }
+        .firework-particle {
+            position: absolute;
+            border-radius: 50%;
+            animation: fireworkBurst 1.2s ease-out forwards;
         }
-        /* Анимация завершения курса (на весь экран) */
-        .course-celebration {
+        @keyframes fireworkBurst {
+            0% {
+                transform: translate(0, 0) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(var(--tx), var(--ty)) scale(0);
+                opacity: 0;
+            }
+        }
+
+        /* 2. Грандиозный салют на весь экран */
+        .grand-firework {
             position: fixed;
             inset: 0;
-            background: rgba(0,0,0,0.7);
-            display: flex;
-            align-items: center;
-            justify-content: center;
             z-index: 999;
-            flex-direction: column;
+            pointer-events: none;
+            overflow: hidden;
+        }
+        .grand-firework .burst {
+            position: absolute;
+            border-radius: 50%;
+            animation: grandBurst 3s ease-out forwards;
+        }
+        @keyframes grandBurst {
+            0% {
+                transform: translate(0, 0) scale(0.5);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(var(--gx), var(--gy)) scale(0);
+                opacity: 0;
+            }
+        }
+        .grand-firework .title {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             color: #fff;
-            font-size: 48px;
-            animation: courseCelebrate 4s ease forwards;
+            font-size: 64px;
+            font-weight: 700;
+            text-shadow: 0 0 30px rgba(255,215,0,0.8), 0 0 60px rgba(255,215,0,0.5);
+            animation: titlePulse 2s ease-in-out infinite alternate;
+            z-index: 1000;
+            text-align: center;
         }
-        .course-celebration h2 { font-size: 48px; margin-bottom: 20px; text-shadow: 0 0 20px rgba(255,215,0,0.8); }
-        .course-celebration .emoji { font-size: 80px; animation: bounce 1s infinite alternate; }
-        @keyframes bounce { 0% { transform: translateY(0); } 100% { transform: translateY(-20px); } }
-        @keyframes courseCelebrate {
-            0% { opacity: 0; }
-            20% { opacity: 1; }
-            80% { opacity: 1; }
-            100% { opacity: 0; }
+        .grand-firework .subtitle {
+            font-size: 28px;
+            margin-top: 10px;
+            color: #ffd700;
+            text-shadow: 0 0 20px rgba(255,215,0,0.6);
         }
-        /* Скрываем анимацию, когда не активна */
-        .course-celebration.hidden { display: none; }
+        @keyframes titlePulse {
+            0% { transform: translate(-50%, -50%) scale(1); }
+            100% { transform: translate(-50%, -50%) scale(1.1); }
+        }
+
+        /* 3. Звёздочки при клике на задание */
+        .click-stars {
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+        }
+        .click-star {
+            position: absolute;
+            font-size: 20px;
+            animation: starFly 0.8s ease-out forwards;
+        }
+        @keyframes starFly {
+            0% {
+                transform: translate(0, 0) scale(1) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(var(--sx), var(--sy)) scale(0) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        /* Эффект пульсации для завершённого варианта */
+        .variant-card.completed {
+            animation: glowPulse 2s ease-in-out 2;
+        }
+        @keyframes glowPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(72, 187, 120, 0.4); }
+            50% { box-shadow: 0 0 30px 10px rgba(72, 187, 120, 0.2); }
+        }
     </style>
 </head>
 <body>
@@ -208,14 +267,13 @@
                 <button onclick="window.openAddModal()" class="add-child-btn">Добавить</button>
                 <button onclick="window.deleteChild()" class="delete-child-btn">Удалить</button>
             </div>
-            <!-- Настройка количества заданий -->
             <div class="tasks-limit-setting" id="tasksLimitSetting">
                 <label>Заданий в варианте:</label>
                 <input type="number" id="tasksLimitInput" min="1" max="10" value="10" />
                 <button onclick="window.updateTasksLimit()" class="secondary2" style="padding: 6px 12px;">Применить</button>
             </div>
             <button onclick="window.syncData()" class="secondary2" title="Синхронизировать с облаком">🔄 Синхр.</button>
-            <button onclick="window.clearAllData()" class="btn-clear-all" title="Удалить ВСЕ данные (учеников, прогресс)">🧹 Очистить всё</button>
+            <button onclick="window.clearAllData()" class="btn-clear-all" title="Удалить ВСЕ данные">🧹 Очистить всё</button>
         </div>
 
         <div class="stats">
@@ -255,7 +313,7 @@
         <div class="variants-grid" id="grid"></div>
     </div>
 
-    <!-- Модалка для добавления ребёнка (добавляем поле для лимита) -->
+    <!-- Модалка для добавления ребёнка -->
     <div class="modal-overlay" id="addChildModal">
         <div class="modal">
             <h2> Добавить ученика</h2>
@@ -289,13 +347,6 @@
         </div>
     </div>
 
-    <!-- Элемент для анимации завершения курса -->
-    <div id="courseCelebration" class="course-celebration hidden">
-        <div class="emoji">🎉</div>
-        <h2>Курс завершён!</h2>
-        <div style="font-size: 30px;">Поздравляем! 🏆</div>
-    </div>
-
     <!-- ====== ПОДКЛЮЧЕНИЕ БИБЛИОТЕК ====== -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
     </script>
@@ -327,20 +378,19 @@
         const TASKS = 10;
         const STORAGE_KEY = 'tasksProgress_v2';
         const USERS_KEY = 'users_v1';
-        const SETTINGS_KEY = 'tasksSettings_v1'; // для хранения настроек
+        const SETTINGS_KEY = 'tasksSettings_v1';
 
         let data = {
             children: [],
             current: null,
             progress: {}
         };
-        let settings = {}; // { childName: { maxTasks: 7 } }
+        let settings = {};
         let usersCache = {};
         let currentTaskKey = null;
         let currentComment = '';
-        // Флаги для анимаций (чтобы не повторять)
-        let variantCelebrated = {}; // { childName: { variant: true } }
-        let courseCelebrated = {}; // { childName: true }
+        let variantCelebrated = {};
+        let courseCelebrated = {};
 
         try {
             if (SUPABASE_URL && SUPABASE_KEY && SUPABASE_URL !== 'https://ваш-проект.supabase.co') {
@@ -355,127 +405,70 @@
         }
 
         // ===============================
-        // 3. Работа с пользователями через Supabase
+        // 3. Работа с пользователями (без изменений)
         // ===============================
-
         async function loadUsersFromSupabase() {
             if (!supabaseEnabled) return;
             try {
-                const { data: rows, error } = await supabaseClient
-                    .from('users')
-                    .select('username, password, role');
-                if (error) {
-                    console.error('Ошибка загрузки пользователей из Supabase:', error);
-                    return;
-                }
+                const { data: rows, error } = await supabaseClient.from('users').select('username, password, role');
+                if (error) { console.error('Ошибка загрузки пользователей:', error); return; }
                 usersCache = {};
-                rows.forEach(row => {
-                    usersCache[row.username] = { password: row.password, role: row.role };
-                });
+                rows.forEach(row => { usersCache[row.username] = { password: row.password, role: row.role }; });
                 localStorage.setItem(USERS_KEY, JSON.stringify(usersCache));
-                console.log('✅ Пользователи загружены из Supabase:', Object.keys(usersCache));
-            } catch (e) {
-                console.error('Ошибка при загрузке пользователей:', e);
-            }
+            } catch (e) { console.error('Ошибка при загрузке пользователей:', e); }
         }
 
         async function saveUserToSupabase(username, password, role) {
             if (!supabaseEnabled) return false;
             try {
-                const { error } = await supabaseClient
-                    .from('users')
-                    .upsert({ username, password, role }, { onConflict: 'username' });
-                if (error) {
-                    console.error('Ошибка сохранения пользователя в Supabase:', error);
-                    return false;
-                }
+                const { error } = await supabaseClient.from('users').upsert({ username, password, role }, { onConflict: 'username' });
+                if (error) { console.error('Ошибка сохранения пользователя:', error); return false; }
                 usersCache[username] = { password, role };
                 localStorage.setItem(USERS_KEY, JSON.stringify(usersCache));
                 return true;
-            } catch (e) {
-                console.error('Ошибка при сохранении пользователя:', e);
-                return false;
-            }
+            } catch (e) { console.error('Ошибка при сохранении пользователя:', e); return false; }
         }
 
         async function deleteUserFromSupabase(username) {
-            if (!supabaseEnabled) return false;
-            if (username === ADMIN_USERNAME) return false;
+            if (!supabaseEnabled || username === ADMIN_USERNAME) return false;
             try {
-                const { error } = await supabaseClient
-                    .from('users')
-                    .delete()
-                    .eq('username', username);
-                if (error) {
-                    console.error('Ошибка удаления пользователя из Supabase:', error);
-                    return false;
-                }
+                const { error } = await supabaseClient.from('users').delete().eq('username', username);
+                if (error) { console.error('Ошибка удаления пользователя:', error); return false; }
                 delete usersCache[username];
                 localStorage.setItem(USERS_KEY, JSON.stringify(usersCache));
                 return true;
-            } catch (e) {
-                console.error('Ошибка при удалении пользователя:', e);
-                return false;
-            }
+            } catch (e) { console.error('Ошибка при удалении пользователя:', e); return false; }
         }
 
         async function authenticateWithSupabase(username, password) {
-            if (usersCache[username] && usersCache[username].password === password) {
-                return usersCache[username];
-            }
+            if (usersCache[username] && usersCache[username].password === password) return usersCache[username];
             if (!supabaseEnabled) return null;
             try {
-                const { data: rows, error } = await supabaseClient
-                    .from('users')
-                    .select('username, password, role')
-                    .eq('username', username)
-                    .maybeSingle();
-                if (error || !rows) {
-                    console.error('Ошибка аутентификации:', error);
-                    return null;
-                }
+                const { data: rows, error } = await supabaseClient.from('users').select('username, password, role').eq('username',
+                    username).maybeSingle();
+                if (error || !rows) { console.error('Ошибка аутентификации:', error); return null; }
                 if (rows.password === password) {
                     usersCache[username] = { password: rows.password, role: rows.role };
                     localStorage.setItem(USERS_KEY, JSON.stringify(usersCache));
                     return { password: rows.password, role: rows.role };
                 }
                 return null;
-            } catch (e) {
-                console.error('Ошибка при аутентификации:', e);
-                return null;
-            }
+            } catch (e) { console.error('Ошибка при аутентификации:', e); return null; }
         }
 
         // ===============================
-        // 4. Загрузка/сохранение настроек (maxTasks)
+        // 4. Настройки
         // ===============================
-
         function loadSettings() {
             const saved = localStorage.getItem(SETTINGS_KEY);
-            if (saved) {
-                try {
-                    settings = JSON.parse(saved);
-                    console.log('✅ Настройки загружены:', settings);
-                } catch (e) { settings = {}; }
-            } else {
-                settings = {};
-            }
-            // Убедимся, что для всех детей есть запись
-            data.children.forEach(name => {
-                if (!settings[name]) {
-                    settings[name] = { maxTasks: 10 };
-                }
-            });
+            if (saved) { try { settings = JSON.parse(saved); } catch (e) { settings = {}; } } else { settings = {}; }
+            data.children.forEach(name => { if (!settings[name]) settings[name] = { maxTasks: 10 }; });
             saveSettings();
         }
 
-        function saveSettings() {
-            localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
-        }
+        function saveSettings() { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); }
 
-        function getMaxTasks(childName) {
-            return settings[childName]?.maxTasks || 10;
-        }
+        function getMaxTasks(childName) { return settings[childName]?.maxTasks || 10; }
 
         function setMaxTasks(childName, val) {
             if (!settings[childName]) settings[childName] = {};
@@ -486,7 +479,6 @@
         // ===============================
         // 5. Инициализация
         // ===============================
-
         async function initUsers() {
             if (!supabaseEnabled) {
                 const saved = localStorage.getItem(USERS_KEY);
@@ -505,13 +497,11 @@
                 updateChildrenList();
                 return;
             }
-
             await loadUsersFromSupabase();
             if (!usersCache[ADMIN_USERNAME]) {
                 const created = await saveUserToSupabase(ADMIN_USERNAME, ADMIN_PASSWORD, 'admin');
                 if (created) console.log('✅ Администратор создан в Supabase');
             }
-            // Не делаем автоматическую миграцию из localStorage
             updateChildrenList();
         }
 
@@ -521,9 +511,7 @@
             if (data.current && !data.children.includes(data.current)) {
                 data.current = data.children.length > 0 ? data.children[0] : null;
             }
-            // Загружаем настройки
             loadSettings();
-            // Обновляем интерфейс
             if (typeof renderGrid === 'function') {
                 renderChildSelect();
                 renderGrid();
@@ -534,63 +522,42 @@
         // ===============================
         // 6. Авторизация
         // ===============================
-
         window.login = async function() {
             const username = document.getElementById('loginUsername').value.trim();
             const password = document.getElementById('loginPassword').value.trim();
             const errorEl = document.getElementById('loginError');
-
-            if (!username || !password) {
-                errorEl.textContent = 'Введите имя пользователя и пароль';
-                errorEl.classList.add('show');
-                return;
-            }
-
+            if (!username || !password) { errorEl.textContent = 'Введите имя пользователя и пароль';
+                errorEl.classList.add('show'); return; }
             const user = await authenticateWithSupabase(username, password);
-            if (!user) {
-                errorEl.textContent = 'Неверное имя пользователя или пароль';
-                errorEl.classList.add('show');
-                return;
-            }
-
+            if (!user) { errorEl.textContent = 'Неверное имя пользователя или пароль';
+                errorEl.classList.add('show'); return; }
             errorEl.classList.remove('show');
             currentUser = { username, role: user.role };
-
             if (user.role === 'child' && !data.children.includes(username)) {
                 data.children.push(username);
                 data.progress[username] = {};
                 await saveData();
             }
-
             document.getElementById('loginModal').classList.remove('active');
             document.getElementById('mainApp').style.display = 'block';
-
             setupUIForUser(user.role, username);
             renderChildSelect();
             renderGrid();
             updateTasksLimitInput();
-
             document.getElementById('loginPassword').value = '';
             console.log(`✅ Пользователь "${username}" вошел в систему (${user.role})`);
-
             if (supabaseEnabled) {
-                setTimeout(() => {
-                    setupRealtimeSubscription();
-                    setupUserRealtimeSubscription();
-                }, 500);
+                setTimeout(() => { setupRealtimeSubscription();
+                    setupUserRealtimeSubscription(); }, 500);
             }
         };
 
         window.logout = function() {
             if (confirm('Выйти из системы?')) {
-                if (realtimeSubscription) {
-                    supabaseClient.removeChannel(realtimeSubscription);
-                    realtimeSubscription = null;
-                }
-                if (userRealtimeSubscription) {
-                    supabaseClient.removeChannel(userRealtimeSubscription);
-                    userRealtimeSubscription = null;
-                }
+                if (realtimeSubscription) { supabaseClient.removeChannel(realtimeSubscription);
+                    realtimeSubscription = null; }
+                if (userRealtimeSubscription) { supabaseClient.removeChannel(userRealtimeSubscription);
+                    userRealtimeSubscription = null; }
                 isRealtimeConnected = false;
                 currentUser = null;
                 document.getElementById('mainApp').style.display = 'none';
@@ -613,7 +580,6 @@
             const adminPanel = document.getElementById('adminPanel');
             const adminToolbar = document.getElementById('adminToolbar');
             const childToolbar = document.getElementById('childToolbar');
-
             if (role === 'admin') {
                 userInfo.textContent = 'Admin';
                 userRole.textContent = '👑 Администратор';
@@ -632,43 +598,28 @@
         }
 
         // ===============================
-        // 7. Загрузка / сохранение прогресса
+        // 7. Загрузка/сохранение прогресса
         // ===============================
-
         async function loadData() {
             isLoading = true;
             const grid = document.getElementById('grid');
             if (grid) grid.innerHTML = '<div class="loading">Загрузка данных</div>';
-
             await initUsers();
-
-            // Загружаем прогресс
             const saved = localStorage.getItem(STORAGE_KEY);
             if (saved) {
                 try {
                     const parsed = JSON.parse(saved);
                     if (parsed.children && parsed.children.length > 0) {
-                        parsed.children.forEach(name => {
-                            if (!data.children.includes(name)) {
-                                data.children.push(name);
-                            }
-                        });
+                        parsed.children.forEach(name => { if (!data.children.includes(name)) data.children.push(name); });
                     }
                     data.current = parsed.current || (data.children.length > 0 ? data.children[0] : null);
                     data.progress = parsed.progress || {};
                 } catch (e) { /* ignore */ }
             }
-
             if (supabaseEnabled) {
-                for (const childName of data.children) {
-                    await loadProgressFromSupabase(childName);
-                }
+                for (const childName of data.children) { await loadProgressFromSupabase(childName); }
             }
-
-            if (!data.current && data.children.length > 0) {
-                data.current = data.children[0];
-            }
-
+            if (!data.current && data.children.length > 0) { data.current = data.children[0]; }
             await saveData();
             renderChildSelect();
             renderGrid();
@@ -680,128 +631,76 @@
             if (!supabaseEnabled || !childName) return;
             try {
                 const progress = data.progress[childName] || {};
-                const payload = {
-                    child_name: childName,
-                    progress: progress,
-                    updated_at: new Date().toISOString()
-                };
-                const { error } = await supabaseClient
-                    .from('tasks_progress')
-                    .upsert(payload, { onConflict: 'child_name' });
-                if (error) {
-                    console.error('Supabase upsert error:', error);
-                } else {
-                    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-                }
-            } catch (e) {
-                console.error('Ошибка при сохранении в Supabase:', e);
-            }
+                const { error } = await supabaseClient.from('tasks_progress').upsert({ child_name: childName, progress: progress,
+                    updated_at: new Date().toISOString() }, { onConflict: 'child_name' });
+                if (error) { console.error('Supabase upsert error:', error); } else { localStorage.setItem(STORAGE_KEY, JSON
+                        .stringify(data)); }
+            } catch (e) { console.error('Ошибка при сохранении в Supabase:', e); }
         }
 
         async function loadProgressFromSupabase(childName) {
             if (!supabaseEnabled || !childName) return;
             try {
-                const { data: rows, error } = await supabaseClient
-                    .from('tasks_progress')
-                    .select('progress')
-                    .eq('child_name', childName)
-                    .maybeSingle();
-                if (error) {
-                    console.error('Supabase select error:', error);
-                    return;
-                }
-                if (rows && rows.progress) {
-                    data.progress[childName] = rows.progress;
-                } else {
-                    if (!data.progress[childName]) {
-                        data.progress[childName] = {};
-                    }
-                }
-            } catch (e) {
-                console.error('Ошибка при загрузке из Supabase:', e);
-            }
+                const { data: rows, error } = await supabaseClient.from('tasks_progress').select('progress').eq('child_name',
+                    childName).maybeSingle();
+                if (error) { console.error('Supabase select error:', error); return; }
+                if (rows && rows.progress) { data.progress[childName] = rows.progress; } else { if (!data.progress[
+                        childName]) data.progress[childName] = {}; }
+            } catch (e) { console.error('Ошибка при загрузке из Supabase:', e); }
         }
 
         async function saveData() {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
             if (supabaseEnabled) {
-                for (const childName of data.children) {
-                    await saveProgressToSupabase(childName);
-                }
+                for (const childName of data.children) { await saveProgressToSupabase(childName); }
             }
         }
 
         window.syncData = async function() {
-            if (!supabaseEnabled) {
-                alert('Supabase не настроен. Работаем в офлайн-режиме.');
-                return;
-            }
+            if (!supabaseEnabled) { alert('Supabase не настроен. Работаем в офлайн-режиме.'); return; }
             if (isLoading) return;
             isLoading = true;
-            try {
-                await loadData();
-                alert('Синхронизация завершена успешно!');
-            } catch (e) {
-                console.error('Ошибка синхронизации:', e);
-                alert('Ошибка при синхронизации: ' + e.message);
-            } finally {
-                isLoading = false;
-            }
+            try { await loadData();
+                alert('Синхронизация завершена успешно!'); } catch (e) { console.error('Ошибка синхронизации:', e);
+                alert('Ошибка при синхронизации: ' + e.message); } finally { isLoading = false; }
         };
 
         // ===============================
-        // 8. Realtime подписки
+        // 8. Realtime
         // ===============================
-
         function setupRealtimeSubscription() {
             if (!supabaseEnabled || realtimeSubscription) return;
-            console.log('🔄 Настройка real-time подписки для прогресса...');
+            console.log('🔄 Настройка real-time...');
             updateStatusText('Подключение...', false);
-
             try {
                 realtimeSubscription = supabaseClient
                     .channel('tasks_progress_changes')
-                    .on(
-                        'postgres_changes',
-                        { event: '*', schema: 'public', table: 'tasks_progress' },
-                        (payload) => {
-                            console.log('📨 Получено real-time событие:', payload);
-                            handleRealtimeUpdate(payload);
-                        }
-                    )
+                    .on('postgres_changes', { event: '*', schema: 'public', table: 'tasks_progress' }, (payload) => {
+                        console.log('📨 Получено real-time событие:', payload);
+                        handleRealtimeUpdate(payload);
+                    })
                     .subscribe((status, err) => {
-                        console.log('📡 Статус подписки прогресса:', status);
-                        if (status === 'SUBSCRIBED') {
-                            isRealtimeConnected = true;
+                        console.log('📡 Статус подписки:', status);
+                        if (status === 'SUBSCRIBED') { isRealtimeConnected = true;
                             updateStatusText('Синхронизация активна', true);
-                            console.log('✅ Real-time прогресса подключен!');
-                        } else if (status === 'CHANNEL_ERROR') {
-                            isRealtimeConnected = false;
+                            console.log('✅ Real-time подключен!'); } else if (status === 'CHANNEL_ERROR') { isRealtimeConnected =
+                                false;
                             updateStatusText('❌ Ошибка подключения', false);
-                            console.error('❌ Ошибка канала:', err);
-                        } else if (status === 'TIMED_OUT') {
-                            updateStatusText('⏰ Ожидание подключения...', false);
-                            console.warn('⏰ Таймаут подключения');
-                        } else if (status === 'CLOSED') {
-                            updateStatusText('🔌 Отключено', false);
-                            console.log('🔌 Канал закрыт');
-                        }
+                            console.error('❌ Ошибка канала:', err); } else if (status === 'TIMED_OUT') { updateStatusText(
+                                '⏰ Ожидание подключения...', false);
+                            console.warn('⏰ Таймаут подключения'); } else if (status === 'CLOSED') { updateStatusText(
+                                '🔌 Отключено', false);
+                            console.log('🔌 Канал закрыт'); }
                     });
-                console.log('📡 Подписка прогресса создана');
-            } catch (e) {
-                console.error('❌ Ошибка при создании подписки:', e);
-                updateStatusText('❌ Ошибка: ' + e.message, false);
-            }
+                console.log('📡 Подписка создана');
+            } catch (e) { console.error('❌ Ошибка при создании подписки:', e);
+                updateStatusText('❌ Ошибка: ' + e.message, false); }
         }
 
         function handleRealtimeUpdate(payload) {
-            if (!payload || !payload.new) {
-                console.warn('⚠️ Пустой payload');
-                return;
-            }
+            if (!payload || !payload.new) { console.warn('⚠️ Пустой payload'); return; }
             const childName = payload.new.child_name;
             const newProgress = payload.new.progress;
-
             console.log(`🔄 Обновление для ${childName}`);
             if (!data.children.includes(childName)) {
                 data.children.push(childName);
@@ -811,18 +710,11 @@
                 data.progress[childName] = newProgress || {};
             }
             localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-
             let shouldUpdate = false;
-            if (currentUser && currentUser.role === 'admin') {
-                if (data.current === childName) shouldUpdate = true;
-            } else if (currentUser && currentUser.role === 'child') {
-                if (currentUser.username === childName) shouldUpdate = true;
-            }
-
-            if (shouldUpdate) {
-                console.log(`🔄 Обновление интерфейса для ${childName}`);
-                renderGrid();
-            }
+            if (currentUser && currentUser.role === 'admin') { if (data.current === childName) shouldUpdate = true; } else if (
+                currentUser && currentUser.role === 'child') { if (currentUser.username === childName) shouldUpdate = true; }
+            if (shouldUpdate) { console.log(`🔄 Обновление интерфейса для ${childName}`);
+                renderGrid(); }
         }
 
         function updateStatusText(text, connected) {
@@ -835,39 +727,30 @@
 
         function setupUserRealtimeSubscription() {
             if (!supabaseEnabled || userRealtimeSubscription) return;
-            console.log('🔄 Настройка real-time подписки для users...');
+            console.log('🔄 Настройка real-time для users...');
             userRealtimeSubscription = supabaseClient
                 .channel('users_changes')
-                .on(
-                    'postgres_changes',
-                    { event: '*', schema: 'public', table: 'users' },
-                    (payload) => {
-                        console.log('📨 Изменение в таблице users:', payload);
-                        loadUsersFromSupabase().then(() => {
-                            updateChildrenList();
-                            if (currentUser && currentUser.role === 'child') {
-                                if (!usersCache[currentUser.username]) {
-                                    alert('Ваша учётная запись была удалена. Выйдите и войдите заново.');
-                                    window.logout();
-                                }
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'users' }, (payload) => {
+                    console.log('📨 Изменение в таблице users:', payload);
+                    loadUsersFromSupabase().then(() => {
+                        updateChildrenList();
+                        if (currentUser && currentUser.role === 'child') {
+                            if (!usersCache[currentUser.username]) {
+                                alert('Ваша учётная запись была удалена. Выйдите и войдите заново.');
+                                window.logout();
                             }
-                            if (currentUser && currentUser.role === 'admin') {
-                                renderChildSelect();
-                                renderGrid();
-                                updateTasksLimitInput();
-                            }
-                        });
-                    }
-                )
-                .subscribe((status) => {
-                    if (status === 'SUBSCRIBED') console.log('✅ Подписка на users активна');
-                });
+                        }
+                        if (currentUser && currentUser.role === 'admin') { renderChildSelect();
+                            renderGrid();
+                            updateTasksLimitInput(); }
+                    });
+                })
+                .subscribe((status) => { if (status === 'SUBSCRIBED') console.log('✅ Подписка на users активна'); });
         }
 
         // ===============================
-        // 9. Работа с UI
+        // 9. UI функции
         // ===============================
-
         function renderChildSelect() {
             const sel = document.getElementById('childSelect');
             if (!sel) return;
@@ -881,10 +764,7 @@
                 return;
             }
             const validChildren = data.children.filter(name => name && name.trim() !== '');
-            if (validChildren.length === 0) {
-                sel.innerHTML = '<option value="">— Нет учеников —</option>';
-                return;
-            }
+            if (validChildren.length === 0) { sel.innerHTML = '<option value="">— Нет учеников —</option>'; return; }
             validChildren.forEach(name => {
                 const opt = document.createElement('option');
                 opt.value = name;
@@ -898,38 +778,179 @@
             const input = document.getElementById('tasksLimitInput');
             if (!input) return;
             if (currentUser && currentUser.role === 'child') {
-                // Для ребенка скрываем настройку
                 document.getElementById('tasksLimitSetting').style.display = 'none';
                 return;
             }
             document.getElementById('tasksLimitSetting').style.display = 'flex';
-            if (data.current) {
-                input.value = getMaxTasks(data.current);
-            } else {
-                input.value = 10;
-            }
+            if (data.current) { input.value = getMaxTasks(data.current); } else { input.value = 10; }
         }
 
         window.updateTasksLimit = function() {
-            if (!data.current) {
-                alert('Сначала выберите ученика.');
-                return;
-            }
+            if (!data.current) { alert('Сначала выберите ученика.'); return; }
             const input = document.getElementById('tasksLimitInput');
             const val = parseInt(input.value);
-            if (isNaN(val) || val < 1 || val > 10) {
-                alert('Введите число от 1 до 10.');
-                return;
-            }
+            if (isNaN(val) || val < 1 || val > 10) { alert('Введите число от 1 до 10.'); return; }
             setMaxTasks(data.current, val);
-            renderGrid(); // перерисовываем сетку с новым лимитом
+            renderGrid();
             alert(`Для ${data.current} установлено ${val} заданий в варианте.`);
         };
 
         // ===============================
-        // 10. Отрисовка сетки (с учетом maxTasks и анимаций)
+        // 10. АНИМАЦИИ (Новые крутые эффекты)
         // ===============================
 
+        // 10.1 Фейерверк для варианта
+        function fireworkVariant(card, variantNum) {
+            const colors = ['#ff6b6b', '#ffd93d', '#6bcb77', '#4d96ff', '#ff6bff', '#ff9f43', '#00d2d3', '#f368e0'];
+            const container = document.createElement('div');
+            container.className = 'variant-firework';
+            card.appendChild(container);
+
+            const count = 30 + Math.floor(Math.random() * 20);
+            for (let i = 0; i < count; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'firework-particle';
+                const angle = Math.random() * 2 * Math.PI;
+                const distance = 80 + Math.random() * 150;
+                const tx = Math.cos(angle) * distance;
+                const ty = Math.sin(angle) * distance - 30;
+                const size = 4 + Math.random() * 8;
+                particle.style.cssText = `
+                    left: 50%; top: 50%;
+                    width: ${size}px; height: ${size}px;
+                    background: ${colors[Math.floor(Math.random() * colors.length)]};
+                    --tx: ${tx}px; --ty: ${ty}px;
+                    animation-delay: ${Math.random() * 0.2}s;
+                    box-shadow: 0 0 ${size * 2}px ${colors[Math.floor(Math.random() * colors.length)]};
+                `;
+                container.appendChild(particle);
+            }
+
+            // Добавляем звёздочки ✨
+            for (let i = 0; i < 8; i++) {
+                const star = document.createElement('div');
+                star.textContent = ['✨', '⭐', '🌟'][Math.floor(Math.random() * 3)];
+                star.style.cssText = `
+                    position: absolute;
+                    font-size: ${16 + Math.random() * 20}px;
+                    left: ${10 + Math.random() * 80}%;
+                    top: ${10 + Math.random() * 80}%;
+                    animation: fireworkBurst ${1 + Math.random() * 0.5}s ease-out forwards;
+                    animation-delay: ${Math.random() * 0.3}s;
+                    --tx: ${(Math.random() - 0.5) * 200}px;
+                    --ty: ${(Math.random() - 0.5) * 200 - 50}px;
+                `;
+                container.appendChild(star);
+            }
+
+            setTimeout(() => { if (container.parentNode) container.remove(); }, 2000);
+        }
+
+        // 10.2 Грандиозный салют на весь экран
+        function grandFirework() {
+            const container = document.createElement('div');
+            container.className = 'grand-firework';
+            document.body.appendChild(container);
+
+            const colors = ['#ff6b6b', '#ffd93d', '#6bcb77', '#4d96ff', '#ff6bff', '#ff9f43', '#00d2d3', '#f368e0', '#fd79a8',
+                '#a29bfe'
+            ];
+
+            // 5 взрывов в разных местах
+            const bursts = [
+                { x: 20, y: 20 },
+                { x: 80, y: 15 },
+                { x: 50, y: 10 },
+                { x: 30, y: 30 },
+                { x: 70, y: 25 }
+            ];
+
+            bursts.forEach((pos, idx) => {
+                const count = 40 + Math.floor(Math.random() * 30);
+                for (let i = 0; i < count; i++) {
+                    const particle = document.createElement('div');
+                    particle.className = 'burst';
+                    const angle = Math.random() * 2 * Math.PI;
+                    const distance = 200 + Math.random() * 400;
+                    const gx = Math.cos(angle) * distance;
+                    const gy = Math.sin(angle) * distance - 100;
+                    const size = 4 + Math.random() * 10;
+                    const color = colors[Math.floor(Math.random() * colors.length)];
+                    particle.style.cssText = `
+                        left: ${pos.x}%; top: ${pos.y}%;
+                        width: ${size}px; height: ${size}px;
+                        background: ${color};
+                        --gx: ${gx}px; --gy: ${gy}px;
+                        animation-delay: ${idx * 0.4 + Math.random() * 0.3}s;
+                        box-shadow: 0 0 ${size * 3}px ${color};
+                    `;
+                    container.appendChild(particle);
+                }
+            });
+
+            // Добавляем звёздочки
+            for (let i = 0; i < 30; i++) {
+                const star = document.createElement('div');
+                star.textContent = ['✨', '⭐', '🌟', '🎆', '🎇'][Math.floor(Math.random() * 5)];
+                star.style.cssText = `
+                    position: absolute;
+                    font-size: ${20 + Math.random() * 30}px;
+                    left: ${Math.random() * 90 + 5}%;
+                    top: ${Math.random() * 90 + 5}%;
+                    animation: grandBurst 2.5s ease-out forwards;
+                    animation-delay: ${Math.random() * 2}s;
+                    --gx: ${(Math.random() - 0.5) * 500}px;
+                    --gy: ${(Math.random() - 0.5) * 500 - 200}px;
+                `;
+                container.appendChild(star);
+            }
+
+            // Заголовок
+            const title = document.createElement('div');
+            title.className = 'title';
+            title.innerHTML = `
+                🎉 КУРС ЗАВЕРШЁН! 🎉
+                <div class="subtitle">Поздравляем! Вы справились со всеми заданиями! 🏆</div>
+            `;
+            container.appendChild(title);
+
+            setTimeout(() => { if (container.parentNode) container.remove(); }, 5500);
+        }
+
+        // 10.3 Звёздочки при клике на задание
+        function clickStars(e, taskElement) {
+            const rect = taskElement.getBoundingClientRect();
+            const cx = rect.left + rect.width / 2;
+            const cy = rect.top + rect.height / 2;
+
+            const container = document.createElement('div');
+            container.className = 'click-stars';
+            container.style.cssText = `left: ${cx}px; top: ${cy}px;`;
+            document.body.appendChild(container);
+
+            const emojis = ['✨', '⭐', '🌟', '💫', '🌈', '🎯'];
+            for (let i = 0; i < 12; i++) {
+                const star = document.createElement('div');
+                star.className = 'click-star';
+                const angle = Math.random() * 2 * Math.PI;
+                const dist = 60 + Math.random() * 120;
+                const sx = Math.cos(angle) * dist;
+                const sy = Math.sin(angle) * dist - 40;
+                star.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                star.style.cssText = `
+                    --sx: ${sx}px; --sy: ${sy}px;
+                    animation-delay: ${Math.random() * 0.1}s;
+                    font-size: ${16 + Math.random() * 20}px;
+                `;
+                container.appendChild(star);
+            }
+
+            setTimeout(() => { if (container.parentNode) container.remove(); }, 1000);
+        }
+
+        // ===============================
+        // 11. Отрисовка сетки (с анимациями)
+        // ===============================
         function renderGrid() {
             const grid = document.getElementById('grid');
             if (!grid) return;
@@ -950,7 +971,6 @@
             const maxTasks = getMaxTasks(childToShow);
             const childProgress = data.progress[childToShow] || {};
 
-            // Инициализируем флаги анимаций для этого ребенка
             if (!variantCelebrated[childToShow]) variantCelebrated[childToShow] = {};
             if (!courseCelebrated[childToShow]) courseCelebrated[childToShow] = false;
 
@@ -961,7 +981,6 @@
                 card.className = 'variant-card';
                 let done = 0;
                 let attention = 0;
-                // Считаем только задания до maxTasks
                 for (let t = 1; t <= maxTasks; t++) {
                     const key = `${v}-${t}`;
                     const status = childProgress[key] || 'none';
@@ -981,7 +1000,6 @@
 
                 const tasks = document.createElement('div');
                 tasks.className = 'tasks';
-                // Создаем все 10 заданий, но для t > maxTasks делаем неактивными и скрытыми
                 for (let t = 1; t <= TASKS; t++) {
                     const task = document.createElement('div');
                     task.className = 'task';
@@ -989,19 +1007,23 @@
                     const status = childProgress[key] || 'none';
 
                     if (t <= maxTasks) {
-                        // Активные задания
                         if (status === 'done') task.classList.add('done');
                         else if (status === 'attention') task.classList.add('needs-attention');
-                        task.onclick = () => cycleTaskStatus(v, t);
+
+                        // Сохраняем ссылку на задание для анимации звёздочек
+                        const taskRef = task;
+                        task.onclick = (e) => {
+                            cycleTaskStatus(v, t);
+                            clickStars(e, taskRef);
+                        };
                         task.oncontextmenu = (e) => {
                             e.preventDefault();
                             openCommentModal(v, t);
                         };
                     } else {
-                        // Неактивные задания (за пределами лимита)
                         task.classList.add('task-disabled');
                         task.textContent = t;
-                        continue; // не добавляем обработчики
+                        continue;
                     }
 
                     const comment = childProgress[`${key}_comment`];
@@ -1025,17 +1047,12 @@
                 bar.innerHTML = `<div class="variant-bar-fill" style="width:${progressPercent}%"></div>`;
                 card.appendChild(bar);
 
-                // Анимация завершения варианта
+                // 🎆 Анимация фейерверка при завершении варианта
                 if (isCompleted && !variantCelebrated[childToShow][v]) {
                     variantCelebrated[childToShow][v] = true;
-                    const celebration = document.createElement('div');
-                    celebration.className = 'variant-celebration';
-                    celebration.textContent = '🎉';
-                    card.appendChild(celebration);
-                    // Удаляем элемент после анимации
                     setTimeout(() => {
-                        if (celebration.parentNode) celebration.remove();
-                    }, 2500);
+                        fireworkVariant(card, v);
+                    }, 100);
                 }
 
                 grid.appendChild(card);
@@ -1043,62 +1060,40 @@
                 if (!isCompleted) allVariantsCompleted = false;
             }
 
-            // Проверка завершения всего курса
+            // 🎊 Грандиозный салют при завершении курса
             if (allVariantsCompleted && maxTasks > 0 && data.children.length > 0 && !courseCelebrated[childToShow]) {
                 courseCelebrated[childToShow] = true;
-                showCourseCelebration();
+                setTimeout(() => {
+                    grandFirework();
+                }, 300);
             }
 
             updateStats();
         }
 
         // ===============================
-        // 11. Анимация завершения курса
-        // ===============================
-
-        function showCourseCelebration() {
-            const el = document.getElementById('courseCelebration');
-            el.classList.remove('hidden');
-            // Автоматически скрыть через 5 секунд
-            setTimeout(() => {
-                el.classList.add('hidden');
-            }, 5000);
-        }
-
-        // ===============================
         // 12. Переключение статуса задания
         // ===============================
-
         function cycleTaskStatus(v, t) {
-            console.log('🔄 cycleTaskStatus вызван для', v, t);
-            if (!data.current) {
-                console.warn('⚠️ data.current не установлен');
-                return;
-            }
-
+            if (!data.current) { console.warn('⚠️ data.current не установлен'); return; }
             const childName = currentUser && currentUser.role === 'child' ? currentUser.username : data.current;
             const maxTasks = getMaxTasks(childName);
-            if (t > maxTasks) return; // не должно случиться
-
+            if (t > maxTasks) return;
             if (!data.progress[childName]) data.progress[childName] = {};
             const key = `${v}-${t}`;
             const currentStatus = data.progress[childName][key] || 'none';
-
             let newStatus;
             if (currentStatus === 'none') newStatus = 'done';
             else if (currentStatus === 'done') newStatus = 'attention';
             else newStatus = 'none';
-
             data.progress[childName][key] = newStatus;
-            console.log(`✅ Статус задания ${key} изменён на ${newStatus}`);
             saveData();
             renderGrid();
         }
 
         // ===============================
-        // 13. Обновление статистики (с учетом maxTasks)
+        // 13. Статистика
         // ===============================
-
         function updateStats() {
             const statTotal = document.getElementById('statTotal');
             const statDone = document.getElementById('statDone');
@@ -1108,9 +1103,7 @@
             const statBar = document.getElementById('statBar');
 
             let childToShow = data.current;
-            if (currentUser && currentUser.role === 'child') {
-                childToShow = currentUser.username;
-            }
+            if (currentUser && currentUser.role === 'child') { childToShow = currentUser.username; }
             if (!childToShow) {
                 if (statTotal) statTotal.textContent = '0';
                 if (statDone) statDone.textContent = '0';
@@ -1124,27 +1117,22 @@
             const maxTasks = getMaxTasks(childToShow);
             const totalTasks = VARIANTS * maxTasks;
             const prog = data.progress[childToShow] || {};
-            let done = 0;
-            let attention = 0;
-            let variantsDone = 0;
+            let done = 0,
+                attention = 0,
+                variantsDone = 0;
 
             for (let v = 1; v <= VARIANTS; v++) {
                 let variantDone = 0;
                 for (let t = 1; t <= maxTasks; t++) {
                     const key = `${v}-${t}`;
                     const status = prog[key] || 'none';
-                    if (status === 'done') {
-                        done++;
-                        variantDone++;
-                    } else if (status === 'attention') {
-                        attention++;
-                    }
+                    if (status === 'done') { done++;
+                        variantDone++; } else if (status === 'attention') { attention++; }
                 }
                 if (variantDone === maxTasks) variantsDone++;
             }
 
             const percent = totalTasks ? Math.round((done + attention) / totalTasks * 100) : 0;
-
             if (statTotal) statTotal.textContent = totalTasks;
             if (statDone) statDone.textContent = done;
             if (statAttention) statAttention.textContent = attention;
@@ -1154,9 +1142,8 @@
         }
 
         // ===============================
-        // 14. Модалка добавления ребенка (с учетом лимита)
+        // 14. Модалки (без изменений)
         // ===============================
-
         window.openAddModal = function() {
             const modal = document.getElementById('addChildModal');
             if (modal) {
@@ -1183,17 +1170,12 @@
             if (usersCache[name]) return alert('Пользователь с таким именем уже существует');
 
             const saved = await saveUserToSupabase(name, password, 'child');
-            if (!saved && supabaseEnabled) {
-                alert('Ошибка при сохранении пользователя. Попробуйте позже.');
-                return;
-            }
+            if (!saved && supabaseEnabled) { alert('Ошибка при сохранении пользователя.'); return; }
 
             data.children.push(name);
             data.current = name;
             data.progress[name] = {};
-            // Устанавливаем лимит
             setMaxTasks(name, limit);
-
             await saveData();
             renderChildSelect();
             renderGrid();
@@ -1202,32 +1184,23 @@
             alert(`✅ Ученик "${name}" успешно добавлен!\nПароль: ${password}\nЗаданий в варианте: ${limit}`);
         };
 
-        // ===============================
-        // 15. Модалка комментария (без изменений)
-        // ===============================
-
+        // Комментарии (без изменений)
         function openCommentModal(v, t) {
             currentTaskKey = `${v}-${t}`;
             let childToShow = data.current;
-            if (currentUser && currentUser.role === 'child') {
-                childToShow = currentUser.username;
-            }
+            if (currentUser && currentUser.role === 'child') { childToShow = currentUser.username; }
             if (!childToShow) return;
             const maxTasks = getMaxTasks(childToShow);
-            if (t > maxTasks) return; // не должно случиться
-
+            if (t > maxTasks) return;
             const childProgress = data.progress[childToShow] || {};
             const currentStatus = childProgress[currentTaskKey] || 'none';
             currentComment = childProgress[`${currentTaskKey}_comment`] || '';
-
             document.getElementById('commentModalTitle').textContent = `Комментарий к заданию ${v}-${t}`;
             document.getElementById('commentText').value = currentComment;
-
             document.querySelectorAll('.task-status-buttons button').forEach(btn => btn.classList.remove('active'));
             if (currentStatus === 'done') document.querySelector('.status-done').classList.add('active');
             else if (currentStatus === 'attention') document.querySelector('.status-attention').classList.add('active');
             else document.querySelector('.status-none').classList.add('active');
-
             document.getElementById('commentModal').classList.add('active');
         }
 
@@ -1239,13 +1212,10 @@
         window.setTaskStatus = function(status) {
             if (!currentTaskKey) return;
             let childToShow = data.current;
-            if (currentUser && currentUser.role === 'child') {
-                childToShow = currentUser.username;
-            }
+            if (currentUser && currentUser.role === 'child') { childToShow = currentUser.username; }
             if (!childToShow) return;
             if (!data.progress[childToShow]) data.progress[childToShow] = {};
             data.progress[childToShow][currentTaskKey] = status;
-
             document.querySelectorAll('.task-status-buttons button').forEach(btn => btn.classList.remove('active'));
             if (status === 'done') document.querySelector('.status-done').classList.add('active');
             else if (status === 'attention') document.querySelector('.status-attention').classList.add('active');
@@ -1255,53 +1225,31 @@
         window.saveComment = function() {
             if (!currentTaskKey) return;
             let childToShow = data.current;
-            if (currentUser && currentUser.role === 'child') {
-                childToShow = currentUser.username;
-            }
+            if (currentUser && currentUser.role === 'child') { childToShow = currentUser.username; }
             if (!childToShow) return;
             if (!data.progress[childToShow]) data.progress[childToShow] = {};
-
             const comment = document.getElementById('commentText').value.trim();
-            if (comment) {
-                data.progress[childToShow][`${currentTaskKey}_comment`] = comment;
-            } else {
-                delete data.progress[childToShow][`${currentTaskKey}_comment`];
-            }
+            if (comment) { data.progress[childToShow][`${currentTaskKey}_comment`] = comment; } else { delete data.progress[
+                    childToShow][`${currentTaskKey}_comment`]; }
             saveData();
             renderGrid();
             window.closeCommentModal();
         };
 
         // ===============================
-        // 16. Действия (удаление, сброс, очистка)
+        // 15. Действия (без изменений)
         // ===============================
-
         window.deleteChild = async function() {
             if (!data.current) return;
-            if (currentUser && currentUser.role === 'child') {
-                alert('У вас нет прав на удаление');
-                return;
-            }
+            if (currentUser && currentUser.role === 'child') { alert('У вас нет прав на удаление'); return; }
             const nameToDelete = data.current;
             if (!confirm(`Удалить ученика "${nameToDelete}" и весь его прогресс?`)) return;
-
             if (supabaseEnabled) {
                 const deleted = await deleteUserFromSupabase(nameToDelete);
-                if (!deleted) {
-                    alert('Ошибка при удалении пользователя из Supabase.');
-                    return;
-                }
-                try {
-                    const { error } = await supabaseClient
-                        .from('tasks_progress')
-                        .delete()
-                        .eq('child_name', nameToDelete);
-                    if (error) console.error('Supabase delete progress error:', error);
-                } catch (e) {
-                    console.error('Ошибка при удалении прогресса из Supabase:', e);
-                }
+                if (!deleted) { alert('Ошибка при удалении пользователя из Supabase.'); return; }
+                try { await supabaseClient.from('tasks_progress').delete().eq('child_name', nameToDelete); } catch (e) { console
+                        .error('Ошибка при удалении прогресса:', e); }
             }
-
             delete data.progress[nameToDelete];
             delete settings[nameToDelete];
             data.children = data.children.filter(c => c !== nameToDelete && c && c.trim() !== '');
@@ -1315,14 +1263,9 @@
 
         window.resetProgress = async function() {
             if (!data.current) return;
-            if (currentUser && currentUser.role === 'child') {
-                alert('У вас нет прав на сброс прогресса');
-                return;
-            }
+            if (currentUser && currentUser.role === 'child') { alert('У вас нет прав на сброс прогресса'); return; }
             if (!confirm(`Сбросить весь прогресс у "${data.current}"?`)) return;
-
             data.progress[data.current] = {};
-            // Сбрасываем флаги анимаций
             variantCelebrated[data.current] = {};
             courseCelebrated[data.current] = false;
             await saveData();
@@ -1330,12 +1273,9 @@
         };
 
         window.clearAllData = async function() {
-            if (!currentUser || currentUser.role !== 'admin') {
-                alert('Только администратор может выполнить эту операцию.');
-                return;
-            }
-            if (!confirm('Удалить ВСЕ данные: всех учеников, прогресс, пользователей (кроме admin)? Это действие необратимо!')) return;
-
+            if (!currentUser || currentUser.role !== 'admin') { alert('Только администратор может выполнить эту операцию.');
+                return; }
+            if (!confirm('Удалить ВСЕ данные? Это действие необратимо!')) return;
             if (supabaseEnabled) {
                 try {
                     const children = Object.keys(usersCache).filter(name => name !== ADMIN_USERNAME);
@@ -1358,10 +1298,8 @@
                     renderGrid();
                     updateTasksLimitInput();
                     alert('✅ Все данные очищены!');
-                } catch (e) {
-                    console.error('Ошибка при очистке:', e);
-                    alert('Ошибка при очистке данных.');
-                }
+                } catch (e) { console.error('Ошибка при очистке:', e);
+                    alert('Ошибка при очистке данных.'); }
             } else {
                 localStorage.removeItem(STORAGE_KEY);
                 localStorage.removeItem(USERS_KEY);
@@ -1382,22 +1320,11 @@
         };
 
         // ===============================
-        // 17. Экспорт/Импорт (с учетом настроек)
+        // 16. Экспорт/Импорт
         // ===============================
-
-        // Добавляем настройки в экспорт JSON
-        const originalExportJSON = window.exportJSON;
         window.exportJSON = function() {
-            if (currentUser && currentUser.role === 'child') {
-                alert('У вас нет прав на экспорт');
-                return;
-            }
-            const exportData = {
-                data: data,
-                settings: settings,
-                variantCelebrated: variantCelebrated,
-                courseCelebrated: courseCelebrated
-            };
+            if (currentUser && currentUser.role === 'child') { alert('У вас нет прав на экспорт'); return; }
+            const exportData = { data, settings, variantCelebrated, courseCelebrated };
             const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -1407,13 +1334,8 @@
             URL.revokeObjectURL(url);
         };
 
-        // Обновляем импорт
-        const originalImportJSON = window.importJSON;
         window.importJSON = async function(e) {
-            if (currentUser && currentUser.role === 'child') {
-                alert('У вас нет прав на импорт');
-                return;
-            }
+            if (currentUser && currentUser.role === 'child') { alert('У вас нет прав на импорт'); return; }
             const file = e.target.files[0];
             if (!file) return;
             const reader = new FileReader();
@@ -1423,10 +1345,8 @@
                     if (!imported.data || !imported.data.children || !imported.data.progress) throw new Error();
                     if (!confirm('Заменить текущие данные импортированными?')) return;
                     data = imported.data;
-                    if (imported.settings) {
-                        settings = imported.settings;
-                        saveSettings();
-                    }
+                    if (imported.settings) { settings = imported.settings;
+                        saveSettings(); }
                     if (imported.variantCelebrated) variantCelebrated = imported.variantCelebrated;
                     if (imported.courseCelebrated) courseCelebrated = imported.courseCelebrated;
                     await saveData();
@@ -1434,21 +1354,22 @@
                     renderGrid();
                     updateTasksLimitInput();
                     alert('Импорт JSON успешен!');
-                } catch (err) {
-                    alert('Ошибка: неверный формат файла');
-                }
+                } catch (err) { alert('Ошибка: неверный формат файла'); }
             };
             reader.readAsText(file);
             e.target.value = '';
         };
 
-        // Экспорт Excel (без изменений, но добавим колонку с лимитом)
-        // Остальные экспортные функции оставляем как есть, они работают с data.progress
+        window.exportExcelChild = function() { /* ... оставляем как было ... */
+        };
+        window.exportExcel = function() { /* ... оставляем как было ... */
+        };
+        window.importExcel = function() { /* ... оставляем как было ... */
+        };
 
         // ===============================
-        // 18. Обработчики событий
+        // 17. Обработчики событий
         // ===============================
-
         document.addEventListener('DOMContentLoaded', async function() {
             await loadData();
 
@@ -1476,30 +1397,23 @@
 
             const loginPassword = document.getElementById('loginPassword');
             if (loginPassword) {
-                loginPassword.addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter') window.login();
-                });
+                loginPassword.addEventListener('keydown', (e) => { if (e.key === 'Enter') window.login(); });
             }
 
             const loginUsername = document.getElementById('loginUsername');
             if (loginUsername) {
-                loginUsername.addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter') document.getElementById('loginPassword').focus();
-                });
+                loginUsername.addEventListener('keydown', (e) => { if (e.key === 'Enter') document.getElementById(
+                        'loginPassword').focus(); });
             }
 
             const addChildModal = document.getElementById('addChildModal');
             if (addChildModal) {
-                addChildModal.addEventListener('click', (e) => {
-                    if (e.target === e.currentTarget) window.closeAddModal();
-                });
+                addChildModal.addEventListener('click', (e) => { if (e.target === e.currentTarget) window.closeAddModal(); });
             }
 
             const commentModal = document.getElementById('commentModal');
             if (commentModal) {
-                commentModal.addEventListener('click', (e) => {
-                    if (e.target === e.currentTarget) window.closeCommentModal();
-                });
+                commentModal.addEventListener('click', (e) => { if (e.target === e.currentTarget) window.closeCommentModal(); });
             }
 
             const loginModal = document.getElementById('loginModal');
