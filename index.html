@@ -291,7 +291,15 @@
             justify-content: center;
             border: 1px solid #e2e8f0;
         }
-
+.loading {
+    text-align: center;
+    padding: 40px;
+    color: #718096;
+}
+.loading::after {
+    content: '...';
+    animation: dots 1.5s steps(4, end) infinite;
+}
         /* Всплывающая подсказка для комментария */
         .task-tooltip {
             display: none;
@@ -532,7 +540,8 @@
             </div>
         </div>
     </div>
-
+<button onclick="window.syncData()" class="secondary" title="Синхронизировать с облаком">🔄 Синхр.</button>
+  
     <!-- ====== ПОДКЛЮЧЕНИЕ БИБЛИОТЕК ====== -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
     </script>
@@ -543,11 +552,12 @@
         // ===============================
         // 1. Конфигурация Supabase
         // ===============================
-           const SUPABASE_URL = 'https://fuflttwdnwntljyblgeh.supabase.co'; // Замените на свой URL
-    const SUPABASE_KEY = 'sb_publishable_CGYKGrbepaKLK5mBpfdypA_OHgJSPK4'; // Замените на свой anon/public ключ
+        const SUPABASE_URL = 'https://ваш-проект.supabase.co';
+        const SUPABASE_KEY = 'ваш-публичный-ключ';
 
         let supabaseClient = null;
         let supabaseEnabled = false;
+        let isLoading = false;
 
         try {
             if (SUPABASE_URL && SUPABASE_KEY && SUPABASE_URL !== 'https://ваш-проект.supabase.co') {
@@ -581,23 +591,77 @@
         // 3. Загрузка / сохранение
         // ===============================
 
+        // Загрузка всех детей из Supabase
+        async function loadAllChildrenFromSupabase() {
+            if (!supabaseEnabled) return [];
+
+            try {
+                const { data: rows, error } = await supabaseClient
+                    .from('tasks_progress')
+                    .select('child_name');
+
+                if (error) {
+                    console.error('Supabase select error:', error);
+                    return [];
+                }
+
+                return rows.map(row => row.child_name);
+            } catch (e) {
+                console.error('Ошибка при загрузке списка детей из Supabase:', e);
+                return [];
+            }
+        }
+
         async function loadData() {
+            isLoading = true;
+            const grid = document.getElementById('grid');
+            grid.innerHTML = '<div class="loading">Загрузка данных</div>';
+
+            // Сначала загружаем список детей из Supabase
+            if (supabaseEnabled) {
+                const childrenFromDB = await loadAllChildrenFromSupabase();
+                if (childrenFromDB.length > 0) {
+                    data.children = childrenFromDB;
+                }
+            }
+
+            // Затем загружаем локальный кеш для прогресса
             const saved = localStorage.getItem(STORAGE_KEY);
             if (saved) {
                 try {
                     const parsed = JSON.parse(saved);
-                    data.children = parsed.children || [];
-                    data.current = parsed.current || null;
+                    // Объединяем списки детей (из Supabase и локального)
+                    if (parsed.children && parsed.children.length > 0) {
+                        // Добавляем локальных детей, которых нет в Supabase
+                        parsed.children.forEach(name => {
+                            if (!data.children.includes(name)) {
+                                data.children.push(name);
+                            }
+                        });
+                    }
+                    data.current = parsed.current || (data.children.length > 0 ? data.children[0] : null);
                     data.progress = parsed.progress || {};
                 } catch (e) { /* ignore */ }
             }
 
-            if (supabaseEnabled && data.current) {
-                await loadProgressFromSupabase(data.current);
+            // Загружаем прогресс для всех детей из Supabase
+            if (supabaseEnabled) {
+                for (const childName of data.children) {
+                    await loadProgressFromSupabase(childName);
+                }
             }
+
+            // Если нет текущего ребенка, но есть дети - выбираем первого
+            if (!data.current && data.children.length > 0) {
+                data.current = data.children[0];
+            }
+
+            // Сохраняем обновленные данные
+            await saveData();
 
             renderChildSelect();
             renderGrid();
+            isLoading = false;
         }
 
         async function saveProgressToSupabase(childName) {
@@ -642,7 +706,6 @@
 
                 if (rows && rows.progress) {
                     data.progress[childName] = rows.progress;
-                    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
                 } else {
                     if (!data.progress[childName]) {
                         data.progress[childName] = {};
@@ -655,10 +718,44 @@
 
         async function saveData() {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-            if (supabaseEnabled && data.current) {
-                await saveProgressToSupabase(data.current);
+            if (supabaseEnabled) {
+                // Сохраняем прогресс для всех детей
+                for (const childName of data.children) {
+                    await saveProgressToSupabase(childName);
+                }
             }
         }
+
+        // Синхронизация данных с облаком
+        window.syncData = async function() {
+            if (!supabaseEnabled) {
+                alert('Supabase не настроен. Работаем в офлайн-режиме.');
+                return;
+            }
+
+            if (isLoading) return;
+
+            isLoading = true;
+            const btn = event?.target;
+            if (btn) {
+                btn.textContent = '⏳ Синхр.';
+                btn.disabled = true;
+            }
+
+            try {
+                await loadData();
+                alert('Синхронизация завершена успешно!');
+            } catch (e) {
+                console.error('Ошибка синхронизации:', e);
+                alert('Ошибка при синхронизации: ' + e.message);
+            } finally {
+                isLoading = false;
+                if (btn) {
+                    btn.textContent = '🔄 Синхр.';
+                    btn.disabled = false;
+                }
+            }
+        };
 
         // ===============================
         // 4. Работа с UI
@@ -723,22 +820,18 @@
                     if (status === 'done') task.classList.add('done');
                     else if (status === 'attention') task.classList.add('needs-attention');
 
-                    // Проверяем наличие комментария
                     const comment = childProgress[`${key}_comment`];
                     if (comment) task.classList.add('has-comment');
 
                     task.textContent = t;
 
-                    // Левый клик - переключение статуса
                     task.onclick = () => cycleTaskStatus(v, t);
 
-                    // Правый клик - открыть модалку с комментарием
                     task.oncontextmenu = (e) => {
                         e.preventDefault();
                         openCommentModal(v, t);
                     };
 
-                    // Добавляем всплывающую подсказку с комментарием
                     if (comment) {
                         const tooltip = document.createElement('div');
                         tooltip.className = 'task-tooltip';
@@ -850,7 +943,6 @@
                 `Комментарий к заданию ${v}-${t}`;
             document.getElementById('commentText').value = currentComment;
 
-            // Обновляем активную кнопку статуса
             document.querySelectorAll('.task-status-buttons button').forEach(btn => {
                 btn.classList.remove('active');
             });
@@ -876,7 +968,6 @@
 
             data.progress[data.current][currentTaskKey] = status;
 
-            // Обновляем активную кнопку
             document.querySelectorAll('.task-status-buttons button').forEach(btn => {
                 btn.classList.remove('active');
             });
@@ -1007,13 +1098,11 @@
                         row.push(display);
                     }
 
-                    // Статус варианта
                     let variantStatus = 'Не завершен';
                     if (statusCount === TASKS) variantStatus = '✅ Завершен';
                     else if (statusCount > 0) variantStatus = '⚠️ В процессе';
                     row.push(variantStatus);
 
-                    // Комментарий (берем первый комментарий в варианте)
                     let comment = '';
                     for (let t = 1; t <= TASKS; t++) {
                         const key = `${v}-${t}`;
@@ -1100,12 +1189,10 @@
                             }
                         }
 
-                        // Импортируем комментарий
                         const commentIndex = 2 + TASKS + 1;
                         if (commentIndex < row.length && row[commentIndex]) {
                             const comment = String(row[commentIndex]).trim();
                             if (comment) {
-                                // Добавляем комментарий к первому заданию варианта
                                 const firstKey = `${variant}-1`;
                                 importedProgress[childName][`${firstKey}_comment`] = comment;
                             }
@@ -1143,9 +1230,6 @@
             const newChild = e.target.value || null;
             if (newChild !== data.current) {
                 data.current = newChild;
-                if (supabaseEnabled && data.current) {
-                    await loadProgressFromSupabase(data.current);
-                }
                 await saveData();
                 renderGrid();
             }
@@ -1156,7 +1240,6 @@
             if (e.key === 'Escape') window.closeAddModal();
         });
 
-        // Закрытие модалок по клику вне их
         document.getElementById('addChildModal').addEventListener('click', (e) => {
             if (e.target === e.currentTarget) {
                 window.closeAddModal();
