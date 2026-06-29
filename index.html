@@ -334,8 +334,8 @@
       <h1>📚 Контроль решённых заданий</h1>
       <div class="child-selector">
         <select id="childSelect"></select>
-        <button onclick="openAddModal()">+ Ребёнок</button>
-        <button onclick="deleteChild()" class="danger">Удалить</button>
+        <button onclick="window.openAddModal()">+ Ребёнок</button>
+        <button onclick="window.deleteChild()" class="danger">Удалить</button>
       </div>
     </header>
 
@@ -360,10 +360,10 @@
     </div>
 
     <div class="toolbar">
-      <button class="secondary" onclick="exportData()">💾 Экспорт</button>
+      <button class="secondary" onclick="window.exportData()">💾 Экспорт</button>
       <button class="secondary" onclick="document.getElementById('importFile').click()">📂 Импорт</button>
-      <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)" />
-      <button class="danger" onclick="resetProgress()">🗑 Сбросить прогресс</button>
+      <input type="file" id="importFile" accept=".json" style="display:none" onchange="window.importData(event)" />
+      <button class="danger" onclick="window.resetProgress()">🗑 Сбросить прогресс</button>
     </div>
 
     <div class="variants-grid" id="grid"></div>
@@ -375,8 +375,8 @@
       <h2 id="modalTitle">Добавить ребёнка</h2>
       <input type="text" id="childName" placeholder="Имя ребёнка" maxlength="30" />
       <div class="modal-actions">
-        <button class="secondary" onclick="closeModal()">Отмена</button>
-        <button onclick="addChild()">Добавить</button>
+        <button class="secondary" onclick="window.closeModal()">Отмена</button>
+        <button onclick="window.addChild()">Добавить</button>
       </div>
     </div>
   </div>
@@ -387,16 +387,16 @@
     // ===============================
     // 1. Конфигурация Supabase
     // ===============================
-    const SUPABASE_URL = 'https://fuflttwdnwntljyblgeh.supabase.co'; // Замените на свой URL
+     const SUPABASE_URL = 'https://fuflttwdnwntljyblgeh.supabase.co'; // Замените на свой URL
     const SUPABASE_KEY = 'sb_publishable_CGYKGrbepaKLK5mBpfdypA_OHgJSPK4'; // Замените на свой anon/public ключ
 
-    let supabase = null;
+    let supabaseClient = null;
     let supabaseEnabled = false;
 
     // Пытаемся инициализировать Supabase
     try {
       if (SUPABASE_URL && SUPABASE_KEY && SUPABASE_URL !== 'https://ваш-проект.supabase.co') {
-        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         supabaseEnabled = true;
         console.log('✅ Supabase подключен');
       } else {
@@ -458,7 +458,7 @@
           updated_at: new Date().toISOString()
         };
 
-        const { error } = await supabase
+        const { error } = await supabaseClient
           .from('tasks_progress')
           .upsert(payload, { onConflict: 'child_name' });
 
@@ -479,7 +479,7 @@
       if (!supabaseEnabled || !childName) return;
       
       try {
-        const { data: rows, error } = await supabase
+        const { data: rows, error } = await supabaseClient
           .from('tasks_progress')
           .select('progress')
           .eq('child_name', childName)
@@ -621,17 +621,17 @@
     // 5. Действия (добавление/удаление детей, сброс, импорт/экспорт)
     // ===============================
 
-    function openAddModal() {
+    window.openAddModal = function() {
       document.getElementById('modal').classList.add('active');
       document.getElementById('childName').value = '';
       setTimeout(() => document.getElementById('childName').focus(), 50);
-    }
+    };
 
-    function closeModal() {
+    window.closeModal = function() {
       document.getElementById('modal').classList.remove('active');
-    }
+    };
 
-    async function addChild() {
+    window.addChild = async function() {
       const name = document.getElementById('childName').value.trim();
       if (!name) return alert('Введите имя');
       if (data.children.includes(name)) return alert('Такой ребёнок уже есть');
@@ -642,17 +642,17 @@
       await saveData();
       renderChildSelect();
       renderGrid();
-      closeModal();
-    }
+      window.closeModal();
+    };
 
-    async function deleteChild() {
+    window.deleteChild = async function() {
       if (!data.current) return;
       if (!confirm(`Удалить ребёнка "${data.current}" и весь его прогресс?`)) return;
 
       // удаляем из Supabase
       if (supabaseEnabled) {
         try {
-          const { error } = await supabase
+          const { error } = await supabaseClient
             .from('tasks_progress')
             .delete()
             .eq('child_name', data.current);
@@ -670,22 +670,22 @@
       await saveData();
       renderChildSelect();
       renderGrid();
-    }
+    };
 
-    async function resetProgress() {
+    window.resetProgress = async function() {
       if (!data.current) return;
       if (!confirm(`Сбросить весь прогресс у "${data.current}"?`)) return;
 
       data.progress[data.current] = {};
       await saveData();
       renderGrid();
-    }
+    };
 
     // ===============================
     // 6. Импорт / Экспорт (JSON)
     // ===============================
 
-    function exportData() {
+    window.exportData = function() {
       const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -693,9 +693,9 @@
       a.download = `tasks-backup-${new Date().toISOString().slice(0, 10)}.json`;
       a.click();
       URL.revokeObjectURL(url);
-    }
+    };
 
-    async function importData(e) {
+    window.importData = async function(e) {
       const file = e.target.files[0];
       if (!file) return;
       const reader = new FileReader();
@@ -716,7 +716,7 @@
       };
       reader.readAsText(file);
       e.target.value = '';
-    }
+    };
 
     // ===============================
     // 7. Обработчики событий
@@ -735,8 +735,8 @@
     });
 
     document.getElementById('childName').addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') addChild();
-      if (e.key === 'Escape') closeModal();
+      if (e.key === 'Enter') window.addChild();
+      if (e.key === 'Escape') window.closeModal();
     });
 
     // ===============================
