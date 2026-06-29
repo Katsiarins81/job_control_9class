@@ -90,6 +90,12 @@
             border: 1px solid #e2e8f0;
             display: none;
         }
+         button.secondary2 {
+            background: #edf2f7;
+            color: #4a5568;
+            border: 1px solid #e2e8f0;
+           
+        }
 
         button.secondary:hover {
             background: #e2e8f0;
@@ -477,7 +483,7 @@
                 <select id="childSelect"></select>
                 <button onclick="window.openAddModal()">+ Ребёнок</button>
                 <button onclick="window.deleteChild()" class="danger">Удалить</button>
-                <button onclick="window.syncData()" class="secondary" title="Синхронизировать с облаком">🔄 Синхр.</button>
+                <button onclick="window.syncData()" class="secondary2" title="Синхронизировать с облаком">🔄 Синхр.</button>
             </div>
         </header>
 
@@ -553,8 +559,8 @@
         // ===============================
         // 1. Конфигурация Supabase
         // ===============================
-        const SUPABASE_URL = 'https://ваш-проект.supabase.co';
-        const SUPABASE_KEY = 'ваш-публичный-ключ';
+        const SUPABASE_URL = 'https://fuflttwdnwntljyblgeh.supabase.co'; // Замените на свой URL
+        const SUPABASE_KEY = 'sb_publishable_CGYKGrbepaKLK5mBpfdypA_OHgJSPK4'; // Замените на свой anon/public ключ
 
         let supabaseClient = null;
         let supabaseEnabled = false;
