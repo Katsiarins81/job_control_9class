@@ -208,13 +208,13 @@
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            background: #48bb78;
-            animation: pulse 2s infinite;
-        }
-
-        .status-indicator .dot.offline {
             background: #fc8181;
             animation: none;
+        }
+
+        .status-indicator .dot.connected {
+            background: #48bb78;
+            animation: pulse 2s infinite;
         }
 
         @keyframes pulse {
@@ -684,7 +684,7 @@
                 </div>
                 <div class="status-indicator" id="statusIndicator">
                     <span class="dot" id="statusDot"></span>
-                    <span id="statusText">Подключено</span>
+                    <span id="statusText">Подключение...</span>
                 </div>
                 <button onclick="window.logout()" class="logout-btn">🚪 Выйти</button>
             </div>
@@ -875,101 +875,125 @@
         }
 
         // ===============================
-        // 4. Supabase Realtime
+        // 4. Supabase Realtime (ИСПРАВЛЕННАЯ ВЕРСИЯ)
         // ===============================
 
         function setupRealtimeSubscription() {
-            if (!supabaseEnabled || realtimeSubscription) return;
+            if (!supabaseEnabled) {
+                console.warn('⚠️ Supabase не включен');
+                return;
+            }
+
+            if (realtimeSubscription) {
+                console.log('📡 Подписка уже существует');
+                return;
+            }
+
+            console.log('🔄 Настройка real-time подписки...');
+            updateStatusText('Подключение...', false);
 
             try {
-                // Подписываемся на изменения в таблице tasks_progress
                 realtimeSubscription = supabaseClient
                     .channel('tasks_progress_changes')
                     .on(
                         'postgres_changes',
                         {
-                            event: 'UPDATE',
+                            event: '*',
                             schema: 'public',
                             table: 'tasks_progress'
                         },
                         (payload) => {
-                            console.log('🔄 Real-time обновление получено:', payload);
+                            console.log('📨 Получено real-time событие:', payload);
+                            console.log('📊 Тип:', payload.eventType);
+                            console.log('👶 Ребенок:', payload.new?.child_name);
+                            
+                            // Обновляем данные
                             handleRealtimeUpdate(payload);
                         }
                     )
-                    .on(
-                        'postgres_changes',
-                        {
-                            event: 'INSERT',
-                            schema: 'public',
-                            table: 'tasks_progress'
-                        },
-                        (payload) => {
-                            console.log('🔄 Real-time вставка получена:', payload);
-                            handleRealtimeUpdate(payload);
-                        }
-                    )
-                    .subscribe((status) => {
+                    .subscribe((status, err) => {
+                        console.log('📡 Статус подписки:', status);
+                        
                         if (status === 'SUBSCRIBED') {
                             isRealtimeConnected = true;
-                            updateStatusIndicator(true);
-                            console.log('✅ Подписка на real-time установлена');
+                            updateStatusText('✅ Синхронизация активна', true);
+                            console.log('✅ Real-time подключен!');
                         } else if (status === 'CHANNEL_ERROR') {
                             isRealtimeConnected = false;
-                            updateStatusIndicator(false);
-                            console.warn('⚠️ Ошибка real-time подключения');
+                            updateStatusText('❌ Ошибка подключения', false);
+                            console.error('❌ Ошибка канала:', err);
+                        } else if (status === 'TIMED_OUT') {
+                            updateStatusText('⏰ Ожидание подключения...', false);
+                            console.warn('⏰ Таймаут подключения');
+                        } else if (status === 'CLOSED') {
+                            updateStatusText('🔌 Отключено', false);
+                            console.log('🔌 Канал закрыт');
                         }
                     });
 
-                console.log('📡 Real-time подписка настроена');
+                console.log('📡 Подписка создана');
             } catch (e) {
-                console.error('❌ Ошибка настройки real-time:', e);
+                console.error('❌ Ошибка при создании подписки:', e);
+                updateStatusText('❌ Ошибка: ' + e.message, false);
             }
         }
 
         function handleRealtimeUpdate(payload) {
-            if (!payload || !payload.new) return;
+            if (!payload || !payload.new) {
+                console.warn('⚠️ Пустой payload');
+                return;
+            }
 
             const childName = payload.new.child_name;
             const newProgress = payload.new.progress;
 
+            console.log(`🔄 Обновление для ${childName}`);
+
             // Проверяем, есть ли этот ребенок в наших данных
-            if (data.children.includes(childName)) {
-                // Обновляем прогресс для этого ребенка
-                data.progress[childName] = newProgress || {};
-                
-                // Сохраняем в localStorage
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-                
-                // Если это текущий ребенок или мы админ, обновляем интерфейс
-                const isCurrentChild = (data.current === childName);
-                const isAdmin = currentUser && currentUser.role === 'admin';
-                const isChildViewingSelf = currentUser && currentUser.role === 'child' && currentUser.username === childName;
-                
-                if (isCurrentChild || isAdmin || isChildViewingSelf) {
-                    console.log(`🔄 Обновление интерфейса для ${childName}`);
-                    renderGrid();
-                }
-            } else {
-                // Если появился новый ребенок, обновляем список
+            if (!data.children.includes(childName)) {
                 data.children.push(childName);
                 data.progress[childName] = newProgress || {};
                 renderChildSelect();
+            } else {
+                // Обновляем прогресс
+                data.progress[childName] = newProgress || {};
+            }
+
+            // Сохраняем в localStorage
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+
+            // Проверяем, нужно ли обновить интерфейс
+            let shouldUpdate = false;
+            
+            if (currentUser && currentUser.role === 'admin') {
+                // Админ видит всех, обновляем если это текущий выбранный ребенок
+                if (data.current === childName) {
+                    shouldUpdate = true;
+                }
+            } else if (currentUser && currentUser.role === 'child') {
+                // Ребенок видит только себя
+                if (currentUser.username === childName) {
+                    shouldUpdate = true;
+                }
+            }
+
+            if (shouldUpdate) {
+                console.log(`🔄 Обновление интерфейса для ${childName}`);
                 renderGrid();
             }
         }
 
-        function updateStatusIndicator(connected) {
+        function updateStatusText(text, connected) {
             const dot = document.getElementById('statusDot');
-            const text = document.getElementById('statusText');
-            if (!dot || !text) return;
+            const statusText = document.getElementById('statusText');
+            if (!dot || !statusText) return;
 
+            statusText.textContent = text;
+            
             if (connected) {
-                dot.className = 'dot';
-                text.textContent = 'Синхронизация в реальном времени';
+                dot.className = 'dot connected';
             } else {
-                dot.className = 'dot offline';
-                text.textContent = 'Офлайн-режим (обновления не в реальном времени)';
+                dot.className = 'dot';
             }
         }
 
@@ -1017,13 +1041,14 @@
 
             // Настраиваем real-time после входа
             if (supabaseEnabled) {
-                setupRealtimeSubscription();
+                setTimeout(() => {
+                    setupRealtimeSubscription();
+                }, 500);
             }
         };
 
         window.logout = function() {
             if (confirm('Выйти из системы?')) {
-                // Отписываемся от real-time
                 if (realtimeSubscription) {
                     supabaseClient.removeChannel(realtimeSubscription);
                     realtimeSubscription = null;
@@ -1935,7 +1960,7 @@
             console.log('   Имя: admin');
             console.log('   Пароль: 210847');
             console.log('📊 Данные пользователей в localStorage:', localStorage.getItem(USERS_KEY));
-            console.log('🔄 Real-time синхронизация будет активирована после входа');
+            console.log('🔄 Real-time будет активирован после входа');
         });
     </script>
 </body>
