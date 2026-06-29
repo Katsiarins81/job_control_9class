@@ -5,12 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Контроль заданий</title>
     <style>
-        /* (стили без изменений, оставьте те, что были) */
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        /* ----- Стили (без изменений) ----- */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -18,505 +14,92 @@
             padding: 20px;
             color: #2d3748;
         }
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            background: #fff;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            overflow: hidden;
-        }
-        header {
-            background: linear-gradient(135deg, #ea66c3 0%, #764ba2 100%);
-            color: #fff;
-            padding: 25px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-        header h1 {
-            font-size: 24px;
-            font-weight: 600;
-        }
-        .header-right {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: rgba(255,255,255,0.15);
-            padding: 8px 16px;
-            border-radius: 10px;
-            font-size: 24px;
-        }
-        .user-info .role {
-            font-size: 11px;
-            opacity: 0.8;
-        }
-        .child-selector {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-        .child-selector select {
-            min-width: 150px;
-            background: rgba(255,255,255,0.95);
-            color: #2d3748;
-            padding: 10px 14px;
-            border-radius: 10px;
-            border: none;
-            outline: none;
-            font-family: inherit;
-            font-size: 14px;
-        }
-        select, input, button {
-            font-family: inherit;
-            font-size: 14px;
-            padding: 10px 14px;
-            border-radius: 10px;
-            border: none;
-            outline: none;
-            transition: all 0.2s;
-        }
-        select, input {
-            background: rgba(255,255,255,0.95);
-            color: #2d3748;
-            min-width: 150px;
-        }
-        button {
-            background: rgba(255,255,255,0.2);
-            color: #fff;
-            cursor: pointer;
-            border: 1px solid rgba(255,255,255,0.3);
-            font-weight: 500;
-        }
-        button:hover {
-            background: rgba(255,255,255,0.35);
-            transform: translateY(-1px);
-        }
-        button.secondary {
-            background: #edf2f7;
-            color: #4a5568;
-            border: 1px solid #e2e8f0;
-        }
-        button.secondary2 {
-            background: #edf2f7;
-            color: #4a5568;
-            border: 1px solid #e2e8f0;
-        }
-        button.secondary:hover {
-            background: #e2e8f0;
-        }
-        button.success {
-            background: #4866bb6e;
-            color: #fff;
-            border: 1px solid #8438a1;
-        }
-        button.success:hover {
-            background: #4866bbcf;
-        }
-        button.danger {
-            background: #fed7d7;
-            color: #c53030;
-            border-color: #feb2b2;
-        }
-        button.danger:hover {
-            background: #feb2b2;
-        }
-        button.logout-btn {
-            background: rgba(255,255,255,0.2);
-            border-color: rgba(255,255,255,0.3);
-        }
-        button.logout-btn:hover {
-            background: rgba(255,0,0,0.3);
-        }
-        button.add-child-btn {
-            background: #48bb78;
-            color: #fff;
-            border: 1px solid #38a169;
-        }
-        button.add-child-btn:hover {
-            background: #38a169;
-        }
-        button.delete-child-btn {
-            background: #fed7d7;
-            color: #c53030;
-            border-color: #feb2b2;
-        }
-        button.delete-child-btn:hover {
-            background: #feb2b2;
-        }
-        .status-indicator {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            background: rgba(255,255,255,0.1);
-        }
-        .status-indicator .dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #fc8181;
-            animation: none;
-        }
-        .status-indicator .dot.connected {
-            background: #48bb78;
-            animation: pulse 2s infinite;
-        }
-        @keyframes pulse {
-            0% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(0.8); }
-            100% { opacity: 1; transform: scale(1); }
-        }
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            padding: 20px 30px;
-            background: #f7fafc;
-            border-bottom: 1px solid #e2e8f0;
-        }
-        .stat-card {
-            background: #fff;
-            padding: 15px 20px;
-            border-radius: 12px;
-            border: 1px solid #e2e8f0;
-        }
-        .stat-card .label {
-            font-size: 12px;
-            color: #718096;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 5px;
-        }
-        .stat-card .value {
-            font-size: 22px;
-            font-weight: 700;
-            color: #2d3748;
-        }
-        .progress-bar {
-            height: 8px;
-            background: #e2e8f0;
-            border-radius: 4px;
-            overflow: hidden;
-            margin-top: 8px;
-        }
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #48bb78, #38a169);
-            transition: width 0.4s ease;
-        }
-        .toolbar {
-            padding: 15px 30px;
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            border-bottom: 1px solid #e2e8f0;
-            background: #fff;
-        }
-        .variants-grid {
-            padding: 20px 30px 30px;
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 15px;
-            max-height: 70vh;
-            overflow-y: auto;
-        }
-        .variant-card {
-            background: #fff;
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            padding: 15px;
-            transition: all 0.2s;
-        }
-        .variant-card:hover {
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        }
-        .variant-card.completed {
-            background: linear-gradient(135deg, #c6f6d5 0%, #9ae6b4 100%);
-            border-color: #68d391;
-        }
-        .variant-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-        .variant-title {
-            font-weight: 600;
-            font-size: 15px;
-            color: #2d3748;
-        }
-        .variant-progress {
-            font-size: 12px;
-            color: #718096;
-            font-weight: 500;
-        }
-        .tasks {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 6px;
-            margin-bottom: 10px;
-        }
-        .task {
-            aspect-ratio: 1;
-            border-radius: 8px;
-            background: #edf2f7;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            font-size: 14px;
-            color: #718096;
-            cursor: pointer;
-            transition: all 0.15s;
-            user-select: none;
-            border: 2px solid transparent;
-            position: relative;
-        }
-        .task:hover {
-            background: #e2e8f0;
-            transform: scale(1.05);
-            z-index: 1;
-        }
-        .task.done {
-            background: linear-gradient(135deg, #48bb70 0%, #5af436 100%);
-            color: #fff;
-            border-color: #2f855a;
-        }
-        .task.done:hover {
-            background: linear-gradient(135deg, #48bb70 0%, #42c025 100%);
-        }
-        .task.needs-attention {
-            background: linear-gradient(135deg, #f65584 0%, #ed36a0b5 100%);
-            color: #fff;
-            border-color: #dd204f;
-        }
-        .task.needs-attention:hover {
-            background: linear-gradient(135deg, #f65584 0%, #ed36a0 100%);
-        }
-        .task.has-comment::after {
-            content: '💬';
-            position: absolute;
-            top: -5px;
-            right: -5px;
-            font-size: 10px;
-            background: #fff;
-            border-radius: 50%;
-            width: 16px;
-            height: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 1px solid #e2e8f0;
-        }
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: #718096;
-        }
-        .loading::after {
-            content: '...';
-            animation: dots 1.5s steps(4, end) infinite;
-        }
-        .task-tooltip {
-            display: none;
-            position: absolute;
-            bottom: 110%;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #2d3748;
-            color: #fff;
-            padding: 8px 12px;
-            border-radius: 8px;
-            font-size: 12px;
-            font-weight: 400;
-            white-space: nowrap;
-            max-width: 300px;
-            white-space: normal;
-            word-wrap: break-word;
-            z-index: 1000;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            pointer-events: none;
-        }
-        .task-tooltip::after {
-            content: '';
-            position: absolute;
-            top: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            border: 6px solid transparent;
-            border-top-color: #2d3748;
-        }
-        .task:hover .task-tooltip {
-            display: block;
-        }
-        .variant-bar {
-            height: 4px;
-            background: #e2e8f0;
-            border-radius: 2px;
-            overflow: hidden;
-        }
-        .variant-bar-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #48bb78, #38a169);
-            transition: width 0.3s;
-        }
-        .modal-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.5);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 100;
-            padding: 20px;
-        }
-        .modal-overlay.active {
-            display: flex;
-        }
-        .modal {
-            background: #fff;
-            border-radius: 16px;
-            padding: 25px;
-            max-width: 500px;
-            width: 100%;
-        }
-        .modal h2 {
-            margin-bottom: 15px;
-            font-size: 20px;
-            text-align: center;
-        }
-        .modal input, .modal textarea {
-            width: 100%;
-            background: #f7fafc;
-            color: #2d3748;
-            margin-bottom: 15px;
-            border: 1px solid #e2e8f0;
-            border-radius: 10px;
-            padding: 10px 14px;
-            font-family: inherit;
-            font-size: 14px;
-            resize: vertical;
-        }
-        .modal textarea {
-            min-height: 80px;
-        }
-        .modal-actions {
-            display: flex;
-            gap: 10px;
-            justify-content: flex-end;
-        }
-        .modal-actions button {
-            color: #fff;
-            background: #667eea;
-            border: none;
-            padding: 10px 20px;
-        }
-        .modal-actions button.secondary {
-            background: #a0aec0;
-        }
-        .modal .task-status-buttons {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-        .modal .task-status-buttons button {
-            flex: 1;
-            background: #edf2f7;
-            color: #4a5568;
-            border: 2px solid transparent;
-        }
-        .modal .task-status-buttons button.active {
-            border-color: #667eea;
-            background: #ebf4ff;
-        }
-        .modal .task-status-buttons button.status-done.active {
-            border-color: #48bb78;
-            background: #f0fff4;
-        }
-        .modal .task-status-buttons button.status-attention.active {
-            border-color: #ed8936;
-            background: #fffaf0;
-        }
-        .login-modal .modal {
-            max-width: 400px;
-        }
-        .login-modal .modal h2 {
-            margin-bottom: 5px;
-        }
-        .login-modal .modal .subtitle {
-            text-align: center;
-            color: #718096;
-            font-size: 14px;
-            margin-bottom: 20px;
-        }
-        .login-modal .modal .login-error {
-            color: #e53e3e;
-            font-size: 13px;
-            text-align: center;
-            margin-bottom: 10px;
-            display: none;
-        }
-        .login-modal .modal .login-error.show {
-            display: block;
-        }
-        .login-modal .modal .login-icon {
-            text-align: center;
-            font-size: 48px;
-            margin-bottom: 10px;
-        }
-        .password-input-wrapper {
-            position: relative;
-        }
-        .password-input-wrapper input {
-            padding-right: 45px;
-        }
-        .password-toggle {
-            position: absolute;
-            right: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: none;
-            border: none;
-            color: #718096;
-            cursor: pointer;
-            font-size: 18px;
-            padding: 5px;
-        }
-        .password-toggle:hover {
-            background: none;
-            transform: translateY(-50%);
-        }
-        @media (max-width: 600px) {
-            header { flex-direction: column; align-items: flex-start; }
-            .variants-grid { grid-template-columns: 1fr; padding: 15px; }
-            .stats { padding: 15px; }
-            .toolbar { padding: 15px; }
-            .modal { max-width: 100%; }
-            .header-right { width: 100%; justify-content: space-between; }
-        }
+        .container { max-width: 1400px; margin: 0 auto; background: #fff; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); overflow: hidden; }
+        header { background: linear-gradient(135deg, #ea66c3 0%, #764ba2 100%); color: #fff; padding: 25px 30px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
+        header h1 { font-size: 24px; font-weight: 600; }
+        .header-right { display: flex; gap: 15px; align-items: center; flex-wrap: wrap; }
+        .user-info { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.15); padding: 8px 16px; border-radius: 10px; font-size: 24px; }
+        .user-info .role { font-size: 11px; opacity: 0.8; }
+        .child-selector { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        .child-selector select { min-width: 150px; background: rgba(255,255,255,0.95); color: #2d3748; padding: 10px 14px; border-radius: 10px; border: none; outline: none; font-family: inherit; font-size: 14px; }
+        select, input, button { font-family: inherit; font-size: 14px; padding: 10px 14px; border-radius: 10px; border: none; outline: none; transition: all 0.2s; }
+        select, input { background: rgba(255,255,255,0.95); color: #2d3748; min-width: 150px; }
+        button { background: rgba(255,255,255,0.2); color: #fff; cursor: pointer; border: 1px solid rgba(255,255,255,0.3); font-weight: 500; }
+        button:hover { background: rgba(255,255,255,0.35); transform: translateY(-1px); }
+        button.secondary { background: #edf2f7; color: #4a5568; border: 1px solid #e2e8f0; }
+        button.secondary2 { background: #edf2f7; color: #4a5568; border: 1px solid #e2e8f0; }
+        button.secondary:hover { background: #e2e8f0; }
+        button.success { background: #4866bb6e; color: #fff; border: 1px solid #8438a1; }
+        button.success:hover { background: #4866bbcf; }
+        button.danger { background: #fed7d7; color: #c53030; border-color: #feb2b2; }
+        button.danger:hover { background: #feb2b2; }
+        button.logout-btn { background: rgba(255,255,255,0.2); border-color: rgba(255,255,255,0.3); }
+        button.logout-btn:hover { background: rgba(255,0,0,0.3); }
+        button.add-child-btn { background: #48bb78; color: #fff; border: 1px solid #38a169; }
+        button.add-child-btn:hover { background: #38a169; }
+        button.delete-child-btn { background: #fed7d7; color: #c53030; border-color: #feb2b2; }
+        button.delete-child-btn:hover { background: #feb2b2; }
+        .status-indicator { display: inline-flex; align-items: center; gap: 8px; padding: 5px 12px; border-radius: 20px; font-size: 12px; background: rgba(255,255,255,0.1); }
+        .status-indicator .dot { width: 8px; height: 8px; border-radius: 50%; background: #fc8181; animation: none; }
+        .status-indicator .dot.connected { background: #48bb78; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { opacity:1; transform:scale(1); } 50% { opacity:0.5; transform:scale(0.8); } 100% { opacity:1; transform:scale(1); } }
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; padding: 20px 30px; background: #f7fafc; border-bottom: 1px solid #e2e8f0; }
+        .stat-card { background: #fff; padding: 15px 20px; border-radius: 12px; border: 1px solid #e2e8f0; }
+        .stat-card .label { font-size: 12px; color: #718096; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; }
+        .stat-card .value { font-size: 22px; font-weight: 700; color: #2d3748; }
+        .progress-bar { height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden; margin-top: 8px; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #48bb78, #38a169); transition: width 0.4s ease; }
+        .toolbar { padding: 15px 30px; display: flex; gap: 10px; flex-wrap: wrap; border-bottom: 1px solid #e2e8f0; background: #fff; }
+        .variants-grid { padding: 20px 30px 30px; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; max-height: 70vh; overflow-y: auto; }
+        .variant-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 15px; transition: all 0.2s; }
+        .variant-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        .variant-card.completed { background: linear-gradient(135deg, #c6f6d5 0%, #9ae6b4 100%); border-color: #68d391; }
+        .variant-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .variant-title { font-weight: 600; font-size: 15px; color: #2d3748; }
+        .variant-progress { font-size: 12px; color: #718096; font-weight: 500; }
+        .tasks { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-bottom: 10px; }
+        .task { aspect-ratio: 1; border-radius: 8px; background: #edf2f7; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 14px; color: #718096; cursor: pointer; transition: all 0.15s; user-select: none; border: 2px solid transparent; position: relative; }
+        .task:hover { background: #e2e8f0; transform: scale(1.05); z-index: 1; }
+        .task.done { background: linear-gradient(135deg, #48bb70 0%, #5af436 100%); color: #fff; border-color: #2f855a; }
+        .task.done:hover { background: linear-gradient(135deg, #48bb70 0%, #42c025 100%); }
+        .task.needs-attention { background: linear-gradient(135deg, #f65584 0%, #ed36a0b5 100%); color: #fff; border-color: #dd204f; }
+        .task.needs-attention:hover { background: linear-gradient(135deg, #f65584 0%, #ed36a0 100%); }
+        .task.has-comment::after { content: '💬'; position: absolute; top: -5px; right: -5px; font-size: 10px; background: #fff; border-radius: 50%; width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; border: 1px solid #e2e8f0; }
+        .loading { text-align: center; padding: 40px; color: #718096; }
+        .loading::after { content: '...'; animation: dots 1.5s steps(4, end) infinite; }
+        .task-tooltip { display: none; position: absolute; bottom: 110%; left: 50%; transform: translateX(-50%); background: #2d3748; color: #fff; padding: 8px 12px; border-radius: 8px; font-size: 12px; font-weight: 400; white-space: nowrap; max-width: 300px; white-space: normal; word-wrap: break-word; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.3); pointer-events: none; }
+        .task-tooltip::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 6px solid transparent; border-top-color: #2d3748; }
+        .task:hover .task-tooltip { display: block; }
+        .variant-bar { height: 4px; background: #e2e8f0; border-radius: 2px; overflow: hidden; }
+        .variant-bar-fill { height: 100%; background: linear-gradient(90deg, #48bb78, #38a169); transition: width 0.3s; }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 100; padding: 20px; }
+        .modal-overlay.active { display: flex; }
+        .modal { background: #fff; border-radius: 16px; padding: 25px; max-width: 500px; width: 100%; }
+        .modal h2 { margin-bottom: 15px; font-size: 20px; text-align: center; }
+        .modal input, .modal textarea { width: 100%; background: #f7fafc; color: #2d3748; margin-bottom: 15px; border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px 14px; font-family: inherit; font-size: 14px; resize: vertical; }
+        .modal textarea { min-height: 80px; }
+        .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+        .modal-actions button { color: #fff; background: #667eea; border: none; padding: 10px 20px; }
+        .modal-actions button.secondary { background: #a0aec0; }
+        .modal .task-status-buttons { display: flex; gap: 10px; margin-bottom: 15px; }
+        .modal .task-status-buttons button { flex: 1; background: #edf2f7; color: #4a5568; border: 2px solid transparent; }
+        .modal .task-status-buttons button.active { border-color: #667eea; background: #ebf4ff; }
+        .modal .task-status-buttons button.status-done.active { border-color: #48bb78; background: #f0fff4; }
+        .modal .task-status-buttons button.status-attention.active { border-color: #ed8936; background: #fffaf0; }
+        .login-modal .modal { max-width: 400px; }
+        .login-modal .modal h2 { margin-bottom: 5px; }
+        .login-modal .modal .subtitle { text-align: center; color: #718096; font-size: 14px; margin-bottom: 20px; }
+        .login-modal .modal .login-error { color: #e53e3e; font-size: 13px; text-align: center; margin-bottom: 10px; display: none; }
+        .login-modal .modal .login-error.show { display: block; }
+        .login-modal .modal .login-icon { text-align: center; font-size: 48px; margin-bottom: 10px; }
+        .password-input-wrapper { position: relative; }
+        .password-input-wrapper input { padding-right: 45px; }
+        .password-toggle { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #718096; cursor: pointer; font-size: 18px; padding: 5px; }
+        .password-toggle:hover { background: none; transform: translateY(-50%); }
+        @media (max-width: 600px) { header { flex-direction: column; align-items: flex-start; } .variants-grid { grid-template-columns: 1fr; padding: 15px; } .stats { padding: 15px; } .toolbar { padding: 15px; } .modal { max-width: 100%; } .header-right { width: 100%; justify-content: space-between; } }
         .hidden-input { display: none; }
-        .admin-controls {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-        .admin-controls label {
-            color: rgba(255,255,255,0.8);
-            font-size: 14px;
-        }
+        .admin-controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        .admin-controls label { color: rgba(255,255,255,0.8); font-size: 14px; }
     </style>
 </head>
 <body>
@@ -677,7 +260,7 @@
         const VARIANTS = 80;
         const TASKS = 10;
         const STORAGE_KEY = 'tasksProgress_v2';
-        const USERS_KEY = 'users_v1'; // используется как кеш
+        const USERS_KEY = 'users_v1'; // кеш
 
         let data = {
             children: [],
@@ -685,7 +268,7 @@
             progress: {}
         };
 
-        let usersCache = {}; // кеш пользователей { username: { password, role } }
+        let usersCache = {};
         let currentTaskKey = null;
         let currentComment = '';
 
@@ -693,7 +276,6 @@
         // 3. Работа с пользователями через Supabase
         // ===============================
 
-        // Загрузка всех пользователей из Supabase и обновление кеша
         async function loadUsersFromSupabase() {
             if (!supabaseEnabled) return;
             try {
@@ -704,12 +286,10 @@
                     console.error('Ошибка загрузки пользователей из Supabase:', error);
                     return;
                 }
-                // Обновляем кеш
                 usersCache = {};
                 rows.forEach(row => {
                     usersCache[row.username] = { password: row.password, role: row.role };
                 });
-                // Сохраняем в localStorage как резерв
                 localStorage.setItem(USERS_KEY, JSON.stringify(usersCache));
                 console.log('✅ Пользователи загружены из Supabase:', Object.keys(usersCache));
             } catch (e) {
@@ -717,7 +297,6 @@
             }
         }
 
-        // Добавление/обновление пользователя в Supabase
         async function saveUserToSupabase(username, password, role) {
             if (!supabaseEnabled) return false;
             try {
@@ -728,7 +307,6 @@
                     console.error('Ошибка сохранения пользователя в Supabase:', error);
                     return false;
                 }
-                // Обновляем кеш
                 usersCache[username] = { password, role };
                 localStorage.setItem(USERS_KEY, JSON.stringify(usersCache));
                 return true;
@@ -738,10 +316,9 @@
             }
         }
 
-        // Удаление пользователя из Supabase
         async function deleteUserFromSupabase(username) {
             if (!supabaseEnabled) return false;
-            if (username === ADMIN_USERNAME) return false; // нельзя удалить админа
+            if (username === ADMIN_USERNAME) return false;
             try {
                 const { error } = await supabaseClient
                     .from('users')
@@ -751,7 +328,6 @@
                     console.error('Ошибка удаления пользователя из Supabase:', error);
                     return false;
                 }
-                // Удаляем из кеша
                 delete usersCache[username];
                 localStorage.setItem(USERS_KEY, JSON.stringify(usersCache));
                 return true;
@@ -761,13 +337,10 @@
             }
         }
 
-        // Аутентификация через Supabase (с проверкой кеша)
         async function authenticateWithSupabase(username, password) {
-            // Сначала проверяем в кеше (быстрее)
             if (usersCache[username] && usersCache[username].password === password) {
                 return usersCache[username];
             }
-            // Если в кеше нет или пароль не совпал, пробуем запросить из Supabase
             if (!supabaseEnabled) return null;
             try {
                 const { data: rows, error } = await supabaseClient
@@ -780,7 +353,6 @@
                     return null;
                 }
                 if (rows.password === password) {
-                    // Обновляем кеш
                     usersCache[username] = { password: rows.password, role: rows.role };
                     localStorage.setItem(USERS_KEY, JSON.stringify(usersCache));
                     return { password: rows.password, role: rows.role };
@@ -792,10 +364,8 @@
             }
         }
 
-        // Инициализация: загружаем пользователей из Supabase, создаём админа если нет
         async function initUsers() {
             if (!supabaseEnabled) {
-                // Офлайн-режим: загружаем из localStorage
                 const saved = localStorage.getItem(USERS_KEY);
                 if (saved) {
                     try {
@@ -804,26 +374,21 @@
                             usersCache[ADMIN_USERNAME] = { password: ADMIN_PASSWORD, role: 'admin' };
                             localStorage.setItem(USERS_KEY, JSON.stringify(usersCache));
                         }
-                    } catch (e) {
-                        usersCache = {};
-                    }
+                    } catch (e) { usersCache = {}; }
                 } else {
                     usersCache = { admin: { password: ADMIN_PASSWORD, role: 'admin' } };
                     localStorage.setItem(USERS_KEY, JSON.stringify(usersCache));
                 }
+                updateChildrenList();
                 return;
             }
 
-            // Загружаем из Supabase
             await loadUsersFromSupabase();
-            // Если админа нет в Supabase, создаём
             if (!usersCache[ADMIN_USERNAME]) {
                 const created = await saveUserToSupabase(ADMIN_USERNAME, ADMIN_PASSWORD, 'admin');
-                if (created) {
-                    console.log('✅ Администратор создан в Supabase');
-                }
+                if (created) console.log('✅ Администратор создан в Supabase');
             }
-            // Также добавляем всех пользователей из localStorage, которых нет в Supabase (миграция)
+            // Миграция локальных пользователей
             const saved = localStorage.getItem(USERS_KEY);
             if (saved) {
                 try {
@@ -835,25 +400,23 @@
                     }
                 } catch (e) { /* ignore */ }
             }
-            // После загрузки обновляем список детей (data.children) из пользователей с ролью 'child'
             updateChildrenList();
         }
 
-        // Обновление списка детей из usersCache
         function updateChildrenList() {
             const children = Object.keys(usersCache).filter(name => usersCache[name].role === 'child');
-            // Обновляем data.children, сохраняя порядок
             data.children = children;
-            // Если текущий выбранный ребенок не в списке, сбросить
             if (data.current && !data.children.includes(data.current)) {
                 data.current = data.children.length > 0 ? data.children[0] : null;
             }
-            renderChildSelect();
-            renderGrid();
+            if (typeof renderGrid === 'function') {
+                renderChildSelect();
+                renderGrid();
+            }
         }
 
         // ===============================
-        // 4. Supabase Realtime для таблицы users
+        // 4. Supabase Realtime для users
         // ===============================
 
         function setupUserRealtimeSubscription() {
@@ -866,17 +429,14 @@
                     { event: '*', schema: 'public', table: 'users' },
                     (payload) => {
                         console.log('📨 Изменение в таблице users:', payload);
-                        // Перезагружаем пользователей и обновляем интерфейс
                         loadUsersFromSupabase().then(() => {
                             updateChildrenList();
-                            // Если текущий пользователь - ребенок и его удалили, выйти
                             if (currentUser && currentUser.role === 'child') {
                                 if (!usersCache[currentUser.username]) {
                                     alert('Ваша учётная запись была удалена. Выйдите и войдите заново.');
                                     window.logout();
                                 }
                             }
-                            // Если админ, обновляем список
                             if (currentUser && currentUser.role === 'admin') {
                                 renderChildSelect();
                                 renderGrid();
@@ -885,14 +445,12 @@
                     }
                 )
                 .subscribe((status) => {
-                    if (status === 'SUBSCRIBED') {
-                        console.log('✅ Подписка на users активна');
-                    }
+                    if (status === 'SUBSCRIBED') console.log('✅ Подписка на users активна');
                 });
         }
 
         // ===============================
-        // 5. Авторизация (исправлена)
+        // 5. Авторизация
         // ===============================
 
         window.login = async function() {
@@ -932,7 +490,6 @@
             document.getElementById('loginPassword').value = '';
             console.log(`✅ Пользователь "${username}" вошел в систему (${user.role})`);
 
-            // Настраиваем real-time для прогресса и пользователей
             if (supabaseEnabled) {
                 setTimeout(() => {
                     setupRealtimeSubscription();
@@ -992,31 +549,20 @@
         }
 
         // ===============================
-        // 6. Загрузка / сохранение прогресса (без изменений, только добавим синхронизацию пользователей)
+        // 6. Загрузка / сохранение прогресса
         // ===============================
-
-        async function loadAllChildrenFromSupabase() {
-            // Теперь список детей берётся из usersCache
-            return data.children; // обновляется через updateChildrenList
-        }
 
         async function loadData() {
             isLoading = true;
             const grid = document.getElementById('grid');
             if (grid) grid.innerHTML = '<div class="loading">Загрузка данных</div>';
 
-            // Инициализируем пользователей (загружаем из Supabase)
             await initUsers();
 
-            // Обновляем список детей
-            updateChildrenList();
-
-            // Загружаем прогресс из localStorage и Supabase
             const saved = localStorage.getItem(STORAGE_KEY);
             if (saved) {
                 try {
                     const parsed = JSON.parse(saved);
-                    // Объединяем с существующими детьми
                     if (parsed.children && parsed.children.length > 0) {
                         parsed.children.forEach(name => {
                             if (!data.children.includes(name)) {
@@ -1029,7 +575,6 @@
                 } catch (e) { /* ignore */ }
             }
 
-            // Загружаем прогресс для всех детей из Supabase
             if (supabaseEnabled) {
                 for (const childName of data.children) {
                     await loadProgressFromSupabase(childName);
@@ -1046,11 +591,165 @@
             isLoading = false;
         }
 
-        // Функции saveProgressToSupabase, loadProgressFromSupabase, saveData - без изменений
-        // (они уже есть в предыдущей версии, оставляем их)
+        async function saveProgressToSupabase(childName) {
+            if (!supabaseEnabled || !childName) return;
+            try {
+                const progress = data.progress[childName] || {};
+                const payload = {
+                    child_name: childName,
+                    progress: progress,
+                    updated_at: new Date().toISOString()
+                };
+                const { error } = await supabaseClient
+                    .from('tasks_progress')
+                    .upsert(payload, { onConflict: 'child_name' });
+                if (error) {
+                    console.error('Supabase upsert error:', error);
+                } else {
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+                }
+            } catch (e) {
+                console.error('Ошибка при сохранении в Supabase:', e);
+            }
+        }
+
+        async function loadProgressFromSupabase(childName) {
+            if (!supabaseEnabled || !childName) return;
+            try {
+                const { data: rows, error } = await supabaseClient
+                    .from('tasks_progress')
+                    .select('progress')
+                    .eq('child_name', childName)
+                    .maybeSingle();
+                if (error) {
+                    console.error('Supabase select error:', error);
+                    return;
+                }
+                if (rows && rows.progress) {
+                    data.progress[childName] = rows.progress;
+                } else {
+                    if (!data.progress[childName]) {
+                        data.progress[childName] = {};
+                    }
+                }
+            } catch (e) {
+                console.error('Ошибка при загрузке из Supabase:', e);
+            }
+        }
+
+        async function saveData() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+            if (supabaseEnabled) {
+                for (const childName of data.children) {
+                    await saveProgressToSupabase(childName);
+                }
+            }
+        }
+
+        window.syncData = async function() {
+            if (!supabaseEnabled) {
+                alert('Supabase не настроен. Работаем в офлайн-режиме.');
+                return;
+            }
+            if (isLoading) return;
+            isLoading = true;
+            try {
+                await loadData();
+                alert('Синхронизация завершена успешно!');
+            } catch (e) {
+                console.error('Ошибка синхронизации:', e);
+                alert('Ошибка при синхронизации: ' + e.message);
+            } finally {
+                isLoading = false;
+            }
+        };
 
         // ===============================
-        // 7. Работа с UI (без изменений, только добавлена фильтрация)
+        // 7. Realtime для прогресса
+        // ===============================
+
+        function setupRealtimeSubscription() {
+            if (!supabaseEnabled || realtimeSubscription) return;
+            console.log('🔄 Настройка real-time подписки для прогресса...');
+            updateStatusText('Подключение...', false);
+
+            try {
+                realtimeSubscription = supabaseClient
+                    .channel('tasks_progress_changes')
+                    .on(
+                        'postgres_changes',
+                        { event: '*', schema: 'public', table: 'tasks_progress' },
+                        (payload) => {
+                            console.log('📨 Получено real-time событие:', payload);
+                            handleRealtimeUpdate(payload);
+                        }
+                    )
+                    .subscribe((status, err) => {
+                        console.log('📡 Статус подписки прогресса:', status);
+                        if (status === 'SUBSCRIBED') {
+                            isRealtimeConnected = true;
+                            updateStatusText('Синхронизация активна', true);
+                            console.log('✅ Real-time прогресса подключен!');
+                        } else if (status === 'CHANNEL_ERROR') {
+                            isRealtimeConnected = false;
+                            updateStatusText('❌ Ошибка подключения', false);
+                            console.error('❌ Ошибка канала:', err);
+                        } else if (status === 'TIMED_OUT') {
+                            updateStatusText('⏰ Ожидание подключения...', false);
+                            console.warn('⏰ Таймаут подключения');
+                        } else if (status === 'CLOSED') {
+                            updateStatusText('🔌 Отключено', false);
+                            console.log('🔌 Канал закрыт');
+                        }
+                    });
+                console.log('📡 Подписка прогресса создана');
+            } catch (e) {
+                console.error('❌ Ошибка при создании подписки:', e);
+                updateStatusText('❌ Ошибка: ' + e.message, false);
+            }
+        }
+
+        function handleRealtimeUpdate(payload) {
+            if (!payload || !payload.new) {
+                console.warn('⚠️ Пустой payload');
+                return;
+            }
+            const childName = payload.new.child_name;
+            const newProgress = payload.new.progress;
+
+            console.log(`🔄 Обновление для ${childName}`);
+            if (!data.children.includes(childName)) {
+                data.children.push(childName);
+                data.progress[childName] = newProgress || {};
+                renderChildSelect();
+            } else {
+                data.progress[childName] = newProgress || {};
+            }
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+
+            let shouldUpdate = false;
+            if (currentUser && currentUser.role === 'admin') {
+                if (data.current === childName) shouldUpdate = true;
+            } else if (currentUser && currentUser.role === 'child') {
+                if (currentUser.username === childName) shouldUpdate = true;
+            }
+
+            if (shouldUpdate) {
+                console.log(`🔄 Обновление интерфейса для ${childName}`);
+                renderGrid();
+            }
+        }
+
+        function updateStatusText(text, connected) {
+            const dot = document.getElementById('statusDot');
+            const statusText = document.getElementById('statusText');
+            if (!dot || !statusText) return;
+            statusText.textContent = text;
+            dot.className = connected ? 'dot connected' : 'dot';
+        }
+
+        // ===============================
+        // 8. Работа с UI
         // ===============================
 
         function renderChildSelect() {
@@ -1079,11 +778,175 @@
             });
         }
 
-        // Остальные функции (renderGrid, cycleTaskStatus, updateStats) без изменений
-        // (они уже есть, оставляем их)
+        function renderGrid() {
+            const grid = document.getElementById('grid');
+            if (!grid) return;
+            grid.innerHTML = '';
+
+            let childToShow = data.current;
+            if (currentUser && currentUser.role === 'child') {
+                childToShow = currentUser.username;
+            }
+
+            if (!childToShow) {
+                grid.innerHTML =
+                    '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#718096;">Выберите ученика, чтобы начать</div>';
+                updateStats();
+                return;
+            }
+
+            const childProgress = data.progress[childToShow] || {};
+
+            for (let v = 1; v <= VARIANTS; v++) {
+                const card = document.createElement('div');
+                card.className = 'variant-card';
+                let done = 0;
+                let attention = 0;
+                for (let t = 1; t <= TASKS; t++) {
+                    const key = `${v}-${t}`;
+                    const status = childProgress[key] || 'none';
+                    if (status === 'done') done++;
+                    if (status === 'attention') attention++;
+                }
+                if (done === TASKS) card.classList.add('completed');
+
+                const header = document.createElement('div');
+                header.className = 'variant-header';
+                header.innerHTML = `
+                    <div class="variant-title">Вариант ${v}</div>
+                    <div class="variant-progress">${done + attention}/${TASKS}</div>
+                `;
+                card.appendChild(header);
+
+                const tasks = document.createElement('div');
+                tasks.className = 'tasks';
+                for (let t = 1; t <= TASKS; t++) {
+                    const task = document.createElement('div');
+                    task.className = 'task';
+                    const key = `${v}-${t}`;
+                    const status = childProgress[key] || 'none';
+
+                    if (status === 'done') task.classList.add('done');
+                    else if (status === 'attention') task.classList.add('needs-attention');
+
+                    const comment = childProgress[`${key}_comment`];
+                    if (comment) task.classList.add('has-comment');
+
+                    task.textContent = t;
+
+                    task.onclick = () => cycleTaskStatus(v, t);
+                    task.oncontextmenu = (e) => {
+                        e.preventDefault();
+                        openCommentModal(v, t);
+                    };
+
+                    if (comment) {
+                        const tooltip = document.createElement('div');
+                        tooltip.className = 'task-tooltip';
+                        tooltip.textContent = comment;
+                        task.appendChild(tooltip);
+                    }
+
+                    tasks.appendChild(task);
+                }
+                card.appendChild(tasks);
+
+                const bar = document.createElement('div');
+                bar.className = 'variant-bar';
+                const progressPercent = ((done + attention) / TASKS) * 100;
+                bar.innerHTML = `<div class="variant-bar-fill" style="width:${progressPercent}%"></div>`;
+                card.appendChild(bar);
+
+                grid.appendChild(card);
+            }
+            updateStats();
+        }
+
+        function cycleTaskStatus(v, t) {
+            console.log('🔄 cycleTaskStatus вызван для', v, t);
+            if (!data.current) {
+                console.warn('⚠️ data.current не установлен');
+                return;
+            }
+
+            if (currentUser && currentUser.role === 'child') {
+                const childName = currentUser.username;
+                if (!data.progress[childName]) data.progress[childName] = {};
+                const key = `${v}-${t}`;
+                const currentStatus = data.progress[childName][key] || 'none';
+                let newStatus;
+                if (currentStatus === 'none') newStatus = 'done';
+                else if (currentStatus === 'done') newStatus = 'attention';
+                else newStatus = 'none';
+                data.progress[childName][key] = newStatus;
+                console.log(`✅ Статус задания ${key} изменён на ${newStatus}`);
+                saveData();
+                renderGrid();
+                return;
+            }
+
+            if (!data.progress[data.current]) data.progress[data.current] = {};
+            const key = `${v}-${t}`;
+            const currentStatus = data.progress[data.current][key] || 'none';
+
+            let newStatus;
+            if (currentStatus === 'none') newStatus = 'done';
+            else if (currentStatus === 'done') newStatus = 'attention';
+            else newStatus = 'none';
+
+            data.progress[data.current][key] = newStatus;
+            console.log(`✅ Статус задания ${key} изменён на ${newStatus}`);
+            saveData();
+            renderGrid();
+        }
+
+        function updateStats() {
+            const statTotal = document.getElementById('statTotal');
+            const statDone = document.getElementById('statDone');
+            const statAttention = document.getElementById('statAttention');
+            const statVariants = document.getElementById('statVariants');
+            const statPercent = document.getElementById('statPercent');
+            const statBar = document.getElementById('statBar');
+
+            const total = VARIANTS * TASKS;
+
+            let childToShow = data.current;
+            if (currentUser && currentUser.role === 'child') {
+                childToShow = currentUser.username;
+            }
+
+            const prog = data.progress[childToShow] || {};
+            let done = 0;
+            let attention = 0;
+            let variantsDone = 0;
+
+            for (let v = 1; v <= VARIANTS; v++) {
+                let variantDone = 0;
+                for (let t = 1; t <= TASKS; t++) {
+                    const key = `${v}-${t}`;
+                    const status = prog[key] || 'none';
+                    if (status === 'done') {
+                        done++;
+                        variantDone++;
+                    } else if (status === 'attention') {
+                        attention++;
+                    }
+                }
+                if (variantDone === TASKS) variantsDone++;
+            }
+
+            const percent = total ? Math.round((done + attention) / total * 100) : 0;
+
+            if (statTotal) statTotal.textContent = total;
+            if (statDone) statDone.textContent = done;
+            if (statAttention) statAttention.textContent = attention;
+            if (statVariants) statVariants.textContent = `${variantsDone} / ${VARIANTS}`;
+            if (statPercent) statPercent.textContent = percent + '%';
+            if (statBar) statBar.style.width = percent + '%';
+        }
 
         // ===============================
-        // 8. Модалка добавления ребенка (исправлена)
+        // 9. Модалка добавления ребенка
         // ===============================
 
         window.openAddModal = function() {
@@ -1109,7 +972,6 @@
             if (data.children.includes(name)) return alert('Такой ученик уже есть');
             if (usersCache[name]) return alert('Пользователь с таким именем уже существует');
 
-            // Сохраняем пользователя в Supabase
             const saved = await saveUserToSupabase(name, password, 'child');
             if (!saved && supabaseEnabled) {
                 alert('Ошибка при сохранении пользователя. Попробуйте позже.');
@@ -1127,13 +989,73 @@
         };
 
         // ===============================
-        // 9. Модалка комментария (без изменений)
+        // 10. Модалка комментария
         // ===============================
 
-        // Оставляем функции openCommentModal, closeCommentModal, setTaskStatus, saveComment без изменений
+        function openCommentModal(v, t) {
+            currentTaskKey = `${v}-${t}`;
+            let childToShow = data.current;
+            if (currentUser && currentUser.role === 'child') {
+                childToShow = currentUser.username;
+            }
+            const childProgress = data.progress[childToShow] || {};
+            const currentStatus = childProgress[currentTaskKey] || 'none';
+            currentComment = childProgress[`${currentTaskKey}_comment`] || '';
+
+            document.getElementById('commentModalTitle').textContent = `Комментарий к заданию ${v}-${t}`;
+            document.getElementById('commentText').value = currentComment;
+
+            document.querySelectorAll('.task-status-buttons button').forEach(btn => btn.classList.remove('active'));
+            if (currentStatus === 'done') document.querySelector('.status-done').classList.add('active');
+            else if (currentStatus === 'attention') document.querySelector('.status-attention').classList.add('active');
+            else document.querySelector('.status-none').classList.add('active');
+
+            document.getElementById('commentModal').classList.add('active');
+        }
+
+        window.closeCommentModal = function() {
+            document.getElementById('commentModal').classList.remove('active');
+            currentTaskKey = null;
+        };
+
+        window.setTaskStatus = function(status) {
+            if (!currentTaskKey) return;
+            let childToShow = data.current;
+            if (currentUser && currentUser.role === 'child') {
+                childToShow = currentUser.username;
+            }
+            if (!childToShow) return;
+            if (!data.progress[childToShow]) data.progress[childToShow] = {};
+            data.progress[childToShow][currentTaskKey] = status;
+
+            document.querySelectorAll('.task-status-buttons button').forEach(btn => btn.classList.remove('active'));
+            if (status === 'done') document.querySelector('.status-done').classList.add('active');
+            else if (status === 'attention') document.querySelector('.status-attention').classList.add('active');
+            else document.querySelector('.status-none').classList.add('active');
+        };
+
+        window.saveComment = function() {
+            if (!currentTaskKey) return;
+            let childToShow = data.current;
+            if (currentUser && currentUser.role === 'child') {
+                childToShow = currentUser.username;
+            }
+            if (!childToShow) return;
+            if (!data.progress[childToShow]) data.progress[childToShow] = {};
+
+            const comment = document.getElementById('commentText').value.trim();
+            if (comment) {
+                data.progress[childToShow][`${currentTaskKey}_comment`] = comment;
+            } else {
+                delete data.progress[childToShow][`${currentTaskKey}_comment`];
+            }
+            saveData();
+            renderGrid();
+            window.closeCommentModal();
+        };
 
         // ===============================
-        // 10. Действия (исправлено удаление)
+        // 11. Действия (удаление, сброс)
         // ===============================
 
         window.deleteChild = async function() {
@@ -1145,17 +1067,12 @@
             const nameToDelete = data.current;
             if (!confirm(`Удалить ученика "${nameToDelete}" и весь его прогресс?`)) return;
 
-            // Удаляем из Supabase
             if (supabaseEnabled) {
                 const deleted = await deleteUserFromSupabase(nameToDelete);
                 if (!deleted) {
                     alert('Ошибка при удалении пользователя из Supabase.');
                     return;
                 }
-            }
-
-            // Удаляем прогресс
-            if (supabaseEnabled) {
                 try {
                     const { error } = await supabaseClient
                         .from('tasks_progress')
@@ -1175,16 +1092,240 @@
             renderGrid();
         };
 
-        // Остальные функции (resetProgress, export/import) без изменений
+        window.resetProgress = async function() {
+            if (!data.current) return;
+            if (currentUser && currentUser.role === 'child') {
+                alert('У вас нет прав на сброс прогресса');
+                return;
+            }
+            if (!confirm(`Сбросить весь прогресс у "${data.current}"?`)) return;
+
+            data.progress[data.current] = {};
+            await saveData();
+            renderGrid();
+        };
 
         // ===============================
-        // 11. Инициализация при загрузке страницы
+        // 12. Экспорт/Импорт
+        // ===============================
+
+        window.exportExcelChild = function() {
+            if (!currentUser || currentUser.role !== 'child') return;
+            const childName = currentUser.username;
+            const progress = data.progress[childName] || {};
+            const excelData = [];
+            const header = ['Вариант', 'Задание'];
+            for (let t = 1; t <= TASKS; t++) header.push(`Задание ${t}`);
+            header.push('Статус', 'Комментарий');
+            excelData.push(header);
+
+            for (let v = 1; v <= VARIANTS; v++) {
+                const row = [v];
+                let statusCount = 0;
+                for (let t = 1; t <= TASKS; t++) {
+                    const key = `${v}-${t}`;
+                    const status = progress[key] || 'none';
+                    let display = '⬜';
+                    if (status === 'done') { display = '✅';
+                        statusCount++; } else if (status === 'attention') { display = '⚠️';
+                        statusCount++; }
+                    row.push(display);
+                }
+                let variantStatus = 'Не завершен';
+                if (statusCount === TASKS) variantStatus = '✅ Завершен';
+                else if (statusCount > 0) variantStatus = '⚠️ В процессе';
+                row.push(variantStatus);
+
+                let comment = '';
+                for (let t = 1; t <= TASKS; t++) {
+                    const key = `${v}-${t}`;
+                    const commentKey = `${key}_comment`;
+                    if (progress[commentKey]) { comment = progress[commentKey]; break; }
+                }
+                row.push(comment);
+                excelData.push(row);
+            }
+
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.aoa_to_sheet(excelData);
+            ws['!cols'] = [{ wch: 10 }, { wch: 10 }, ...Array(TASKS).fill({ wch: 12 }), { wch: 15 }, { wch: 30 }];
+            XLSX.utils.book_append_sheet(wb, ws, 'Мой прогресс');
+            const fileName = `${childName}-progress-${new Date().toISOString().slice(0, 10)}.xlsx`;
+            XLSX.writeFile(wb, fileName);
+        };
+
+        window.exportJSON = function() {
+            if (currentUser && currentUser.role === 'child') {
+                alert('У вас нет прав на экспорт');
+                return;
+            }
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `tasks-backup-${new Date().toISOString().slice(0, 10)}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        };
+
+        window.importJSON = async function(e) {
+            if (currentUser && currentUser.role === 'child') {
+                alert('У вас нет прав на импорт');
+                return;
+            }
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = async (ev) => {
+                try {
+                    const imported = JSON.parse(ev.target.result);
+                    if (!imported.children || !imported.progress) throw new Error();
+                    if (!confirm('Заменить текущие данные импортированными?')) return;
+                    data = imported;
+                    await saveData();
+                    renderChildSelect();
+                    renderGrid();
+                    alert('Импорт JSON успешен!');
+                } catch (err) {
+                    alert('Ошибка: неверный формат файла');
+                }
+            };
+            reader.readAsText(file);
+            e.target.value = '';
+        };
+
+        window.exportExcel = function() {
+            if (currentUser && currentUser.role === 'child') {
+                alert('У вас нет прав на экспорт');
+                return;
+            }
+            const excelData = [];
+            const header = ['Ребёнок', 'Вариант', 'Задание'];
+            for (let t = 1; t <= TASKS; t++) header.push(`Задание ${t}`);
+            header.push('Статус', 'Комментарий');
+            excelData.push(header);
+
+            data.children.forEach(childName => {
+                const progress = data.progress[childName] || {};
+                for (let v = 1; v <= VARIANTS; v++) {
+                    const row = [childName, v];
+                    let statusCount = 0;
+                    for (let t = 1; t <= TASKS; t++) {
+                        const key = `${v}-${t}`;
+                        const status = progress[key] || 'none';
+                        let display = '⬜';
+                        if (status === 'done') { display = '✅';
+                            statusCount++; } else if (status === 'attention') { display = '⚠️';
+                            statusCount++; }
+                        row.push(display);
+                    }
+                    let variantStatus = 'Не завершен';
+                    if (statusCount === TASKS) variantStatus = '✅ Завершен';
+                    else if (statusCount > 0) variantStatus = '⚠️ В процессе';
+                    row.push(variantStatus);
+
+                    let comment = '';
+                    for (let t = 1; t <= TASKS; t++) {
+                        const key = `${v}-${t}`;
+                        const commentKey = `${key}_comment`;
+                        if (progress[commentKey]) { comment = progress[commentKey]; break; }
+                    }
+                    row.push(comment);
+                    excelData.push(row);
+                }
+            });
+
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.aoa_to_sheet(excelData);
+            ws['!cols'] = [{ wch: 15 }, { wch: 10 }, { wch: 10 }, ...Array(TASKS).fill({ wch: 12 }), { wch: 15 }, { wch: 30 }];
+            XLSX.utils.book_append_sheet(wb, ws, 'Прогресс');
+            const fileName = `progress-${new Date().toISOString().slice(0, 10)}.xlsx`;
+            XLSX.writeFile(wb, fileName);
+        };
+
+        window.importExcel = async function(e) {
+            if (currentUser && currentUser.role === 'child') {
+                alert('У вас нет прав на импорт');
+                return;
+            }
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = async (ev) => {
+                try {
+                    const data = new Uint8Array(ev.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+
+                    if (rows.length < 2) {
+                        alert('Файл пуст или имеет неверный формат');
+                        return;
+                    }
+                    const headerRow = rows[0];
+                    if (!headerRow.includes('Ребёнок') || !headerRow.includes('Вариант')) {
+                        alert('Неверный формат файла. Ожидается экспорт из этой программы.');
+                        return;
+                    }
+                    if (!confirm('Импортировать данные из Excel? Это заменит текущие данные.')) return;
+
+                    const importedProgress = {};
+                    const importedChildren = [];
+                    for (let i = 1; i < rows.length; i++) {
+                        const row = rows[i];
+                        if (!row || row.length < 3) continue;
+                        const childName = String(row[0]).trim();
+                        const variant = parseInt(row[1]);
+                        if (!childName || isNaN(variant) || variant < 1 || variant > VARIANTS) continue;
+                        if (!importedChildren.includes(childName)) importedChildren.push(childName);
+                        if (!importedProgress[childName]) importedProgress[childName] = {};
+
+                        for (let t = 0; t < TASKS; t++) {
+                            const colIndex = 2 + t;
+                            if (colIndex < row.length) {
+                                const value = String(row[colIndex] || '').trim();
+                                const key = `${variant}-${t + 1}`;
+                                if (value === '✅') importedProgress[childName][key] = 'done';
+                                else if (value === '⚠️') importedProgress[childName][key] = 'attention';
+                                else importedProgress[childName][key] = 'none';
+                            }
+                        }
+                        const commentIndex = 2 + TASKS + 1;
+                        if (commentIndex < row.length && row[commentIndex]) {
+                            const comment = String(row[commentIndex]).trim();
+                            if (comment) {
+                                const firstKey = `${variant}-1`;
+                                importedProgress[childName][`${firstKey}_comment`] = comment;
+                            }
+                        }
+                    }
+                    if (importedChildren.length === 0) {
+                        alert('Не найдено данных для импорта');
+                        return;
+                    }
+                    data.children = importedChildren;
+                    data.progress = importedProgress;
+                    data.current = importedChildren[0] || null;
+                    await saveData();
+                    renderChildSelect();
+                    renderGrid();
+                    alert(`Импорт успешен! Загружено детей: ${importedChildren.length}`);
+                } catch (err) {
+                    console.error('Ошибка импорта:', err);
+                    alert('Ошибка при импорте файла. Проверьте формат.');
+                }
+            };
+            reader.readAsArrayBuffer(file);
+            e.target.value = '';
+        };
+
+        // ===============================
+        // 13. Обработчики событий
         // ===============================
 
         document.addEventListener('DOMContentLoaded', async function() {
             await loadData();
 
-            // Настройка обработчиков событий (оставляем как есть)
             const childSelect = document.getElementById('childSelect');
             if (childSelect) {
                 childSelect.addEventListener('change', async (e) => {
@@ -1244,18 +1385,6 @@
                 if (pwd) pwd.focus();
             }, 500);
         });
-
-        // ===============================
-        // 12. Дублируем функции, которые могли быть пропущены (для целостности)
-        // ===============================
-
-        // (Здесь вставьте остальные функции, которые мы не переписывали, но они должны быть)
-        // Чтобы не перегружать ответ, я предполагаю, что вы скопируете их из предыдущей версии.
-        // Все функции: renderGrid, cycleTaskStatus, updateStats, openCommentModal, closeCommentModal,
-        // setTaskStatus, saveComment, resetProgress, export/import - остаются без изменений.
-        // Ниже я приведу их в сокращённом виде, но в полном коде они должны быть.
-
-        // Так как это продолжение, я предоставлю полный файл в следующем сообщении.
     </script>
 </body>
 </html>
