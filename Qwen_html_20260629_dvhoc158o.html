@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Контроль заданий</title>
+  <style>
+    /* ----- базовые стили ----- */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+      color: #2d3748;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+    }
+
+    header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #fff;
+      padding: 25px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+
+    header h1 {
+      font-size: 24px;
+      font-weight: 600;
+    }
+
+    .child-selector {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    select,
+    input,
+    button {
+      font-family: inherit;
+      font-size: 14px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: none;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    select,
+    input {
+      background: rgba(255, 255, 255, 0.95);
+      color: #2d3748;
+      min-width: 150px;
+    }
+
+    button {
+      background: rgba(255, 255, 255, 0.2);
+      color: #fff;
+      cursor: pointer;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      font-weight: 500;
+    }
+
+    button:hover {
+      background: rgba(255, 255, 255, 0.35);
+      transform: translateY(-1px);
+    }
+
+    button.secondary {
+      background: #edf2f7;
+      color: #4a5568;
+      border: 1px solid #e2e8f0;
+    }
+
+    button.secondary:hover {
+      background: #e2e8f0;
+    }
+
+    button.danger {
+      background: #fed7d7;
+      color: #c53030;
+      border-color: #feb2b2;
+    }
+
+    button.danger:hover {
+      background: #feb2b2;
+    }
+
+    /* ----- статистика ----- */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      padding: 20px 30px;
+      background: #f7fafc;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .stat-card {
+      background: #fff;
+      padding: 15px 20px;
+      border-radius: 12px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .stat-card .label {
+      font-size: 12px;
+      color: #718096;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 5px;
+    }
+
+    .stat-card .value {
+      font-size: 22px;
+      font-weight: 700;
+      color: #2d3748;
+    }
+
+    .progress-bar {
+      height: 8px;
+      background: #e2e8f0;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 8px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #48bb78, #38a169);
+      transition: width 0.4s ease;
+    }
+
+    /* ----- панель инструментов ----- */
+    .toolbar {
+      padding: 15px 30px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      border-bottom: 1px solid #e2e8f0;
+      background: #fff;
+    }
+
+    /* ----- сетка вариантов ----- */
+    .variants-grid {
+      padding: 20px 30px 30px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 15px;
+      max-height: 70vh;
+      overflow-y: auto;
+    }
+
+    .variant-card {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 15px;
+      transition: all 0.2s;
+    }
+
+    .variant-card:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .variant-card.completed {
+      background: linear-gradient(135deg, #c6f6d5 0%, #9ae6b4 100%);
+      border-color: #68d391;
+    }
+
+    .variant-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .variant-title {
+      font-weight: 600;
+      font-size: 15px;
+      color: #2d3748;
+    }
+
+    .variant-progress {
+      font-size: 12px;
+      color: #718096;
+      font-weight: 500;
+    }
+
+    .tasks {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+
+    .task {
+      aspect-ratio: 1;
+      border-radius: 8px;
+      background: #edf2f7;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 14px;
+      color: #718096;
+      cursor: pointer;
+      transition: all 0.15s;
+      user-select: none;
+      border: 2px solid transparent;
+    }
+
+    .task:hover {
+      background: #e2e8f0;
+      transform: scale(1.05);
+    }
+
+    .task.done {
+      background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+      color: #fff;
+      border-color: #2f855a;
+    }
+
+    .task.done:hover {
+      background: linear-gradient(135deg, #38a169 0%, #2f855a 100%);
+    }
+
+    .variant-bar {
+      height: 4px;
+      background: #e2e8f0;
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .variant-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #48bb78, #38a169);
+      transition: width 0.3s;
+    }
+
+    /* ----- модалка ----- */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 20px;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal {
+      background: #fff;
+      border-radius: 16px;
+      padding: 25px;
+      max-width: 400px;
+      width: 100%;
+    }
+
+    .modal h2 {
+      margin-bottom: 15px;
+      font-size: 20px;
+    }
+
+    .modal input {
+      width: 100%;
+      background: #f7fafc;
+      color: #2d3748;
+      margin-bottom: 15px;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+
+    .modal-actions button {
+      color: #fff;
+      background: #667eea;
+      border: none;
+    }
+
+    .modal-actions button.secondary {
+      background: #a0aec0;
+    }
+
+    /* ----- адаптив ----- */
+    @media (max-width: 600px) {
+      header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .variants-grid {
+        grid-template-columns: 1fr;
+        padding: 15px;
+      }
+      .stats {
+        padding: 15px;
+      }
+      .toolbar {
+        padding: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <h1>📚 Контроль решённых заданий</h1>
+      <div class="child-selector">
+        <select id="childSelect"></select>
+        <button onclick="openAddModal()">+ Ребёнок</button>
+        <button onclick="deleteChild()" class="danger">Удалить</button>
+      </div>
+    </header>
+
+    <div class="stats">
+      <div class="stat-card">
+        <div class="label">Всего заданий</div>
+        <div class="value" id="statTotal">800</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Решено</div>
+        <div class="value" id="statDone">0</div>
+        <div class="progress-bar"><div class="progress-fill" id="statBar" style="width:0%"></div></div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Вариантов завершено</div>
+        <div class="value" id="statVariants">0 / 80</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Прогресс</div>
+        <div class="value" id="statPercent">0%</div>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <button class="secondary" onclick="exportData()">💾 Экспорт</button>
+      <button class="secondary" onclick="document.getElementById('importFile').click()">📂 Импорт</button>
+      <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)" />
+      <button class="danger" onclick="resetProgress()">🗑 Сбросить прогресс</button>
+    </div>
+
+    <div class="variants-grid" id="grid"></div>
+  </div>
+
+  <!-- модалка -->
+  <div class="modal-overlay" id="modal">
+    <div class="modal">
+      <h2 id="modalTitle">Добавить ребёнка</h2>
+      <input type="text" id="childName" placeholder="Имя ребёнка" maxlength="30" />
+      <div class="modal-actions">
+        <button class="secondary" onclick="closeModal()">Отмена</button>
+        <button onclick="addChild()">Добавить</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== ПОДКЛЮЧЕНИЕ SUPABASE ====== -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // ===============================
+    // 1. Конфигурация Supabase
+    // ===============================
+    const SUPABASE_URL = 'https://fuflttwdnwntljyblgeh.supabase.co'; // Замените на свой URL
+    const SUPABASE_KEY = 'sb_publishable_CGYKGrbepaKLK5mBpfdypA_OHgJSPK4'; // Замените на свой anon/public ключ
+
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // ===============================
+    // 2. Константы и состояния
+    // ===============================
+    const VARIANTS = 80;
+    const TASKS = 10;
+    const STORAGE_KEY = 'tasksProgress_v1'; // локальный бэкап
+
+    let data = {
+      children: [],
+      current: null,
+      progress: {}
+    };
+
+    // ===============================
+    // 3. Загрузка / сохранение (Supabase + localStorage)
+    // ===============================
+
+    // Загружаем данные: сначала локально, затем пробуем из Supabase
+    async function loadData() {
+      // локальный кеш
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          data.children = parsed.children || [];
+          data.current = parsed.current || null;
+          data.progress = parsed.progress || {};
+        } catch (e) { /* ignore */ }
+      }
+
+      // пробуем загрузить из Supabase (если есть текущий ребёнок)
+      if (data.current) {
+        await loadProgressFromSupabase(data.current);
+      }
+
+      renderChildSelect();
+      renderGrid();
+    }
+
+    // Сохраняем прогресс конкретного ребёнка в Supabase
+    async function saveProgressToSupabase(childName) {
+      if (!childName) return;
+      const progress = data.progress[childName] || {};
+      const payload = {
+        child_name: childName,
+        progress: progress,
+        updated_at: new Date().toISOString()
+      };
+
+      const { error } = await supabase
+        .from('tasks_progress')
+        .upsert(payload, { onConflict: 'child_name' });
+
+      if (error) {
+        console.error('Supabase upsert error:', error);
+        alert('Не удалось сохранить прогресс в Supabase: ' + error.message);
+      } else {
+        // после успешной записи обновляем локальный кеш
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      }
+    }
+
+    // Загружаем прогресс для ребёнка из Supabase
+    async function loadProgressFromSupabase(childName) {
+      if (!childName) return;
+      const { data: rows, error } = await supabase
+        .from('tasks_progress')
+        .select('progress')
+        .eq('child_name', childName)
+        .maybeSingle();
+
+      if (error) {
+        console.error('Supabase select error:', error);
+        alert('Ошибка загрузки данных из Supabase: ' + error.message);
+        return;
+      }
+
+      if (rows && rows.progress) {
+        data.progress[childName] = rows.progress;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      } else {
+        // если в БД нет записи — инициализируем пустым объектом
+        if (!data.progress[childName]) {
+          data.progress[childName] = {};
+        }
+      }
+    }
+
+    // Общая функция сохранения (локально + Supabase)
+    async function saveData() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      if (data.current) {
+        await saveProgressToSupabase(data.current);
+      }
+    }
+
+    // ===============================
+    // 4. Работа с UI
+    // ===============================
+
+    function renderChildSelect() {
+      const sel = document.getElementById('childSelect');
+      sel.innerHTML = '';
+      if (data.children.length === 0) {
+        sel.innerHTML = '<option value="">— Нет детей —</option>';
+        return;
+      }
+      data.children.forEach(name => {
+        const opt = document.createElement('option');
+        opt.value = name;
+        opt.textContent = name;
+        if (name === data.current) opt.selected = true;
+        sel.appendChild(opt);
+      });
+    }
+
+    function renderGrid() {
+      const grid = document.getElementById('grid');
+      grid.innerHTML = '';
+      if (!data.current) {
+        grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#718096;">Добавьте ребёнка, чтобы начать</div>';
+        updateStats();
+        return;
+      }
+      const childProgress = data.progress[data.current] || {};
+
+      for (let v = 1; v <= VARIANTS; v++) {
+        const card = document.createElement('div');
+        card.className = 'variant-card';
+        let done = 0;
+        for (let t = 1; t <= TASKS; t++) {
+          if (childProgress[`${v}-${t}`]) done++;
+        }
+        if (done === TASKS) card.classList.add('completed');
+
+        const header = document.createElement('div');
+        header.className = 'variant-header';
+        header.innerHTML = `
+          <div class="variant-title">Вариант ${v}</div>
+          <div class="variant-progress">${done}/${TASKS}</div>
+        `;
+        card.appendChild(header);
+
+        const tasks = document.createElement('div');
+        tasks.className = 'tasks';
+        for (let t = 1; t <= TASKS; t++) {
+          const task = document.createElement('div');
+          task.className = 'task';
+          const key = `${v}-${t}`;
+          if (childProgress[key]) task.classList.add('done');
+          task.textContent = t;
+          task.onclick = () => toggleTask(v, t);
+          tasks.appendChild(task);
+        }
+        card.appendChild(tasks);
+
+        const bar = document.createElement('div');
+        bar.className = 'variant-bar';
+        bar.innerHTML = `<div class="variant-bar-fill" style="width:${done/TASKS*100}%"></div>`;
+        card.appendChild(bar);
+
+        grid.appendChild(card);
+      }
+      updateStats();
+    }
+
+    // Переключение задания
+    async function toggleTask(v, t) {
+      if (!data.current) return;
+      if (!data.progress[data.current]) data.progress[data.current] = {};
+      const key = `${v}-${t}`;
+      if (data.progress[data.current][key]) {
+        delete data.progress[data.current][key];
+      } else {
+        data.progress[data.current][key] = true;
+      }
+      await saveData();
+      renderGrid();
+    }
+
+    // Обновление статистики
+    function updateStats() {
+      const total = VARIANTS * TASKS;
+      const prog = data.progress[data.current] || {};
+      const done = Object.keys(prog).length;
+      let variantsDone = 0;
+      for (let v = 1; v <= VARIANTS; v++) {
+        let count = 0;
+        for (let t = 1; t <= TASKS; t++) {
+          if (prog[`${v}-${t}`]) count++;
+        }
+        if (count === TASKS) variantsDone++;
+      }
+      const percent = total ? Math.round(done / total * 100) : 0;
+      document.getElementById('statTotal').textContent = total;
+      document.getElementById('statDone').textContent = done;
+      document.getElementById('statVariants').textContent = `${variantsDone} / ${VARIANTS}`;
+      document.getElementById('statPercent').textContent = percent + '%';
+      document.getElementById('statBar').style.width = percent + '%';
+    }
+
+    // ===============================
+    // 5. Действия (добавление/удаление детей, сброс, импорт/экспорт)
+    // ===============================
+
+    function openAddModal() {
+      document.getElementById('modal').classList.add('active');
+      document.getElementById('childName').value = '';
+      setTimeout(() => document.getElementById('childName').focus(), 50);
+    }
+
+    function closeModal() {
+      document.getElementById('modal').classList.remove('active');
+    }
+
+    async function addChild() {
+      const name = document.getElementById('childName').value.trim();
+      if (!name) return alert('Введите имя');
+      if (data.children.includes(name)) return alert('Такой ребёнок уже есть');
+
+      data.children.push(name);
+      data.current = name;
+      data.progress[name] = {};
+      await saveData();
+      renderChildSelect();
+      renderGrid();
+      closeModal();
+    }
+
+    async function deleteChild() {
+      if (!data.current) return;
+      if (!confirm(`Удалить ребёнка "${data.current}" и весь его прогресс?`)) return;
+
+      // удаляем из Supabase
+      const { error } = await supabase
+        .from('tasks_progress')
+        .delete()
+        .eq('child_name', data.current);
+      if (error) {
+        console.error('Supabase delete error:', error);
+        alert('Ошибка удаления из Supabase: ' + error.message);
+        // продолжаем, чтобы удалить локально
+      }
+
+      delete data.progress[data.current];
+      data.children = data.children.filter(c => c !== data.current);
+      data.current = data.children[0] || null;
+      await saveData();
+      renderChildSelect();
+      renderGrid();
+    }
+
+    async function resetProgress() {
+      if (!data.current) return;
+      if (!confirm(`Сбросить весь прогресс у "${data.current}"?`)) return;
+
+      data.progress[data.current] = {};
+      await saveData();
+      renderGrid();
+    }
+
+    // ===============================
+    // 6. Импорт / Экспорт (JSON)
+    // ===============================
+
+    function exportData() {
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `tasks-backup-${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    async function importData(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = async (ev) => {
+        try {
+          const imported = JSON.parse(ev.target.result);
+          if (!imported.children || !imported.progress) throw new Error();
+          if (!confirm('Заменить текущие данные импортированными?')) return;
+
+          data = imported;
+          await saveData();
+          renderChildSelect();
+          renderGrid();
+          alert('Импорт успешен!');
+        } catch (err) {
+          alert('Ошибка: неверный формат файла');
+        }
+      };
+      reader.readAsText(file);
+      e.target.value = '';
+    }
+
+    // ===============================
+    // 7. Обработчики событий
+    // ===============================
+
+    document.getElementById('childSelect').addEventListener('change', async (e) => {
+      const newChild = e.target.value || null;
+      if (newChild !== data.current) {
+        data.current = newChild;
+        if (data.current) {
+          await loadProgressFromSupabase(data.current);
+        }
+        saveData();
+        renderGrid();
+      }
+    });
+
+    document.getElementById('childName').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') addChild();
+      if (e.key === 'Escape') closeModal();
+    });
+
+    // ===============================
+    // 8. Запуск
+    // ===============================
+
+    loadData();
+
+    // ===============================
+    // 9. (Опционально) Создание таблицы в Supabase
+    //    Если таблицы ещё нет – выполните этот SQL в SQL-редакторе Supabase:
+    //
+    //    CREATE TABLE tasks_progress (
+    //      child_name TEXT PRIMARY KEY,
+    //      progress JSONB NOT NULL DEFAULT '{}',
+    //      updated_at TIMESTAMPTZ DEFAULT NOW()
+    //    );
+    // ===============================
+  </script>
+</body>
+</html>
