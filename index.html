@@ -608,7 +608,7 @@
     <!-- Модалка для добавления ребёнка -->
     <div class="modal-overlay" id="addChildModal">
         <div class="modal">
-            <h2>➕ Добавить ученика</h2>
+            <h2> Добавить ученика</h2>
             <input type="text" id="childName" placeholder="Имя ученика" maxlength="30" />
             <input type="text" id="childPassword" placeholder="Пароль для ученика" maxlength="30" />
             <div class="modal-actions">
@@ -662,7 +662,7 @@
             if (SUPABASE_URL && SUPABASE_KEY && SUPABASE_URL !== 'https://ваш-проект.supabase.co') {
                 supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
                 supabaseEnabled = true;
-                console.log('✅ Supabase подключен');
+                console.log(' Supabase подключен');
             } else {
                 console.warn('⚠️ Supabase не настроен. Работаем в офлайн-режиме');
             }
@@ -916,7 +916,7 @@
                 childToolbar.style.display = 'none';
             } else {
                 userInfo.textContent = username;
-                userRole.textContent = '👨‍🎓 Ученик';
+                userRole.textContent = ' Ученик';
                 adminPanel.style.display = 'none';
                 adminToolbar.style.display = 'none';
                 childToolbar.style.display = 'flex';
