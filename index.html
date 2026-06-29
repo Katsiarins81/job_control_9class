@@ -45,6 +45,28 @@
             font-weight: 600;
         }
 
+        .header-right {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255,255,255,0.15);
+            padding: 8px 16px;
+            border-radius: 10px;
+            font-size: 14px;
+        }
+
+        .user-info .role {
+            font-size: 11px;
+            opacity: 0.8;
+        }
+
         .child-selector {
             display: flex;
             gap: 10px;
@@ -90,11 +112,11 @@
             border: 1px solid #e2e8f0;
             display: none;
         }
-         button.secondary2 {
+        
+        button.secondary2 {
             background: #edf2f7;
             color: #4a5568;
             border: 1px solid #e2e8f0;
-           
         }
 
         button.secondary:hover {
@@ -129,6 +151,15 @@
 
         button.warning:hover {
             background: #dd6b20;
+        }
+
+        button.logout-btn {
+            background: rgba(255,255,255,0.2);
+            border-color: rgba(255,255,255,0.3);
+        }
+
+        button.logout-btn:hover {
+            background: rgba(255,0,0,0.3);
         }
 
         /* ----- статистика ----- */
@@ -297,15 +328,17 @@
             justify-content: center;
             border: 1px solid #e2e8f0;
         }
-.loading {
-    text-align: center;
-    padding: 40px;
-    color: #718096;
-}
-.loading::after {
-    content: '...';
-    animation: dots 1.5s steps(4, end) infinite;
-}
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #718096;
+        }
+        .loading::after {
+            content: '...';
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+
         /* Всплывающая подсказка для комментария */
         .task-tooltip {
             display: none;
@@ -382,6 +415,7 @@
         .modal h2 {
             margin-bottom: 15px;
             font-size: 20px;
+            text-align: center;
         }
 
         .modal input,
@@ -412,6 +446,7 @@
             color: #fff;
             background: #667eea;
             border: none;
+            padding: 10px 20px;
         }
 
         .modal-actions button.secondary {
@@ -446,6 +481,66 @@
             background: #fffaf0;
         }
 
+        /* Стили для модалки входа */
+        .login-modal .modal {
+            max-width: 400px;
+        }
+
+        .login-modal .modal h2 {
+            margin-bottom: 5px;
+        }
+
+        .login-modal .modal .subtitle {
+            text-align: center;
+            color: #718096;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .login-modal .modal .login-error {
+            color: #e53e3e;
+            font-size: 13px;
+            text-align: center;
+            margin-bottom: 10px;
+            display: none;
+        }
+
+        .login-modal .modal .login-error.show {
+            display: block;
+        }
+
+        .login-modal .modal .login-icon {
+            text-align: center;
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        .password-input-wrapper {
+            position: relative;
+        }
+
+        .password-input-wrapper input {
+            padding-right: 45px;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #718096;
+            cursor: pointer;
+            font-size: 18px;
+            padding: 5px;
+        }
+
+        .password-toggle:hover {
+            background: none;
+            transform: translateY(-50%);
+        }
+
         /* ----- адаптив ----- */
         @media (max-width: 600px) {
             header {
@@ -465,6 +560,10 @@
             .modal {
                 max-width: 100%;
             }
+            .header-right {
+                width: 100%;
+                justify-content: space-between;
+            }
         }
 
         /* Стили для скрытого файлового инпута */
@@ -475,15 +574,41 @@
 </head>
 <body>
 
+    <!-- Модалка входа -->
+    <div class="modal-overlay login-modal active" id="loginModal">
+        <div class="modal">
+            <div class="login-icon">🔐</div>
+            <h2>Вход в систему</h2>
+            <p class="subtitle">Войдите как администратор или ученик</p>
+            
+            <div class="login-error" id="loginError">Неверное имя пользователя или пароль</div>
+            
+            <input type="text" id="loginUsername" placeholder="Имя пользователя" />
+            
+            <div class="password-input-wrapper">
+                <input type="password" id="loginPassword" placeholder="Пароль" />
+                <button class="password-toggle" onclick="togglePassword()">👁️</button>
+            </div>
+            
+            <div class="modal-actions" style="justify-content: center; margin-top: 10px;">
+                <button onclick="window.login()" style="min-width: 120px;">Войти</button>
+            </div>
+            
+            <p style="text-align: center; margin-top: 15px; font-size: 12px; color: #a0aec0;">
+                Для входа как ученик используйте имя и пароль, выданные администратором
+            </p>
+        </div>
+    </div>
 
-    <div class="container">
+    <div class="container" id="mainApp" style="display: none;">
         <header>
             <h1>📚 МАТЕМАТИКА. Контроль решённых заданий <br> по экзаменационному сборнику за 9 класс</h1>
-            <div class="child-selector">
-                <select id="childSelect"></select>
-                <button onclick="window.openAddModal()">+ Ребёнок</button>
-                <button onclick="window.deleteChild()" class="danger">Удалить</button>
-                <button onclick="window.syncData()" class="secondary2" title="Синхронизировать с облаком">🔄 Синхр.</button>
+            <div class="header-right">
+                <div class="user-info" id="userInfo">
+                    <span id="userNameDisplay">Admin</span>
+                    <span class="role" id="userRoleDisplay">👑 Администратор</span>
+                </div>
+                <button onclick="window.logout()" class="logout-btn">🚪 Выйти</button>
             </div>
         </header>
 
@@ -507,7 +632,7 @@
             </div>
         </div>
 
-        <div class="toolbar">
+        <div class="toolbar" id="adminToolbar">
             <button class="secondary" onclick="window.exportJSON()">💾 JSON</button>
             <button class="success" onclick="window.exportExcel()">📊 Excel</button>
             <button class="secondary" onclick="document.getElementById('importJSON').click()">📂 Импорт JSON</button>
@@ -517,14 +642,19 @@
             <button class="danger" onclick="window.resetProgress()">🗑 Сбросить прогресс</button>
         </div>
 
+        <div class="toolbar" id="childToolbar" style="display: none;">
+            <button class="secondary2" onclick="window.exportExcelChild()">📊 Мои результаты</button>
+        </div>
+
         <div class="variants-grid" id="grid"></div>
     </div>
 
-    <!-- Модалка для добавления ребёнка -->
+    <!-- Модалка для добавления ребёнка (только для админа) -->
     <div class="modal-overlay" id="addChildModal">
         <div class="modal">
             <h2>Добавить ребёнка</h2>
             <input type="text" id="childName" placeholder="Имя ребёнка" maxlength="30" />
+            <input type="text" id="childPassword" placeholder="Пароль для ребёнка" maxlength="30" />
             <div class="modal-actions">
                 <button class="secondary" onclick="window.closeAddModal()">Отмена</button>
                 <button onclick="window.addChild()">Добавить</button>
@@ -548,7 +678,7 @@
             </div>
         </div>
     </div>
-  
+
     <!-- ====== ПОДКЛЮЧЕНИЕ БИБЛИОТЕК ====== -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
     </script>
@@ -559,12 +689,16 @@
         // ===============================
         // 1. Конфигурация Supabase
         // ===============================
-        const SUPABASE_URL = 'https://fuflttwdnwntljyblgeh.supabase.co'; // Замените на свой URL
-        const SUPABASE_KEY = 'sb_publishable_CGYKGrbepaKLK5mBpfdypA_OHgJSPK4'; // Замените на свой anon/public ключ
+        const SUPABASE_URL = 'https://fuflttwdnwntljyblgeh.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_CGYKGrbepaKLK5mBpfdypA_OHgJSPK4';
+
+        const ADMIN_USERNAME = 'admin';
+        const ADMIN_PASSWORD = '210847';
 
         let supabaseClient = null;
         let supabaseEnabled = false;
         let isLoading = false;
+        let currentUser = null; // { username, role, childName? }
 
         try {
             if (SUPABASE_URL && SUPABASE_KEY && SUPABASE_URL !== 'https://ваш-проект.supabase.co') {
@@ -584,6 +718,7 @@
         const VARIANTS = 80;
         const TASKS = 10;
         const STORAGE_KEY = 'tasksProgress_v2';
+        const USERS_KEY = 'users_v1';
 
         let data = {
             children: [],
@@ -591,14 +726,150 @@
             progress: {}
         };
 
+        let users = {};
+
         let currentTaskKey = null;
         let currentComment = '';
 
         // ===============================
-        // 3. Загрузка / сохранение
+        // 3. Управление пользователями
         // ===============================
 
-        // Загрузка всех детей из Supabase
+        function loadUsers() {
+            const saved = localStorage.getItem(USERS_KEY);
+            if (saved) {
+                try {
+                    users = JSON.parse(saved);
+                    return;
+                } catch (e) {}
+            }
+            // По умолчанию только админ
+            users = {
+                'admin': { password: ADMIN_PASSWORD, role: 'admin' }
+            };
+            saveUsers();
+        }
+
+        function saveUsers() {
+            localStorage.setItem(USERS_KEY, JSON.stringify(users));
+        }
+
+        function addUser(username, password, role = 'child') {
+            users[username] = { password, role };
+            saveUsers();
+        }
+
+        function deleteUser(username) {
+            if (username === 'admin') return;
+            delete users[username];
+            saveUsers();
+        }
+
+        function authenticate(username, password) {
+            const user = users[username];
+            if (user && user.password === password) {
+                return user;
+            }
+            return null;
+        }
+
+        // ===============================
+        // 4. Авторизация
+        // ===============================
+
+        window.login = function() {
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value.trim();
+            const errorEl = document.getElementById('loginError');
+
+            if (!username || !password) {
+                errorEl.textContent = 'Введите имя пользователя и пароль';
+                errorEl.classList.add('show');
+                return;
+            }
+
+            const user = authenticate(username, password);
+            if (!user) {
+                errorEl.textContent = 'Неверное имя пользователя или пароль';
+                errorEl.classList.add('show');
+                return;
+            }
+
+            errorEl.classList.remove('show');
+            currentUser = { username, role: user.role };
+            
+            // Если это ребенок, проверяем что он есть в списке детей
+            if (user.role === 'child' && !data.children.includes(username)) {
+                data.children.push(username);
+                data.progress[username] = {};
+                saveData();
+            }
+
+            document.getElementById('loginModal').classList.remove('active');
+            document.getElementById('mainApp').style.display = 'block';
+            
+            // Настраиваем интерфейс в зависимости от роли
+            setupUIForUser(user.role, username);
+            
+            renderChildSelect();
+            renderGrid();
+            
+            // Очищаем поля входа
+            document.getElementById('loginPassword').value = '';
+        };
+
+        window.logout = function() {
+            if (confirm('Выйти из системы?')) {
+                currentUser = null;
+                document.getElementById('mainApp').style.display = 'none';
+                document.getElementById('loginModal').classList.add('active');
+                document.getElementById('loginUsername').value = '';
+                document.getElementById('loginPassword').value = '';
+                document.getElementById('loginError').classList.remove('show');
+            }
+        };
+
+        function setupUIForUser(role, username) {
+            const userInfo = document.getElementById('userNameDisplay');
+            const userRole = document.getElementById('userRoleDisplay');
+            const adminToolbar = document.getElementById('adminToolbar');
+            const childToolbar = document.getElementById('childToolbar');
+            const childSelector = document.querySelector('.child-selector');
+
+            if (role === 'admin') {
+                userInfo.textContent = 'Admin';
+                userRole.textContent = '👑 Администратор';
+                adminToolbar.style.display = 'flex';
+                childToolbar.style.display = 'none';
+                childSelector.style.display = 'flex';
+                // Показываем все кнопки админа
+                document.querySelectorAll('.child-selector button').forEach(btn => btn.style.display = '');
+            } else {
+                userInfo.textContent = username;
+                userRole.textContent = '👨‍🎓 Ученик';
+                adminToolbar.style.display = 'none';
+                childToolbar.style.display = 'flex';
+                childSelector.style.display = 'none';
+                
+                // Выбираем этого ребенка
+                data.current = username;
+                saveData();
+            }
+        }
+
+        function togglePassword() {
+            const input = document.getElementById('loginPassword');
+            if (input.type === 'password') {
+                input.type = 'text';
+            } else {
+                input.type = 'password';
+            }
+        }
+
+        // ===============================
+        // 5. Загрузка / сохранение
+        // ===============================
+
         async function loadAllChildrenFromSupabase() {
             if (!supabaseEnabled) return [];
 
@@ -624,6 +895,9 @@
             const grid = document.getElementById('grid');
             grid.innerHTML = '<div class="loading">Загрузка данных</div>';
 
+            // Загружаем пользователей
+            loadUsers();
+
             // Сначала загружаем список детей из Supabase
             if (supabaseEnabled) {
                 const childrenFromDB = await loadAllChildrenFromSupabase();
@@ -637,9 +911,7 @@
             if (saved) {
                 try {
                     const parsed = JSON.parse(saved);
-                    // Объединяем списки детей (из Supabase и локального)
                     if (parsed.children && parsed.children.length > 0) {
-                        // Добавляем локальных детей, которых нет в Supabase
                         parsed.children.forEach(name => {
                             if (!data.children.includes(name)) {
                                 data.children.push(name);
@@ -726,51 +998,30 @@
         async function saveData() {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
             if (supabaseEnabled) {
-                // Сохраняем прогресс для всех детей
                 for (const childName of data.children) {
                     await saveProgressToSupabase(childName);
                 }
             }
         }
 
-        // Синхронизация данных с облаком
-        window.syncData = async function() {
-            if (!supabaseEnabled) {
-                alert('Supabase не настроен. Работаем в офлайн-режиме.');
-                return;
-            }
-
-            if (isLoading) return;
-
-            isLoading = true;
-            const btn = event?.target;
-            if (btn) {
-                btn.textContent = '⏳ Синхр.';
-                btn.disabled = true;
-            }
-
-            try {
-                await loadData();
-                alert('Синхронизация завершена успешно!');
-            } catch (e) {
-                console.error('Ошибка синхронизации:', e);
-                alert('Ошибка при синхронизации: ' + e.message);
-            } finally {
-                isLoading = false;
-                if (btn) {
-                    btn.textContent = '🔄 Синхр.';
-                    btn.disabled = false;
-                }
-            }
-        };
-
         // ===============================
-        // 4. Работа с UI
+        // 6. Работа с UI
         // ===============================
 
         function renderChildSelect() {
             const sel = document.getElementById('childSelect');
             sel.innerHTML = '';
+            
+            // Если пользователь - ребенок, показываем только его
+            if (currentUser && currentUser.role === 'child') {
+                const opt = document.createElement('option');
+                opt.value = currentUser.username;
+                opt.textContent = currentUser.username;
+                opt.selected = true;
+                sel.appendChild(opt);
+                return;
+            }
+
             if (data.children.length === 0) {
                 sel.innerHTML = '<option value="">— Нет детей —</option>';
                 return;
@@ -787,13 +1038,21 @@
         function renderGrid() {
             const grid = document.getElementById('grid');
             grid.innerHTML = '';
-            if (!data.current) {
+            
+            // Определяем, кого показывать
+            let childToShow = data.current;
+            if (currentUser && currentUser.role === 'child') {
+                childToShow = currentUser.username;
+            }
+
+            if (!childToShow) {
                 grid.innerHTML =
-                    '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#718096;">Добавьте ребёнка, чтобы начать</div>';
+                    '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#718096;">Выберите ребёнка, чтобы начать</div>';
                 updateStats();
                 return;
             }
-            const childProgress = data.progress[data.current] || {};
+
+            const childProgress = data.progress[childToShow] || {};
 
             for (let v = 1; v <= VARIANTS; v++) {
                 const card = document.createElement('div');
@@ -863,6 +1122,23 @@
 
         function cycleTaskStatus(v, t) {
             if (!data.current) return;
+            
+            // Если пользователь ребенок, он может менять только свой прогресс
+            if (currentUser && currentUser.role === 'child') {
+                const childName = currentUser.username;
+                if (!data.progress[childName]) data.progress[childName] = {};
+                const key = `${v}-${t}`;
+                const currentStatus = data.progress[childName][key] || 'none';
+                let newStatus;
+                if (currentStatus === 'none') newStatus = 'done';
+                else if (currentStatus === 'done') newStatus = 'attention';
+                else newStatus = 'none';
+                data.progress[childName][key] = newStatus;
+                saveData();
+                renderGrid();
+                return;
+            }
+
             if (!data.progress[data.current]) data.progress[data.current] = {};
             const key = `${v}-${t}`;
             const currentStatus = data.progress[data.current][key] || 'none';
@@ -879,7 +1155,14 @@
 
         function updateStats() {
             const total = VARIANTS * TASKS;
-            const prog = data.progress[data.current] || {};
+            
+            // Если пользователь ребенок, показываем его статистику
+            let childToShow = data.current;
+            if (currentUser && currentUser.role === 'child') {
+                childToShow = currentUser.username;
+            }
+            
+            const prog = data.progress[childToShow] || {};
             let done = 0;
             let attention = 0;
             let variantsDone = 0;
@@ -909,12 +1192,13 @@
         }
 
         // ===============================
-        // 5. Модалка добавления ребенка
+        // 7. Модалка добавления ребенка
         // ===============================
 
         window.openAddModal = function() {
             document.getElementById('addChildModal').classList.add('active');
             document.getElementById('childName').value = '';
+            document.getElementById('childPassword').value = '';
             setTimeout(() => document.getElementById('childName').focus(), 50);
         };
 
@@ -924,25 +1208,41 @@
 
         window.addChild = async function() {
             const name = document.getElementById('childName').value.trim();
-            if (!name) return alert('Введите имя');
+            const password = document.getElementById('childPassword').value.trim();
+            
+            if (!name) return alert('Введите имя ребёнка');
+            if (!password) return alert('Введите пароль для ребёнка');
             if (data.children.includes(name)) return alert('Такой ребёнок уже есть');
+            if (users[name]) return alert('Пользователь с таким именем уже существует');
 
             data.children.push(name);
             data.current = name;
             data.progress[name] = {};
+            
+            // Добавляем пользователя
+            addUser(name, password, 'child');
+            
             await saveData();
             renderChildSelect();
             renderGrid();
             window.closeAddModal();
+            alert(`Ребёнок "${name}" успешно добавлен!\nПароль: ${password}`);
         };
 
         // ===============================
-        // 6. Модалка комментария
+        // 8. Модалка комментария
         // ===============================
 
         function openCommentModal(v, t) {
             currentTaskKey = `${v}-${t}`;
-            const childProgress = data.progress[data.current] || {};
+            
+            // Определяем, для кого открываем комментарий
+            let childToShow = data.current;
+            if (currentUser && currentUser.role === 'child') {
+                childToShow = currentUser.username;
+            }
+            
+            const childProgress = data.progress[childToShow] || {};
             const currentStatus = childProgress[currentTaskKey] || 'none';
             currentComment = childProgress[`${currentTaskKey}_comment`] || '';
 
@@ -970,10 +1270,18 @@
         };
 
         window.setTaskStatus = function(status) {
-            if (!currentTaskKey || !data.current) return;
-            if (!data.progress[data.current]) data.progress[data.current] = {};
+            if (!currentTaskKey) return;
+            
+            // Определяем, для кого меняем статус
+            let childToShow = data.current;
+            if (currentUser && currentUser.role === 'child') {
+                childToShow = currentUser.username;
+            }
+            
+            if (!childToShow) return;
+            if (!data.progress[childToShow]) data.progress[childToShow] = {};
 
-            data.progress[data.current][currentTaskKey] = status;
+            data.progress[childToShow][currentTaskKey] = status;
 
             document.querySelectorAll('.task-status-buttons button').forEach(btn => {
                 btn.classList.remove('active');
@@ -988,14 +1296,22 @@
         };
 
         window.saveComment = function() {
-            if (!currentTaskKey || !data.current) return;
-            if (!data.progress[data.current]) data.progress[data.current] = {};
+            if (!currentTaskKey) return;
+            
+            // Определяем, для кого сохраняем
+            let childToShow = data.current;
+            if (currentUser && currentUser.role === 'child') {
+                childToShow = currentUser.username;
+            }
+            
+            if (!childToShow) return;
+            if (!data.progress[childToShow]) data.progress[childToShow] = {};
 
             const comment = document.getElementById('commentText').value.trim();
             if (comment) {
-                data.progress[data.current][`${currentTaskKey}_comment`] = comment;
+                data.progress[childToShow][`${currentTaskKey}_comment`] = comment;
             } else {
-                delete data.progress[data.current][`${currentTaskKey}_comment`];
+                delete data.progress[childToShow][`${currentTaskKey}_comment`];
             }
 
             saveData();
@@ -1004,11 +1320,15 @@
         };
 
         // ===============================
-        // 7. Действия
+        // 9. Действия
         // ===============================
 
         window.deleteChild = async function() {
             if (!data.current) return;
+            if (currentUser && currentUser.role === 'child') {
+                alert('У вас нет прав на удаление');
+                return;
+            }
             if (!confirm(`Удалить ребёнка "${data.current}" и весь его прогресс?`)) return;
 
             if (supabaseEnabled) {
@@ -1025,6 +1345,9 @@
                 }
             }
 
+            // Удаляем пользователя
+            deleteUser(data.current);
+            
             delete data.progress[data.current];
             data.children = data.children.filter(c => c !== data.current);
             data.current = data.children[0] || null;
@@ -1035,6 +1358,10 @@
 
         window.resetProgress = async function() {
             if (!data.current) return;
+            if (currentUser && currentUser.role === 'child') {
+                alert('У вас нет прав на сброс прогресса');
+                return;
+            }
             if (!confirm(`Сбросить весь прогресс у "${data.current}"?`)) return;
 
             data.progress[data.current] = {};
@@ -1043,10 +1370,76 @@
         };
 
         // ===============================
-        // 8. Экспорт/Импорт
+        // 10. Экспорт для ребенка
+        // ===============================
+
+        window.exportExcelChild = function() {
+            if (!currentUser || currentUser.role !== 'child') return;
+            const childName = currentUser.username;
+            const progress = data.progress[childName] || {};
+            
+            const excelData = [];
+            const header = ['Вариант', 'Задание'];
+            for (let t = 1; t <= TASKS; t++) {
+                header.push(`Задание ${t}`);
+            }
+            header.push('Статус', 'Комментарий');
+            excelData.push(header);
+
+            for (let v = 1; v <= VARIANTS; v++) {
+                const row = [v];
+                let statusCount = 0;
+
+                for (let t = 1; t <= TASKS; t++) {
+                    const key = `${v}-${t}`;
+                    const status = progress[key] || 'none';
+                    let display = '⬜';
+                    if (status === 'done') { display = '✅';
+                        statusCount++; } else if (status === 'attention') { display = '⚠️';
+                        statusCount++; }
+                    row.push(display);
+                }
+
+                let variantStatus = 'Не завершен';
+                if (statusCount === TASKS) variantStatus = '✅ Завершен';
+                else if (statusCount > 0) variantStatus = '⚠️ В процессе';
+                row.push(variantStatus);
+
+                let comment = '';
+                for (let t = 1; t <= TASKS; t++) {
+                    const key = `${v}-${t}`;
+                    const commentKey = `${key}_comment`;
+                    if (progress[commentKey]) {
+                        comment = progress[commentKey];
+                        break;
+                    }
+                }
+                row.push(comment);
+                excelData.push(row);
+            }
+
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.aoa_to_sheet(excelData);
+            ws['!cols'] = [
+                { wch: 10 }, { wch: 10 },
+                ...Array(TASKS).fill({ wch: 12 }),
+                { wch: 15 }, { wch: 30 }
+            ];
+            XLSX.utils.book_append_sheet(wb, ws, 'Мой прогресс');
+
+            const fileName = `${childName}-progress-${new Date().toISOString().slice(0, 10)}.xlsx`;
+            XLSX.writeFile(wb, fileName);
+        };
+
+        // ===============================
+        // 11. Экспорт/Импорт (админ)
         // ===============================
 
         window.exportJSON = function() {
+            if (currentUser && currentUser.role === 'child') {
+                alert('У вас нет прав на экспорт');
+                return;
+            }
             const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -1057,6 +1450,10 @@
         };
 
         window.importJSON = async function(e) {
+            if (currentUser && currentUser.role === 'child') {
+                alert('У вас нет прав на импорт');
+                return;
+            }
             const file = e.target.files[0];
             if (!file) return;
             const reader = new FileReader();
@@ -1080,6 +1477,10 @@
         };
 
         window.exportExcel = function() {
+            if (currentUser && currentUser.role === 'child') {
+                alert('У вас нет прав на экспорт');
+                return;
+            }
             const excelData = [];
             const header = ['Ребёнок', 'Вариант', 'Задание'];
             for (let t = 1; t <= TASKS; t++) {
@@ -1138,6 +1539,10 @@
         };
 
         window.importExcel = async function(e) {
+            if (currentUser && currentUser.role === 'child') {
+                alert('У вас нет прав на импорт');
+                return;
+            }
             const file = e.target.files[0];
             if (!file) return;
 
@@ -1230,10 +1635,14 @@
         };
 
         // ===============================
-        // 9. Обработчики событий
+        // 12. Обработчики событий
         // ===============================
 
         document.getElementById('childSelect').addEventListener('change', async (e) => {
+            if (currentUser && currentUser.role === 'child') {
+                // Ребенок не может менять выбор
+                return;
+            }
             const newChild = e.target.value || null;
             if (newChild !== data.current) {
                 data.current = newChild;
@@ -1245,6 +1654,16 @@
         document.getElementById('childName').addEventListener('keydown', (e) => {
             if (e.key === 'Enter') window.addChild();
             if (e.key === 'Escape') window.closeAddModal();
+        });
+
+        document.getElementById('loginPassword').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') window.login();
+        });
+
+        document.getElementById('loginUsername').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                document.getElementById('loginPassword').focus();
+            }
         });
 
         document.getElementById('addChildModal').addEventListener('click', (e) => {
@@ -1260,10 +1679,13 @@
         });
 
         // ===============================
-        // 10. Запуск
+        // 13. Запуск
         // ===============================
 
         loadData();
+
+        // Показываем модалку входа сразу
+        document.getElementById('loginModal').classList.add('active');
 
         // Инструкция по созданию таблицы в Supabase:
         // CREATE TABLE tasks_progress (
