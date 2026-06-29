@@ -904,10 +904,6 @@
                         },
                         (payload) => {
                             console.log('📨 Получено real-time событие:', payload);
-                            console.log('📊 Тип:', payload.eventType);
-                            console.log('👶 Ребенок:', payload.new?.child_name);
-                            
-                            // Обновляем данные
                             handleRealtimeUpdate(payload);
                         }
                     )
@@ -1401,6 +1397,20 @@
         }
 
         function updateStats() {
+            // Проверяем, что все элементы существуют
+            const statTotal = document.getElementById('statTotal');
+            const statDone = document.getElementById('statDone');
+            const statAttention = document.getElementById('statAttention');
+            const statVariants = document.getElementById('statVariants');
+            const statPercent = document.getElementById('statPercent');
+            const statBar = document.getElementById('statBar');
+
+            // Если элементов нет - выходим
+            if (!statTotal || !statDone || !statAttention || !statVariants || !statPercent || !statBar) {
+                console.warn('⚠️ Элементы статистики не найдены');
+                return;
+            }
+
             const total = VARIANTS * TASKS;
             
             let childToShow = data.current;
@@ -1429,12 +1439,12 @@
             }
 
             const percent = total ? Math.round((done + attention) / total * 100) : 0;
-            document.getElementById('statTotal').textContent = total;
-            document.getElementById('statDone').textContent = done;
-            document.getElementById('statAttention').textContent = attention;
-            document.getElementById('statVariants').textContent = `${variantsDone} / ${VARIANTS}`;
-            document.getElementById('statPercent').textContent = percent + '%';
-            document.getElementById('statBar').style.width = percent + '%';
+            statTotal.textContent = total;
+            statDone.textContent = done;
+            statAttention.textContent = attention;
+            statVariants.textContent = `${variantsDone} / ${VARIANTS}`;
+            statPercent.textContent = percent + '%';
+            statBar.style.width = percent + '%';
         }
 
         // ===============================
