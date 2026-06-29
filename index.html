@@ -587,7 +587,7 @@
             
             <div class="password-input-wrapper">
                 <input type="password" id="loginPassword" placeholder="Пароль" value="210847" />
-                <button class="password-toggle" onclick="togglePassword()">👁️</button>
+                <button class="password-toggle" onclick="window.togglePassword()">👁️</button>
             </div>
             
             <div class="modal-actions" style="justify-content: center; margin-top: 10px;">
@@ -698,7 +698,7 @@
         let supabaseClient = null;
         let supabaseEnabled = false;
         let isLoading = false;
-        let currentUser = null; // { username, role, childName? }
+        let currentUser = null;
 
         try {
             if (SUPABASE_URL && SUPABASE_KEY && SUPABASE_URL !== 'https://ваш-проект.supabase.co') {
@@ -744,7 +744,9 @@
                     if (!users[ADMIN_USERNAME]) {
                         users[ADMIN_USERNAME] = { password: ADMIN_PASSWORD, role: 'admin' };
                         saveUsers();
+                        console.log('✅ Администратор создан в localStorage');
                     }
+                    console.log('✅ Пользователи загружены:', Object.keys(users));
                     return;
                 } catch (e) {
                     console.error('Ошибка загрузки пользователей:', e);
@@ -755,6 +757,7 @@
                 'admin': { password: ADMIN_PASSWORD, role: 'admin' }
             };
             saveUsers();
+            console.log('✅ Администратор создан (по умолчанию)');
         }
 
         function saveUsers() {
@@ -764,12 +767,14 @@
         function addUser(username, password, role = 'child') {
             users[username] = { password, role };
             saveUsers();
+            console.log(`✅ Пользователь "${username}" добавлен`);
         }
 
         function deleteUser(username) {
             if (username === 'admin') return;
             delete users[username];
             saveUsers();
+            console.log(`✅ Пользователь "${username}" удален`);
         }
 
         function authenticate(username, password) {
@@ -823,6 +828,7 @@
             
             // Очищаем поля входа
             document.getElementById('loginPassword').value = '';
+            console.log(`✅ Пользователь "${username}" вошел в систему (${user.role})`);
         };
 
         window.logout = function() {
@@ -833,6 +839,16 @@
                 document.getElementById('loginUsername').value = 'admin';
                 document.getElementById('loginPassword').value = '210847';
                 document.getElementById('loginError').classList.remove('show');
+                console.log('👋 Пользователь вышел из системы');
+            }
+        };
+
+        window.togglePassword = function() {
+            const input = document.getElementById('loginPassword');
+            if (input.type === 'password') {
+                input.type = 'text';
+            } else {
+                input.type = 'password';
             }
         };
 
@@ -848,28 +864,17 @@
                 userRole.textContent = '👑 Администратор';
                 adminToolbar.style.display = 'flex';
                 childToolbar.style.display = 'none';
-                childSelector.style.display = 'flex';
-                // Показываем все кнопки админа
+                if (childSelector) childSelector.style.display = 'flex';
                 document.querySelectorAll('.child-selector button').forEach(btn => btn.style.display = '');
             } else {
                 userInfo.textContent = username;
                 userRole.textContent = '👨‍🎓 Ученик';
                 adminToolbar.style.display = 'none';
                 childToolbar.style.display = 'flex';
-                childSelector.style.display = 'none';
+                if (childSelector) childSelector.style.display = 'none';
                 
-                // Выбираем этого ребенка
                 data.current = username;
                 saveData();
-            }
-        }
-
-        function togglePassword() {
-            const input = document.getElementById('loginPassword');
-            if (input.type === 'password') {
-                input.type = 'text';
-            } else {
-                input.type = 'password';
             }
         }
 
@@ -900,7 +905,7 @@
         async function loadData() {
             isLoading = true;
             const grid = document.getElementById('grid');
-            grid.innerHTML = '<div class="loading">Загрузка данных</div>';
+            if (grid) grid.innerHTML = '<div class="loading">Загрузка данных</div>';
 
             // Загружаем пользователей
             loadUsers();
@@ -1017,6 +1022,8 @@
 
         function renderChildSelect() {
             const sel = document.getElementById('childSelect');
+            if (!sel) return;
+            
             sel.innerHTML = '';
             
             // Если пользователь - ребенок, показываем только его
@@ -1044,6 +1051,8 @@
 
         function renderGrid() {
             const grid = document.getElementById('grid');
+            if (!grid) return;
+            
             grid.innerHTML = '';
             
             // Определяем, кого показывать
@@ -1203,14 +1212,20 @@
         // ===============================
 
         window.openAddModal = function() {
-            document.getElementById('addChildModal').classList.add('active');
-            document.getElementById('childName').value = '';
-            document.getElementById('childPassword').value = '';
-            setTimeout(() => document.getElementById('childName').focus(), 50);
+            const modal = document.getElementById('addChildModal');
+            if (modal) {
+                modal.classList.add('active');
+                document.getElementById('childName').value = '';
+                document.getElementById('childPassword').value = '';
+                setTimeout(() => document.getElementById('childName').focus(), 50);
+            }
         };
 
         window.closeAddModal = function() {
-            document.getElementById('addChildModal').classList.remove('active');
+            const modal = document.getElementById('addChildModal');
+            if (modal) {
+                modal.classList.remove('active');
+            }
         };
 
         window.addChild = async function() {
@@ -1645,65 +1660,87 @@
         // 12. Обработчики событий
         // ===============================
 
-        document.getElementById('childSelect').addEventListener('change', async (e) => {
-            if (currentUser && currentUser.role === 'child') {
-                // Ребенок не может менять выбор
-                return;
+        // Ждем загрузки DOM
+        document.addEventListener('DOMContentLoaded', function() {
+            // Загружаем пользователей и данные
+            loadUsers();
+            loadData();
+
+            // Настройка обработчиков
+            const childSelect = document.getElementById('childSelect');
+            if (childSelect) {
+                childSelect.addEventListener('change', async (e) => {
+                    if (currentUser && currentUser.role === 'child') {
+                        return;
+                    }
+                    const newChild = e.target.value || null;
+                    if (newChild !== data.current) {
+                        data.current = newChild;
+                        await saveData();
+                        renderGrid();
+                    }
+                });
             }
-            const newChild = e.target.value || null;
-            if (newChild !== data.current) {
-                data.current = newChild;
-                await saveData();
-                renderGrid();
+
+            const childNameInput = document.getElementById('childName');
+            if (childNameInput) {
+                childNameInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') window.addChild();
+                    if (e.key === 'Escape') window.closeAddModal();
+                });
             }
-        });
 
-        document.getElementById('childName').addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') window.addChild();
-            if (e.key === 'Escape') window.closeAddModal();
-        });
-
-        document.getElementById('loginPassword').addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') window.login();
-        });
-
-        document.getElementById('loginUsername').addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                document.getElementById('loginPassword').focus();
+            const loginPassword = document.getElementById('loginPassword');
+            if (loginPassword) {
+                loginPassword.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') window.login();
+                });
             }
-        });
 
-        document.getElementById('addChildModal').addEventListener('click', (e) => {
-            if (e.target === e.currentTarget) {
-                window.closeAddModal();
+            const loginUsername = document.getElementById('loginUsername');
+            if (loginUsername) {
+                loginUsername.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        document.getElementById('loginPassword').focus();
+                    }
+                });
             }
-        });
 
-        document.getElementById('commentModal').addEventListener('click', (e) => {
-            if (e.target === e.currentTarget) {
-                window.closeCommentModal();
+            const addChildModal = document.getElementById('addChildModal');
+            if (addChildModal) {
+                addChildModal.addEventListener('click', (e) => {
+                    if (e.target === e.currentTarget) {
+                        window.closeAddModal();
+                    }
+                });
             }
+
+            const commentModal = document.getElementById('commentModal');
+            if (commentModal) {
+                commentModal.addEventListener('click', (e) => {
+                    if (e.target === e.currentTarget) {
+                        window.closeCommentModal();
+                    }
+                });
+            }
+
+            // Показываем модалку входа
+            const loginModal = document.getElementById('loginModal');
+            if (loginModal) {
+                loginModal.classList.add('active');
+            }
+
+            // Для удобства ставим фокус на поле пароля
+            setTimeout(() => {
+                const pwd = document.getElementById('loginPassword');
+                if (pwd) pwd.focus();
+            }, 500);
+
+            console.log('👑 Для входа как администратор:');
+            console.log('   Имя: admin');
+            console.log('   Пароль: 210847');
+            console.log('📊 Данные пользователей в localStorage:', localStorage.getItem(USERS_KEY));
         });
-
-        // ===============================
-        // 13. Запуск
-        // ===============================
-
-        // Сначала загружаем пользователей и данные
-        loadUsers();
-        loadData();
-
-        // Показываем модалку входа
-        document.getElementById('loginModal').classList.add('active');
-
-        // Для удобства ставим фокус на поле пароля
-        setTimeout(() => {
-            document.getElementById('loginPassword').focus();
-        }, 500);
-
-        console.log('👑 Для входа как администратор:');
-        console.log('   Имя: admin');
-        console.log('   Пароль: 210847');
     </script>
 </body>
 </html>
