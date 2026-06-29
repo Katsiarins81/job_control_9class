@@ -390,14 +390,29 @@
     const SUPABASE_URL = 'https://fuflttwdnwntljyblgeh.supabase.co'; // Замените на свой URL
     const SUPABASE_KEY = 'sb_publishable_CGYKGrbepaKLK5mBpfdypA_OHgJSPK4'; // Замените на свой anon/public ключ
 
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    let supabase = null;
+    let supabaseEnabled = false;
+
+    // Пытаемся инициализировать Supabase
+    try {
+      if (SUPABASE_URL && SUPABASE_KEY && SUPABASE_URL !== 'https://ваш-проект.supabase.co') {
+        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        supabaseEnabled = true;
+        console.log('✅ Supabase подключен');
+      } else {
+        console.warn('⚠️ Supabase не настроен. Работаем в офлайн-режиме (только localStorage)');
+      }
+    } catch (e) {
+      console.warn('⚠️ Ошибка подключения Supabase:', e.message);
+      console.warn('Работаем в офлайн-режиме (только localStorage)');
+    }
 
     // ===============================
     // 2. Константы и состояния
     // ===============================
     const VARIANTS = 80;
     const TASKS = 10;
-    const STORAGE_KEY = 'tasksProgress_v1'; // локальный бэкап
+    const STORAGE_KEY = 'tasksProgress_v1';
 
     let data = {
       children: [],
@@ -423,7 +438,7 @@
       }
 
       // пробуем загрузить из Supabase (если есть текущий ребёнок)
-      if (data.current) {
+      if (supabaseEnabled && data.current) {
         await loadProgressFromSupabase(data.current);
       }
 
@@ -433,57 +448,66 @@
 
     // Сохраняем прогресс конкретного ребёнка в Supabase
     async function saveProgressToSupabase(childName) {
-      if (!childName) return;
-      const progress = data.progress[childName] || {};
-      const payload = {
-        child_name: childName,
-        progress: progress,
-        updated_at: new Date().toISOString()
-      };
+      if (!supabaseEnabled || !childName) return;
+      
+      try {
+        const progress = data.progress[childName] || {};
+        const payload = {
+          child_name: childName,
+          progress: progress,
+          updated_at: new Date().toISOString()
+        };
 
-      const { error } = await supabase
-        .from('tasks_progress')
-        .upsert(payload, { onConflict: 'child_name' });
+        const { error } = await supabase
+          .from('tasks_progress')
+          .upsert(payload, { onConflict: 'child_name' });
 
-      if (error) {
-        console.error('Supabase upsert error:', error);
-        alert('Не удалось сохранить прогресс в Supabase: ' + error.message);
-      } else {
-        // после успешной записи обновляем локальный кеш
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        if (error) {
+          console.error('Supabase upsert error:', error);
+          // Не показываем alert, чтобы не мешать пользователю
+        } else {
+          // после успешной записи обновляем локальный кеш
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        }
+      } catch (e) {
+        console.error('Ошибка при сохранении в Supabase:', e);
       }
     }
 
     // Загружаем прогресс для ребёнка из Supabase
     async function loadProgressFromSupabase(childName) {
-      if (!childName) return;
-      const { data: rows, error } = await supabase
-        .from('tasks_progress')
-        .select('progress')
-        .eq('child_name', childName)
-        .maybeSingle();
+      if (!supabaseEnabled || !childName) return;
+      
+      try {
+        const { data: rows, error } = await supabase
+          .from('tasks_progress')
+          .select('progress')
+          .eq('child_name', childName)
+          .maybeSingle();
 
-      if (error) {
-        console.error('Supabase select error:', error);
-        alert('Ошибка загрузки данных из Supabase: ' + error.message);
-        return;
-      }
-
-      if (rows && rows.progress) {
-        data.progress[childName] = rows.progress;
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-      } else {
-        // если в БД нет записи — инициализируем пустым объектом
-        if (!data.progress[childName]) {
-          data.progress[childName] = {};
+        if (error) {
+          console.error('Supabase select error:', error);
+          return;
         }
+
+        if (rows && rows.progress) {
+          data.progress[childName] = rows.progress;
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        } else {
+          // если в БД нет записи — инициализируем пустым объектом
+          if (!data.progress[childName]) {
+            data.progress[childName] = {};
+          }
+        }
+      } catch (e) {
+        console.error('Ошибка при загрузке из Supabase:', e);
       }
     }
 
     // Общая функция сохранения (локально + Supabase)
     async function saveData() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-      if (data.current) {
+      if (supabaseEnabled && data.current) {
         await saveProgressToSupabase(data.current);
       }
     }
@@ -626,14 +650,18 @@
       if (!confirm(`Удалить ребёнка "${data.current}" и весь его прогресс?`)) return;
 
       // удаляем из Supabase
-      const { error } = await supabase
-        .from('tasks_progress')
-        .delete()
-        .eq('child_name', data.current);
-      if (error) {
-        console.error('Supabase delete error:', error);
-        alert('Ошибка удаления из Supabase: ' + error.message);
-        // продолжаем, чтобы удалить локально
+      if (supabaseEnabled) {
+        try {
+          const { error } = await supabase
+            .from('tasks_progress')
+            .delete()
+            .eq('child_name', data.current);
+          if (error) {
+            console.error('Supabase delete error:', error);
+          }
+        } catch (e) {
+          console.error('Ошибка при удалении из Supabase:', e);
+        }
       }
 
       delete data.progress[data.current];
@@ -698,10 +726,10 @@
       const newChild = e.target.value || null;
       if (newChild !== data.current) {
         data.current = newChild;
-        if (data.current) {
+        if (supabaseEnabled && data.current) {
           await loadProgressFromSupabase(data.current);
         }
-        saveData();
+        await saveData();
         renderGrid();
       }
     });
