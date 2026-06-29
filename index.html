@@ -64,6 +64,7 @@
             top: 0;
             z-index: 50;
             box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            overflow: visible;
         }
         .mini-nav-wrapper {
             display: flex;
@@ -73,6 +74,7 @@
             overflow-y: auto;
             padding: 4px 0;
             justify-content: center;
+            position: relative;
         }
         .mini-nav-wrapper::-webkit-scrollbar {
             width: 4px;
@@ -98,10 +100,11 @@
             transition: all 0.2s;
             position: relative;
             flex-shrink: 0;
+            z-index: 5;
         }
         .mini-nav-item:hover {
             transform: scale(1.15);
-            z-index: 10;
+            z-index: 100;
             border-color: #667eea;
         }
         .mini-nav-item.completed {
@@ -116,22 +119,26 @@
             border-color: #667eea;
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
         }
+
+        /* ===== ТУЛТИПЫ ===== */
         .mini-nav-item .tooltip {
             display: none;
             position: absolute;
-            bottom: calc(100% + 10px);
+            bottom: calc(100% + 12px);
             left: 50%;
             transform: translateX(-50%);
-            background: #2d3748;
+            background: #1a202c;
             color: #fff;
-            padding: 8px 10px;
-            border-radius: 8px;
+            padding: 10px 12px;
+            border-radius: 10px;
             font-size: 11px;
             font-weight: 400;
-            white-space: nowrap;
-            z-index: 100;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            min-width: 120px;
+            z-index: 9999;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+            min-width: 130px;
+            pointer-events: none;
+            white-space: normal;
+            border: 1px solid rgba(255,255,255,0.1);
         }
         .mini-nav-item .tooltip::after {
             content: '';
@@ -140,16 +147,19 @@
             left: 50%;
             transform: translateX(-50%);
             border: 6px solid transparent;
-            border-top-color: #2d3748;
+            border-top-color: #1a202c;
         }
         .mini-nav-item:hover .tooltip {
             display: block;
         }
+        /* Отключаем тултип, если нет места снизу */
         .mini-nav-item .tooltip .tip-title {
-            font-weight: 600;
-            margin-bottom: 4px;
+            font-weight: 700;
+            margin-bottom: 5px;
             text-align: center;
             font-size: 12px;
+            color: #ffd700;
+            letter-spacing: 0.5px;
         }
         .mini-nav-item .tooltip .tip-tasks {
             display: grid;
@@ -158,16 +168,16 @@
             margin-top: 4px;
         }
         .mini-nav-item .tooltip .tip-task {
-            width: 18px;
-            height: 18px;
+            width: 20px;
+            height: 20px;
             border-radius: 4px;
-            background: #4a5568;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 8px;
+            font-weight: 700;
             color: #a0aec0;
-            font-weight: 600;
+            border: 1px solid rgba(255,255,255,0.05);
         }
         .mini-nav-item .tooltip .tip-task.done {
             background: #48bb78;
@@ -180,14 +190,6 @@
         .mini-nav-item .tooltip .tip-task.none {
             background: #4a5568;
             color: #718096;
-        }
-        .mini-nav-label {
-            font-size: 12px;
-            font-weight: 600;
-            color: #718096;
-            margin-right: 8px;
-            display: flex;
-            align-items: center;
         }
 
         /* ===== СЕТКА ВАРИАНТОВ ===== */
@@ -240,7 +242,7 @@
         .password-input-wrapper input { padding-right: 45px; }
         .password-toggle { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #718096; cursor: pointer; font-size: 18px; padding: 5px; }
         .password-toggle:hover { background: none; transform: translateY(-50%); }
-        @media (max-width: 600px) { header { flex-direction: column; align-items: flex-start; } .variants-grid { grid-template-columns: 1fr; padding: 15px; } .stats { padding: 15px; } .toolbar { padding: 15px; } .modal { max-width: 100%; } .header-right { width: 100%; justify-content: space-between; } .mini-nav { padding: 8px 15px; } .mini-nav-item { width: 22px; height: 22px; font-size: 7px; } .mini-nav-wrapper { gap: 3px; } }
+        @media (max-width: 600px) { header { flex-direction: column; align-items: flex-start; } .variants-grid { grid-template-columns: 1fr; padding: 15px; } .stats { padding: 15px; } .toolbar { padding: 15px; } .modal { max-width: 100%; } .header-right { width: 100%; justify-content: space-between; } .mini-nav { padding: 8px 15px; } .mini-nav-item { width: 22px; height: 22px; font-size: 7px; } .mini-nav-wrapper { gap: 3px; } .mini-nav-item .tooltip { min-width: 100px; padding: 6px 8px; } .mini-nav-item .tooltip .tip-task { width: 16px; height: 16px; font-size: 7px; } }
         .hidden-input { display: none; }
         .admin-controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
         .admin-controls label { color: rgba(255,255,255,0.8); font-size: 14px; }
@@ -250,8 +252,6 @@
         .tasks-limit-setting label { font-weight: 600; color: #2d3748; font-size: 14px; }
         .tasks-limit-setting input { width: 60px; min-width: 60px; padding: 6px 8px; text-align: center; background: #fff; border: 1px solid #cbd5e0; border-radius: 6px; }
         .tasks-limit-setting input:focus { border-color: #667eea; }
-
-        /* Анимации (сокращены для экономии места) */
         .variant-celebration { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 10; border-radius: 12px; }
         .variant-celebration::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at center, rgba(255,215,0,0.6) 0%, rgba(72,187,120,0.3) 40%, transparent 70%); animation: variantFlash 1.5s ease-out forwards; }
         @keyframes variantFlash { 0% { opacity: 0; transform: scale(0.3); } 30% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(1.3); } }
@@ -484,7 +484,7 @@
         }
 
         // ===============================
-        // 3. Работа с пользователями (без изменений, сокращено)
+        // 3. Работа с пользователями
         // ===============================
         async function loadUsersFromSupabase() {
             if (!supabaseEnabled) return;
@@ -535,7 +535,7 @@
         }
 
         // ===============================
-        // 4. Работа с настройками (сокращено)
+        // 4. Работа с настройками
         // ===============================
         async function loadSettingsFromSupabase() {
             if (!supabaseEnabled) return;
@@ -777,7 +777,7 @@
         };
 
         // ===============================
-        // 8. Realtime (сокращено)
+        // 8. Realtime
         // ===============================
         function setupRealtimeSubscription() {
             if (!supabaseEnabled || realtimeSubscription) return;
@@ -929,7 +929,7 @@
         };
 
         // ===============================
-        // 10. МИНИ-НАВИГАЦИЯ
+        // 10. МИНИ-НАВИГАЦИЯ (с исправленными тултипами)
         // ===============================
         function renderMiniNav() {
             const wrapper = document.getElementById('miniNavWrapper');
@@ -955,18 +955,17 @@
 
                 // Проверяем статус варианта
                 let done = 0;
+                let attention = 0;
                 for (let t = 1; t <= maxTasks; t++) {
                     const status = childProgress[`${v}-${t}`] || 'none';
                     if (status === 'done') done++;
+                    else if (status === 'attention') attention++;
                 }
                 if (done === maxTasks && maxTasks > 0) {
                     item.classList.add('completed');
                 }
 
-                // Подсветка текущего варианта (если он виден в сетке)
-                // Добавим позже при прокрутке
-
-                // Создаем тултип с мини-заданиями
+                // ===== СОЗДАЁМ ТУЛТИП =====
                 const tooltip = document.createElement('div');
                 tooltip.className = 'tooltip';
 
@@ -996,7 +995,6 @@
                     const target = document.querySelector(`.variant-card[data-variant="${v}"]`);
                     if (target) {
                         target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                        // Подсветка
                         document.querySelectorAll('.mini-nav-item').forEach(el => el.classList.remove('active'));
                         item.classList.add('active');
                         setTimeout(() => item.classList.remove('active'), 2000);
@@ -1007,7 +1005,7 @@
             }
         }
 
-        // Отслеживание прокрутки для подсветки активного варианта в мини-навигации
+        // Отслеживание прокрутки для подсветки активного варианта
         function setupScrollObserver() {
             const cards = document.querySelectorAll('.variant-card');
             const navItems = document.querySelectorAll('.mini-nav-item');
@@ -1074,7 +1072,6 @@
                 const isCompleted = (done === maxTasks);
                 if (isCompleted) card.classList.add('completed');
 
-                // ID бейдж
                 const badge = document.createElement('div');
                 badge.className = 'variant-id-badge';
                 badge.textContent = `#${v}`;
@@ -1150,13 +1147,12 @@
 
             updateStats();
 
-            // Пересоздаём наблюдатель прокрутки
             if (scrollObserver) scrollObserver.disconnect();
             setTimeout(() => { scrollObserver = setupScrollObserver(); }, 100);
         }
 
         // ===============================
-        // 12. Анимации (сокращены, но рабочие)
+        // 12. Анимации
         // ===============================
         function buildVariantCelebration() {
             const celebration = document.createElement('div');
@@ -1384,7 +1380,7 @@
         }
 
         // ===============================
-        // 15. Модалки (сокращены)
+        // 15. Модалки
         // ===============================
         window.openAddModal = function() {
             const modal = document.getElementById('addChildModal');
@@ -1566,7 +1562,7 @@
         };
 
         // ===============================
-        // 17. Экспорт/Импорт Excel (сокращены, но рабочие)
+        // 17. Экспорт/Импорт Excel
         // ===============================
         window.exportExcel = function() {
             if (currentUser && currentUser.role === 'child') { alert('У вас нет прав на экспорт'); return; }
