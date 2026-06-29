@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Контроль заданий</title>
     <style>
-        /* ----- Стили (те же, что были) ----- */
+        /* (все стили без изменений, оставьте как было) */
         * {
             box-sizing: border-box;
             margin: 0;
@@ -402,7 +402,7 @@
             <div class="login-error" id="loginError">Неверное имя пользователя или пароль</div>
             <input type="text" id="loginUsername" placeholder="Имя пользователя" />
             <div class="password-input-wrapper">
-                <input type="password" id="loginPassword" placeholder="Пароль"  />
+                <input type="password" id="loginPassword" placeholder="Пароль" autocomplete="new-password" />
                 <button class="password-toggle" onclick="window.togglePassword()">👁️</button>
             </div>
             <div class="modal-actions" style="justify-content: center; margin-top: 10px;">
@@ -558,7 +558,6 @@
             current: null,
             progress: {}
         };
-        // Настройки теперь хранятся в Supabase, но кешируем здесь
         let settingsCache = {};
         let usersCache = {};
         let currentTaskKey = null;
@@ -579,7 +578,7 @@
         }
 
         // ===============================
-        // 3. Работа с пользователями
+        // 3. Работа с пользователями (без изменений)
         // ===============================
         async function loadUsersFromSupabase() {
             if (!supabaseEnabled) return;
@@ -630,10 +629,8 @@
         }
 
         // ===============================
-        // 4. Работа с настройками (Supabase)
+        // 4. Работа с настройками
         // ===============================
-
-        // Загрузка настроек из Supabase
         async function loadSettingsFromSupabase() {
             if (!supabaseEnabled) return;
             try {
@@ -647,7 +644,6 @@
             } catch (e) { console.error('Ошибка при загрузке настроек:', e); }
         }
 
-        // Сохранение настройки в Supabase
         async function saveSettingToSupabase(childName, maxTasks) {
             if (!supabaseEnabled) return false;
             try {
@@ -663,7 +659,6 @@
             } catch (e) { console.error('Ошибка при сохранении настройки:', e); return false; }
         }
 
-        // Удаление настроек ребёнка
         async function deleteSettingsFromSupabase(childName) {
             if (!supabaseEnabled) return false;
             try {
@@ -674,12 +669,10 @@
             } catch (e) { console.error('Ошибка при удалении настроек:', e); return false; }
         }
 
-        // Получение maxTasks из кеша или по умолчанию
         function getMaxTasks(childName) {
             return settingsCache[childName]?.maxTasks || 10;
         }
 
-        // Установка maxTasks с сохранением в Supabase
         async function setMaxTasks(childName, val) {
             const value = Math.min(10, Math.max(1, parseInt(val) || 10));
             const saved = await saveSettingToSupabase(childName, value);
@@ -691,19 +684,16 @@
             return false;
         }
 
-        // Инициализация настроек
         async function initSettings() {
             if (supabaseEnabled) {
                 await loadSettingsFromSupabase();
             }
-            // Для офлайн-режима используем localStorage (уже есть в settingsCache)
             updateChildrenList();
         }
 
         // ===============================
         // 5. Инициализация
         // ===============================
-
         async function initUsers() {
             if (!supabaseEnabled) {
                 const saved = localStorage.getItem(USERS_KEY);
@@ -977,7 +967,6 @@
                 .subscribe((status) => { if (status === 'SUBSCRIBED') console.log('✅ Подписка на users активна'); });
         }
 
-        // Real-time подписка на настройки
         function setupSettingsRealtimeSubscription() {
             if (!supabaseEnabled || settingsRealtimeSubscription) return;
             console.log('🔄 Настройка real-time для settings...');
@@ -986,7 +975,6 @@
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'settings' }, (payload) => {
                     console.log('📨 Изменение в таблице settings:', payload);
                     loadSettingsFromSupabase().then(() => {
-                        // Обновляем интерфейс, если изменился текущий ребёнок
                         if (data.current) {
                             const newMax = getMaxTasks(data.current);
                             const input = document.getElementById('tasksLimitInput');
@@ -1057,7 +1045,6 @@
         // ===============================
         // 10. Отрисовка сетки
         // ===============================
-
         function renderGrid() {
             const grid = document.getElementById('grid');
             if (!grid) return;
@@ -1148,7 +1135,6 @@
                 bar.innerHTML = `<div class="variant-bar-fill" style="width:${progressPercent}%"></div>`;
                 card.appendChild(bar);
 
-                // Анимация завершения варианта
                 if (isCompleted && !variantCelebrated[childToShow][v]) {
                     variantCelebrated[childToShow][v] = true;
                     const celebration = buildVariantCelebration();
@@ -1163,7 +1149,6 @@
                 if (!isCompleted) allVariantsCompleted = false;
             }
 
-            // Проверка завершения всего курса
             if (allVariantsCompleted && maxTasks > 0 && data.children.length > 0 && !courseCelebrated[childToShow]) {
                 courseCelebrated[childToShow] = true;
                 showCourseCelebration();
@@ -1175,7 +1160,6 @@
         // ===============================
         // 11. Анимации
         // ===============================
-
         function buildVariantCelebration() {
             const celebration = document.createElement('div');
             celebration.className = 'variant-celebration';
@@ -1342,7 +1326,6 @@
         // ===============================
         // 12. Переключение статуса задания
         // ===============================
-
         function cycleTaskStatus(v, t) {
             console.log('🔄 cycleTaskStatus вызван для', v, t);
             if (!data.current) { console.warn('⚠️ data.current не установлен'); return; }
@@ -1364,7 +1347,6 @@
         // ===============================
         // 13. Статистика
         // ===============================
-
         function updateStats() {
             const statTotal = document.getElementById('statTotal');
             const statDone = document.getElementById('statDone');
@@ -1415,7 +1397,6 @@
         // ===============================
         // 14. Модалки
         // ===============================
-
         window.openAddModal = function() {
             const modal = document.getElementById('addChildModal');
             if (modal) {
@@ -1510,7 +1491,6 @@
         // ===============================
         // 15. Действия
         // ===============================
-
         window.deleteChild = async function() {
             if (!data.current) return;
             if (currentUser && currentUser.role === 'child') { alert('У вас нет прав на удаление'); return; }
@@ -1591,9 +1571,299 @@
         };
 
         // ===============================
-        // 16. Экспорт/Импорт
+        // 16. ЭКСПОРТ / ИМПОРТ EXCEL (ИСПРАВЛЕНО!)
         // ===============================
 
+        // 16.1. Экспорт Excel для администратора
+        window.exportExcel = function() {
+            if (currentUser && currentUser.role === 'child') {
+                alert('У вас нет прав на экспорт');
+                return;
+            }
+
+            try {
+                const excelData = [];
+                const header = ['Ребёнок', 'Вариант', 'Задание'];
+                for (let t = 1; t <= TASKS; t++) {
+                    header.push(`Задание ${t}`);
+                }
+                header.push('Статус', 'Комментарий');
+                excelData.push(header);
+
+                data.children.forEach(childName => {
+                    const progress = data.progress[childName] || {};
+                    const maxTasks = getMaxTasks(childName);
+
+                    for (let v = 1; v <= VARIANTS; v++) {
+                        const row = [childName, v];
+                        let statusCount = 0;
+
+                        for (let t = 1; t <= TASKS; t++) {
+                            const key = `${v}-${t}`;
+                            const status = progress[key] || 'none';
+                            let display = '⬜';
+                            if (status === 'done') {
+                                display = '✅';
+                                if (t <= maxTasks) statusCount++;
+                            } else if (status === 'attention') {
+                                display = '⚠️';
+                                if (t <= maxTasks) statusCount++;
+                            }
+                            row.push(display);
+                        }
+
+                        // Статус варианта (только для заданий в пределах лимита)
+                        let variantStatus = 'Не завершен';
+                        if (statusCount === maxTasks) variantStatus = '✅ Завершен';
+                        else if (statusCount > 0) variantStatus = '⚠️ В процессе';
+                        row.push(variantStatus);
+
+                        // Комментарий (первый найденный в варианте)
+                        let comment = '';
+                        for (let t = 1; t <= maxTasks; t++) {
+                            const key = `${v}-${t}`;
+                            const commentKey = `${key}_comment`;
+                            if (progress[commentKey]) {
+                                comment = progress[commentKey];
+                                break;
+                            }
+                        }
+                        row.push(comment);
+                        excelData.push(row);
+                    }
+                });
+
+                const wb = XLSX.utils.book_new();
+                const ws = XLSX.utils.aoa_to_sheet(excelData);
+                ws['!cols'] = [
+                    { wch: 15 }, { wch: 10 }, { wch: 10 },
+                    ...Array(TASKS).fill({ wch: 12 }),
+                    { wch: 15 }, { wch: 30 }
+                ];
+                XLSX.utils.book_append_sheet(wb, ws, 'Прогресс');
+
+                // Лист с настройками
+                const settingsData = [
+                    ['Настройки'],
+                    [''],
+                    ['Имя ребёнка', 'Заданий в варианте']
+                ];
+                data.children.forEach(childName => {
+                    settingsData.push([childName, getMaxTasks(childName)]);
+                });
+                const wsSettings = XLSX.utils.aoa_to_sheet(settingsData);
+                wsSettings['!cols'] = [{ wch: 20 }, { wch: 20 }];
+                XLSX.utils.book_append_sheet(wb, wsSettings, 'Настройки');
+
+                const fileName = `progress-${new Date().toISOString().slice(0, 10)}.xlsx`;
+                XLSX.writeFile(wb, fileName);
+                console.log('✅ Excel экспортирован');
+            } catch (e) {
+                console.error('Ошибка экспорта Excel:', e);
+                alert('Ошибка при экспорте Excel: ' + e.message);
+            }
+        };
+
+        // 16.2. Экспорт Excel для ребенка
+        window.exportExcelChild = function() {
+            if (!currentUser || currentUser.role !== 'child') {
+                alert('Эта функция доступна только ученикам');
+                return;
+            }
+
+            try {
+                const childName = currentUser.username;
+                const progress = data.progress[childName] || {};
+                const maxTasks = getMaxTasks(childName);
+
+                const excelData = [];
+                const header = ['Вариант', 'Задание'];
+                for (let t = 1; t <= TASKS; t++) {
+                    header.push(`Задание ${t}`);
+                }
+                header.push('Статус', 'Комментарий');
+                excelData.push(header);
+
+                for (let v = 1; v <= VARIANTS; v++) {
+                    const row = [v];
+                    let statusCount = 0;
+
+                    for (let t = 1; t <= TASKS; t++) {
+                        const key = `${v}-${t}`;
+                        const status = progress[key] || 'none';
+                        let display = '⬜';
+                        if (status === 'done') {
+                            display = '✅';
+                            if (t <= maxTasks) statusCount++;
+                        } else if (status === 'attention') {
+                            display = '⚠️';
+                            if (t <= maxTasks) statusCount++;
+                        }
+                        row.push(display);
+                    }
+
+                    let variantStatus = 'Не завершен';
+                    if (statusCount === maxTasks) variantStatus = '✅ Завершен';
+                    else if (statusCount > 0) variantStatus = '⚠️ В процессе';
+                    row.push(variantStatus);
+
+                    let comment = '';
+                    for (let t = 1; t <= maxTasks; t++) {
+                        const key = `${v}-${t}`;
+                        const commentKey = `${key}_comment`;
+                        if (progress[commentKey]) {
+                            comment = progress[commentKey];
+                            break;
+                        }
+                    }
+                    row.push(comment);
+                    excelData.push(row);
+                }
+
+                const wb = XLSX.utils.book_new();
+                const ws = XLSX.utils.aoa_to_sheet(excelData);
+                ws['!cols'] = [
+                    { wch: 10 }, { wch: 10 },
+                    ...Array(TASKS).fill({ wch: 12 }),
+                    { wch: 15 }, { wch: 30 }
+                ];
+                XLSX.utils.book_append_sheet(wb, ws, 'Мой прогресс');
+
+                const fileName = `${childName}-progress-${new Date().toISOString().slice(0, 10)}.xlsx`;
+                XLSX.writeFile(wb, fileName);
+                console.log('✅ Excel ребёнка экспортирован');
+            } catch (e) {
+                console.error('Ошибка экспорта Excel:', e);
+                alert('Ошибка при экспорте Excel: ' + e.message);
+            }
+        };
+
+        // 16.3. Импорт Excel
+        window.importExcel = async function(e) {
+            if (currentUser && currentUser.role === 'child') {
+                alert('У вас нет прав на импорт');
+                return;
+            }
+
+            const file = e.target.files[0];
+            if (!file) return;
+
+            try {
+                const reader = new FileReader();
+                reader.onload = async (ev) => {
+                    try {
+                        const data = new Uint8Array(ev.target.result);
+                        const workbook = XLSX.read(data, { type: 'array' });
+                        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                        const rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+
+                        if (rows.length < 2) {
+                            alert('Файл пуст или имеет неверный формат');
+                            return;
+                        }
+
+                        const headerRow = rows[0];
+                        if (!headerRow.includes('Ребёнок') || !headerRow.includes('Вариант')) {
+                            alert('Неверный формат файла. Ожидается экспорт из этой программы.');
+                            return;
+                        }
+
+                        if (!confirm('Импортировать данные из Excel? Это заменит текущие данные.')) return;
+
+                        const importedProgress = {};
+                        const importedChildren = [];
+
+                        for (let i = 1; i < rows.length; i++) {
+                            const row = rows[i];
+                            if (!row || row.length < 3) continue;
+
+                            const childName = String(row[0]).trim();
+                            const variant = parseInt(row[1]);
+                            if (!childName || isNaN(variant) || variant < 1 || variant > VARIANTS) continue;
+
+                            if (!importedChildren.includes(childName)) {
+                                importedChildren.push(childName);
+                            }
+
+                            if (!importedProgress[childName]) {
+                                importedProgress[childName] = {};
+                            }
+
+                            for (let t = 0; t < TASKS; t++) {
+                                const colIndex = 2 + t;
+                                if (colIndex < row.length) {
+                                    const value = String(row[colIndex] || '').trim();
+                                    const key = `${variant}-${t + 1}`;
+                                    if (value === '✅') {
+                                        importedProgress[childName][key] = 'done';
+                                    } else if (value === '⚠️') {
+                                        importedProgress[childName][key] = 'attention';
+                                    } else {
+                                        importedProgress[childName][key] = 'none';
+                                    }
+                                }
+                            }
+
+                            const commentIndex = 2 + TASKS + 1;
+                            if (commentIndex < row.length && row[commentIndex]) {
+                                const comment = String(row[commentIndex]).trim();
+                                if (comment) {
+                                    const firstKey = `${variant}-1`;
+                                    importedProgress[childName][`${firstKey}_comment`] = comment;
+                                }
+                            }
+                        }
+
+                        if (importedChildren.length === 0) {
+                            alert('Не найдено данных для импорта');
+                            return;
+                        }
+
+                        data.children = importedChildren;
+                        data.progress = importedProgress;
+                        data.current = importedChildren[0] || null;
+
+                        // Пытаемся импортировать настройки из второго листа
+                        try {
+                            if (workbook.SheetNames.length > 1) {
+                                const settingsSheet = workbook.Sheets[workbook.SheetNames[1]];
+                                const settingsRows = XLSX.utils.sheet_to_json(settingsSheet, { header: 1 });
+                                for (let i = 2; i < settingsRows.length; i++) {
+                                    const row = settingsRows[i];
+                                    if (row && row.length >= 2) {
+                                        const name = String(row[0]).trim();
+                                        const maxTasks = parseInt(row[1]);
+                                        if (name && !isNaN(maxTasks) && maxTasks >= 1 && maxTasks <= 10) {
+                                            await setMaxTasks(name, maxTasks);
+                                        }
+                                    }
+                                }
+                            }
+                        } catch (e) {
+                            console.warn('Не удалось импортировать настройки:', e);
+                        }
+
+                        await saveData();
+                        renderChildSelect();
+                        renderGrid();
+                        updateTasksLimitInput();
+                        alert(`Импорт успешен! Загружено детей: ${importedChildren.length}`);
+                    } catch (err) {
+                        console.error('Ошибка импорта:', err);
+                        alert('Ошибка при импорте файла: ' + err.message);
+                    }
+                };
+                reader.readAsArrayBuffer(file);
+                e.target.value = '';
+            } catch (err) {
+                console.error('Ошибка:', err);
+                alert('Ошибка при импорте: ' + err.message);
+            }
+        };
+
+        // ===============================
+        // 17. Экспорт/Импорт JSON
+        // ===============================
         window.exportJSON = function() {
             if (currentUser && currentUser.role === 'child') { alert('У вас нет прав на экспорт'); return; }
             const exportData = { data, settings: settingsCache, variantCelebrated, courseCelebrated };
@@ -1619,7 +1889,6 @@
                     data = imported.data;
                     if (imported.settings) {
                         settingsCache = imported.settings;
-                        // Сохраняем настройки в Supabase
                         for (const [name, setting] of Object.entries(settingsCache)) {
                             await setMaxTasks(name, setting.maxTasks);
                         }
@@ -1637,15 +1906,9 @@
             e.target.value = '';
         };
 
-        // Экспорт Excel (без изменений)
-        window.exportExcelChild = function() { /* ... оставляем как было ... */ };
-        window.exportExcel = function() { /* ... оставляем как было ... */ };
-        window.importExcel = function() { /* ... оставляем как было ... */ };
-
         // ===============================
-        // 17. Обработчики событий
+        // 18. Обработчики событий
         // ===============================
-
         document.addEventListener('DOMContentLoaded', async function() {
             await loadData();
 
