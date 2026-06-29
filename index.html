@@ -583,10 +583,10 @@
             
             <div class="login-error" id="loginError">Неверное имя пользователя или пароль</div>
             
-            <input type="text" id="loginUsername" placeholder="Имя пользователя" />
+            <input type="text" id="loginUsername" placeholder="Имя пользователя" value="admin" />
             
             <div class="password-input-wrapper">
-                <input type="password" id="loginPassword" placeholder="Пароль" />
+                <input type="password" id="loginPassword" placeholder="Пароль" value="210847" />
                 <button class="password-toggle" onclick="togglePassword()">👁️</button>
             </div>
             
@@ -740,10 +740,17 @@
             if (saved) {
                 try {
                     users = JSON.parse(saved);
+                    // Проверяем, что admin существует
+                    if (!users[ADMIN_USERNAME]) {
+                        users[ADMIN_USERNAME] = { password: ADMIN_PASSWORD, role: 'admin' };
+                        saveUsers();
+                    }
                     return;
-                } catch (e) {}
+                } catch (e) {
+                    console.error('Ошибка загрузки пользователей:', e);
+                }
             }
-            // По умолчанию только админ
+            // Если данных нет или ошибка - создаем админа
             users = {
                 'admin': { password: ADMIN_PASSWORD, role: 'admin' }
             };
@@ -823,8 +830,8 @@
                 currentUser = null;
                 document.getElementById('mainApp').style.display = 'none';
                 document.getElementById('loginModal').classList.add('active');
-                document.getElementById('loginUsername').value = '';
-                document.getElementById('loginPassword').value = '';
+                document.getElementById('loginUsername').value = 'admin';
+                document.getElementById('loginPassword').value = '210847';
                 document.getElementById('loginError').classList.remove('show');
             }
         };
@@ -1682,17 +1689,21 @@
         // 13. Запуск
         // ===============================
 
+        // Сначала загружаем пользователей и данные
+        loadUsers();
         loadData();
 
-        // Показываем модалку входа сразу
+        // Показываем модалку входа
         document.getElementById('loginModal').classList.add('active');
 
-        // Инструкция по созданию таблицы в Supabase:
-        // CREATE TABLE tasks_progress (
-        //   child_name TEXT PRIMARY KEY,
-        //   progress JSONB NOT NULL DEFAULT '{}',
-        //   updated_at TIMESTAMPTZ DEFAULT NOW()
-        // );
+        // Для удобства ставим фокус на поле пароля
+        setTimeout(() => {
+            document.getElementById('loginPassword').focus();
+        }, 500);
+
+        console.log('👑 Для входа как администратор:');
+        console.log('   Имя: admin');
+        console.log('   Пароль: 210847');
     </script>
 </body>
 </html>
