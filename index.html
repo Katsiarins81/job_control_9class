@@ -1,760 +1,1163 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Контроль заданий</title>
-  <style>
-    /* ----- базовые стили ----- */
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Контроль заданий</title>
+    <style>
+        /* ----- базовые стили ----- */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100vh;
-      padding: 20px;
-      color: #2d3748;
-    }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #2d3748;
+        }
 
-    .container {
-      max-width: 1400px;
-      margin: 0 auto;
-      background: #fff;
-      border-radius: 20px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-      overflow: hidden;
-    }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
 
-    header {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: #fff;
-      padding: 25px 30px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 15px;
-    }
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            padding: 25px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
 
-    header h1 {
-      font-size: 24px;
-      font-weight: 600;
-    }
+        header h1 {
+            font-size: 24px;
+            font-weight: 600;
+        }
 
-    .child-selector {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
+        .child-selector {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
 
-    select,
-    input,
-    button {
-      font-family: inherit;
-      font-size: 14px;
-      padding: 10px 14px;
-      border-radius: 10px;
-      border: none;
-      outline: none;
-      transition: all 0.2s;
-    }
+        select,
+        input,
+        button {
+            font-family: inherit;
+            font-size: 14px;
+            padding: 10px 14px;
+            border-radius: 10px;
+            border: none;
+            outline: none;
+            transition: all 0.2s;
+        }
 
-    select,
-    input {
-      background: rgba(255, 255, 255, 0.95);
-      color: #2d3748;
-      min-width: 150px;
-    }
+        select,
+        input {
+            background: rgba(255, 255, 255, 0.95);
+            color: #2d3748;
+            min-width: 150px;
+        }
 
-    button {
-      background: rgba(255, 255, 255, 0.2);
-      color: #fff;
-      cursor: pointer;
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      font-weight: 500;
-    }
+        button {
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            cursor: pointer;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            font-weight: 500;
+        }
 
-    button:hover {
-      background: rgba(255, 255, 255, 0.35);
-      transform: translateY(-1px);
-    }
+        button:hover {
+            background: rgba(255, 255, 255, 0.35);
+            transform: translateY(-1px);
+        }
 
-    button.secondary {
-      background: #edf2f7;
-      color: #4a5568;
-      border: 1px solid #e2e8f0;
-    }
+        button.secondary {
+            background: #edf2f7;
+            color: #4a5568;
+            border: 1px solid #e2e8f0;
+        }
 
-    button.secondary:hover {
-      background: #e2e8f0;
-    }
+        button.secondary:hover {
+            background: #e2e8f0;
+        }
 
-    button.danger {
-      background: #fed7d7;
-      color: #c53030;
-      border-color: #feb2b2;
-    }
+        button.success {
+            background: #48bb78;
+            color: #fff;
+            border: 1px solid #38a169;
+        }
 
-    button.danger:hover {
-      background: #feb2b2;
-    }
+        button.success:hover {
+            background: #38a169;
+        }
 
-    /* ----- статистика ----- */
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 15px;
-      padding: 20px 30px;
-      background: #f7fafc;
-      border-bottom: 1px solid #e2e8f0;
-    }
+        button.danger {
+            background: #fed7d7;
+            color: #c53030;
+            border-color: #feb2b2;
+        }
 
-    .stat-card {
-      background: #fff;
-      padding: 15px 20px;
-      border-radius: 12px;
-      border: 1px solid #e2e8f0;
-    }
+        button.danger:hover {
+            background: #feb2b2;
+        }
 
-    .stat-card .label {
-      font-size: 12px;
-      color: #718096;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 5px;
-    }
+        button.warning {
+            background: #ed8936;
+            color: #fff;
+            border-color: #dd6b20;
+        }
 
-    .stat-card .value {
-      font-size: 22px;
-      font-weight: 700;
-      color: #2d3748;
-    }
+        button.warning:hover {
+            background: #dd6b20;
+        }
 
-    .progress-bar {
-      height: 8px;
-      background: #e2e8f0;
-      border-radius: 4px;
-      overflow: hidden;
-      margin-top: 8px;
-    }
+        /* ----- статистика ----- */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            padding: 20px 30px;
+            background: #f7fafc;
+            border-bottom: 1px solid #e2e8f0;
+        }
 
-    .progress-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #48bb78, #38a169);
-      transition: width 0.4s ease;
-    }
+        .stat-card {
+            background: #fff;
+            padding: 15px 20px;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+        }
 
-    /* ----- панель инструментов ----- */
-    .toolbar {
-      padding: 15px 30px;
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      border-bottom: 1px solid #e2e8f0;
-      background: #fff;
-    }
+        .stat-card .label {
+            font-size: 12px;
+            color: #718096;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 5px;
+        }
 
-    /* ----- сетка вариантов ----- */
-    .variants-grid {
-      padding: 20px 30px 30px;
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 15px;
-      max-height: 70vh;
-      overflow-y: auto;
-    }
+        .stat-card .value {
+            font-size: 22px;
+            font-weight: 700;
+            color: #2d3748;
+        }
 
-    .variant-card {
-      background: #fff;
-      border: 1px solid #e2e8f0;
-      border-radius: 12px;
-      padding: 15px;
-      transition: all 0.2s;
-    }
+        .progress-bar {
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
 
-    .variant-card:hover {
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #48bb78, #38a169);
+            transition: width 0.4s ease;
+        }
 
-    .variant-card.completed {
-      background: linear-gradient(135deg, #c6f6d5 0%, #9ae6b4 100%);
-      border-color: #68d391;
-    }
+        /* ----- панель инструментов ----- */
+        .toolbar {
+            padding: 15px 30px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            border-bottom: 1px solid #e2e8f0;
+            background: #fff;
+        }
 
-    .variant-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 10px;
-    }
+        /* ----- сетка вариантов ----- */
+        .variants-grid {
+            padding: 20px 30px 30px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 15px;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
 
-    .variant-title {
-      font-weight: 600;
-      font-size: 15px;
-      color: #2d3748;
-    }
+        .variant-card {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 15px;
+            transition: all 0.2s;
+        }
 
-    .variant-progress {
-      font-size: 12px;
-      color: #718096;
-      font-weight: 500;
-    }
+        .variant-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
 
-    .tasks {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 6px;
-      margin-bottom: 10px;
-    }
+        .variant-card.completed {
+            background: linear-gradient(135deg, #c6f6d5 0%, #9ae6b4 100%);
+            border-color: #68d391;
+        }
 
-    .task {
-      aspect-ratio: 1;
-      border-radius: 8px;
-      background: #edf2f7;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 600;
-      font-size: 14px;
-      color: #718096;
-      cursor: pointer;
-      transition: all 0.15s;
-      user-select: none;
-      border: 2px solid transparent;
-    }
+        .variant-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
 
-    .task:hover {
-      background: #e2e8f0;
-      transform: scale(1.05);
-    }
+        .variant-title {
+            font-weight: 600;
+            font-size: 15px;
+            color: #2d3748;
+        }
 
-    .task.done {
-      background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
-      color: #fff;
-      border-color: #2f855a;
-    }
+        .variant-progress {
+            font-size: 12px;
+            color: #718096;
+            font-weight: 500;
+        }
 
-    .task.done:hover {
-      background: linear-gradient(135deg, #38a169 0%, #2f855a 100%);
-    }
+        .tasks {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 6px;
+            margin-bottom: 10px;
+        }
 
-    .variant-bar {
-      height: 4px;
-      background: #e2e8f0;
-      border-radius: 2px;
-      overflow: hidden;
-    }
+        .task {
+            aspect-ratio: 1;
+            border-radius: 8px;
+            background: #edf2f7;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 14px;
+            color: #718096;
+            cursor: pointer;
+            transition: all 0.15s;
+            user-select: none;
+            border: 2px solid transparent;
+            position: relative;
+        }
 
-    .variant-bar-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #48bb78, #38a169);
-      transition: width 0.3s;
-    }
+        .task:hover {
+            background: #e2e8f0;
+            transform: scale(1.05);
+            z-index: 1;
+        }
 
-    /* ----- модалка ----- */
-    .modal-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.5);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 100;
-      padding: 20px;
-    }
+        .task.done {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: #fff;
+            border-color: #2f855a;
+        }
 
-    .modal-overlay.active {
-      display: flex;
-    }
+        .task.done:hover {
+            background: linear-gradient(135deg, #38a169 0%, #2f855a 100%);
+        }
 
-    .modal {
-      background: #fff;
-      border-radius: 16px;
-      padding: 25px;
-      max-width: 400px;
-      width: 100%;
-    }
+        .task.needs-attention {
+            background: linear-gradient(135deg, #f6ad55 0%, #ed8936 100%);
+            color: #fff;
+            border-color: #dd6b20;
+        }
 
-    .modal h2 {
-      margin-bottom: 15px;
-      font-size: 20px;
-    }
+        .task.needs-attention:hover {
+            background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
+        }
 
-    .modal input {
-      width: 100%;
-      background: #f7fafc;
-      color: #2d3748;
-      margin-bottom: 15px;
-    }
+        .task.has-comment::after {
+            content: '💬';
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            font-size: 10px;
+            background: #fff;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #e2e8f0;
+        }
 
-    .modal-actions {
-      display: flex;
-      gap: 10px;
-      justify-content: flex-end;
-    }
+        /* Всплывающая подсказка для комментария */
+        .task-tooltip {
+            display: none;
+            position: absolute;
+            bottom: 110%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #2d3748;
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 400;
+            white-space: nowrap;
+            max-width: 300px;
+            white-space: normal;
+            word-wrap: break-word;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            pointer-events: none;
+        }
 
-    .modal-actions button {
-      color: #fff;
-      background: #667eea;
-      border: none;
-    }
+        .task-tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 6px solid transparent;
+            border-top-color: #2d3748;
+        }
 
-    .modal-actions button.secondary {
-      background: #a0aec0;
-    }
+        .task:hover .task-tooltip {
+            display: block;
+        }
 
-    /* ----- адаптив ----- */
-    @media (max-width: 600px) {
-      header {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-      .variants-grid {
-        grid-template-columns: 1fr;
-        padding: 15px;
-      }
-      .stats {
-        padding: 15px;
-      }
-      .toolbar {
-        padding: 15px;
-      }
-    }
-  </style>
+        .variant-bar {
+            height: 4px;
+            background: #e2e8f0;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .variant-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #48bb78, #38a169);
+            transition: width 0.3s;
+        }
+
+        /* ----- модалка ----- */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: #fff;
+            border-radius: 16px;
+            padding: 25px;
+            max-width: 500px;
+            width: 100%;
+        }
+
+        .modal h2 {
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+
+        .modal input,
+        .modal textarea {
+            width: 100%;
+            background: #f7fafc;
+            color: #2d3748;
+            margin-bottom: 15px;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-family: inherit;
+            font-size: 14px;
+            resize: vertical;
+        }
+
+        .modal textarea {
+            min-height: 80px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .modal-actions button {
+            color: #fff;
+            background: #667eea;
+            border: none;
+        }
+
+        .modal-actions button.secondary {
+            background: #a0aec0;
+        }
+
+        .modal .task-status-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .modal .task-status-buttons button {
+            flex: 1;
+            background: #edf2f7;
+            color: #4a5568;
+            border: 2px solid transparent;
+        }
+
+        .modal .task-status-buttons button.active {
+            border-color: #667eea;
+            background: #ebf4ff;
+        }
+
+        .modal .task-status-buttons button.status-done.active {
+            border-color: #48bb78;
+            background: #f0fff4;
+        }
+
+        .modal .task-status-buttons button.status-attention.active {
+            border-color: #ed8936;
+            background: #fffaf0;
+        }
+
+        /* ----- адаптив ----- */
+        @media (max-width: 600px) {
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .variants-grid {
+                grid-template-columns: 1fr;
+                padding: 15px;
+            }
+            .stats {
+                padding: 15px;
+            }
+            .toolbar {
+                padding: 15px;
+            }
+            .modal {
+                max-width: 100%;
+            }
+        }
+
+        /* Стили для скрытого файлового инпута */
+        .hidden-input {
+            display: none;
+        }
+    </style>
 </head>
 <body>
 
-  <div class="container">
-    <header>
-      <h1>📚 Контроль решённых заданий</h1>
-      <div class="child-selector">
-        <select id="childSelect"></select>
-        <button onclick="window.openAddModal()">+ Ребёнок</button>
-        <button onclick="window.deleteChild()" class="danger">Удалить</button>
-      </div>
-    </header>
+    <div class="container">
+        <header>
+            <h1>📚 Контроль решённых заданий</h1>
+            <div class="child-selector">
+                <select id="childSelect"></select>
+                <button onclick="window.openAddModal()">+ Ребёнок</button>
+                <button onclick="window.deleteChild()" class="danger">Удалить</button>
+            </div>
+        </header>
 
-    <div class="stats">
-      <div class="stat-card">
-        <div class="label">Всего заданий</div>
-        <div class="value" id="statTotal">800</div>
-      </div>
-      <div class="stat-card">
-        <div class="label">Решено</div>
-        <div class="value" id="statDone">0</div>
-        <div class="progress-bar"><div class="progress-fill" id="statBar" style="width:0%"></div></div>
-      </div>
-      <div class="stat-card">
-        <div class="label">Вариантов завершено</div>
-        <div class="value" id="statVariants">0 / 80</div>
-      </div>
-      <div class="stat-card">
-        <div class="label">Прогресс</div>
-        <div class="value" id="statPercent">0%</div>
-      </div>
+        <div class="stats">
+            <div class="stat-card">
+                <div class="label">Всего заданий</div>
+                <div class="value" id="statTotal">800</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Решено</div>
+                <div class="value" id="statDone">0</div>
+                <div class="progress-bar"><div class="progress-fill" id="statBar" style="width:0%"></div></div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Требуют внимания</div>
+                <div class="value" id="statAttention">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Вариантов завершено</div>
+                <div class="value" id="statVariants">0 / 80</div>
+            </div>
+        </div>
+
+        <div class="toolbar">
+            <button class="secondary" onclick="window.exportJSON()">💾 JSON</button>
+            <button class="success" onclick="window.exportExcel()">📊 Excel</button>
+            <button class="secondary" onclick="document.getElementById('importJSON').click()">📂 Импорт JSON</button>
+            <input type="file" id="importJSON" accept=".json" class="hidden-input" onchange="window.importJSON(event)" />
+            <button class="success" onclick="document.getElementById('importExcel').click()">📂 Импорт Excel</button>
+            <input type="file" id="importExcel" accept=".csv,.xlsx,.xls" class="hidden-input" onchange="window.importExcel(event)" />
+            <button class="danger" onclick="window.resetProgress()">🗑 Сбросить прогресс</button>
+        </div>
+
+        <div class="variants-grid" id="grid"></div>
     </div>
 
-    <div class="toolbar">
-      <button class="secondary" onclick="window.exportData()">💾 Экспорт</button>
-      <button class="secondary" onclick="document.getElementById('importFile').click()">📂 Импорт</button>
-      <input type="file" id="importFile" accept=".json" style="display:none" onchange="window.importData(event)" />
-      <button class="danger" onclick="window.resetProgress()">🗑 Сбросить прогресс</button>
+    <!-- Модалка для комментария -->
+    <div class="modal-overlay" id="commentModal">
+        <div class="modal">
+            <h2 id="commentModalTitle">Комментарий к заданию</h2>
+            <div class="task-status-buttons">
+                <button class="status-done" onclick="window.setTaskStatus('done')">✅ Решено</button>
+                <button class="status-attention" onclick="window.setTaskStatus('attention')">⚠️ Требует внимания</button>
+                <button class="status-none" onclick="window.setTaskStatus('none')">⬜ Не решено</button>
+            </div>
+            <textarea id="commentText" placeholder="Введите комментарий к заданию..."></textarea>
+            <div class="modal-actions">
+                <button class="secondary" onclick="window.closeCommentModal()">Отмена</button>
+                <button onclick="window.saveComment()">Сохранить</button>
+            </div>
+        </div>
     </div>
 
-    <div class="variants-grid" id="grid"></div>
-  </div>
+    <!-- ====== ПОДКЛЮЧЕНИЕ БИБЛИОТЕК ====== -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js">
+    </script>
 
-  <!-- модалка -->
-  <div class="modal-overlay" id="modal">
-    <div class="modal">
-      <h2 id="modalTitle">Добавить ребёнка</h2>
-      <input type="text" id="childName" placeholder="Имя ребёнка" maxlength="30" />
-      <div class="modal-actions">
-        <button class="secondary" onclick="window.closeModal()">Отмена</button>
-        <button onclick="window.addChild()">Добавить</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ====== ПОДКЛЮЧЕНИЕ SUPABASE ====== -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script>
-    // ===============================
-    // 1. Конфигурация Supabase
-    // ===============================
-     const SUPABASE_URL = 'https://fuflttwdnwntljyblgeh.supabase.co'; // Замените на свой URL
+    <script>
+        // ===============================
+        // 1. Конфигурация Supabase
+        // ===============================
+        const SUPABASE_URL = 'https://fuflttwdnwntljyblgeh.supabase.co'; // Замените на свой URL
     const SUPABASE_KEY = 'sb_publishable_CGYKGrbepaKLK5mBpfdypA_OHgJSPK4'; // Замените на свой anon/public ключ
 
-    let supabaseClient = null;
-    let supabaseEnabled = false;
+        let supabaseClient = null;
+        let supabaseEnabled = false;
 
-    // Пытаемся инициализировать Supabase
-    try {
-      if (SUPABASE_URL && SUPABASE_KEY && SUPABASE_URL !== 'https://ваш-проект.supabase.co') {
-        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        supabaseEnabled = true;
-        console.log('✅ Supabase подключен');
-      } else {
-        console.warn('⚠️ Supabase не настроен. Работаем в офлайн-режиме (только localStorage)');
-      }
-    } catch (e) {
-      console.warn('⚠️ Ошибка подключения Supabase:', e.message);
-      console.warn('Работаем в офлайн-режиме (только localStorage)');
-    }
-
-    // ===============================
-    // 2. Константы и состояния
-    // ===============================
-    const VARIANTS = 80;
-    const TASKS = 10;
-    const STORAGE_KEY = 'tasksProgress_v1';
-
-    let data = {
-      children: [],
-      current: null,
-      progress: {}
-    };
-
-    // ===============================
-    // 3. Загрузка / сохранение (Supabase + localStorage)
-    // ===============================
-
-    // Загружаем данные: сначала локально, затем пробуем из Supabase
-    async function loadData() {
-      // локальный кеш
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
         try {
-          const parsed = JSON.parse(saved);
-          data.children = parsed.children || [];
-          data.current = parsed.current || null;
-          data.progress = parsed.progress || {};
-        } catch (e) { /* ignore */ }
-      }
+            if (SUPABASE_URL && SUPABASE_KEY && SUPABASE_URL !== 'https://ваш-проект.supabase.co') {
+                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+                supabaseEnabled = true;
+                console.log('✅ Supabase подключен');
+            } else {
+                console.warn('⚠️ Supabase не настроен. Работаем в офлайн-режиме');
+            }
+        } catch (e) {
+            console.warn('⚠️ Ошибка подключения Supabase:', e.message);
+        }
 
-      // пробуем загрузить из Supabase (если есть текущий ребёнок)
-      if (supabaseEnabled && data.current) {
-        await loadProgressFromSupabase(data.current);
-      }
+        // ===============================
+        // 2. Константы и состояния
+        // ===============================
+        const VARIANTS = 80;
+        const TASKS = 10;
+        const STORAGE_KEY = 'tasksProgress_v2';
 
-      renderChildSelect();
-      renderGrid();
-    }
-
-    // Сохраняем прогресс конкретного ребёнка в Supabase
-    async function saveProgressToSupabase(childName) {
-      if (!supabaseEnabled || !childName) return;
-      
-      try {
-        const progress = data.progress[childName] || {};
-        const payload = {
-          child_name: childName,
-          progress: progress,
-          updated_at: new Date().toISOString()
+        let data = {
+            children: [],
+            current: null,
+            progress: {}
         };
 
-        const { error } = await supabaseClient
-          .from('tasks_progress')
-          .upsert(payload, { onConflict: 'child_name' });
+        let currentTaskKey = null;
+        let currentComment = '';
 
-        if (error) {
-          console.error('Supabase upsert error:', error);
-          // Не показываем alert, чтобы не мешать пользователю
-        } else {
-          // после успешной записи обновляем локальный кеш
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-        }
-      } catch (e) {
-        console.error('Ошибка при сохранении в Supabase:', e);
-      }
-    }
+        // ===============================
+        // 3. Загрузка / сохранение
+        // ===============================
 
-    // Загружаем прогресс для ребёнка из Supabase
-    async function loadProgressFromSupabase(childName) {
-      if (!supabaseEnabled || !childName) return;
-      
-      try {
-        const { data: rows, error } = await supabaseClient
-          .from('tasks_progress')
-          .select('progress')
-          .eq('child_name', childName)
-          .maybeSingle();
+        async function loadData() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    data.children = parsed.children || [];
+                    data.current = parsed.current || null;
+                    data.progress = parsed.progress || {};
+                } catch (e) { /* ignore */ }
+            }
 
-        if (error) {
-          console.error('Supabase select error:', error);
-          return;
+            if (supabaseEnabled && data.current) {
+                await loadProgressFromSupabase(data.current);
+            }
+
+            renderChildSelect();
+            renderGrid();
         }
 
-        if (rows && rows.progress) {
-          data.progress[childName] = rows.progress;
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-        } else {
-          // если в БД нет записи — инициализируем пустым объектом
-          if (!data.progress[childName]) {
-            data.progress[childName] = {};
-          }
+        async function saveProgressToSupabase(childName) {
+            if (!supabaseEnabled || !childName) return;
+
+            try {
+                const progress = data.progress[childName] || {};
+                const payload = {
+                    child_name: childName,
+                    progress: progress,
+                    updated_at: new Date().toISOString()
+                };
+
+                const { error } = await supabaseClient
+                    .from('tasks_progress')
+                    .upsert(payload, { onConflict: 'child_name' });
+
+                if (error) {
+                    console.error('Supabase upsert error:', error);
+                } else {
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+                }
+            } catch (e) {
+                console.error('Ошибка при сохранении в Supabase:', e);
+            }
         }
-      } catch (e) {
-        console.error('Ошибка при загрузке из Supabase:', e);
-      }
-    }
 
-    // Общая функция сохранения (локально + Supabase)
-    async function saveData() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-      if (supabaseEnabled && data.current) {
-        await saveProgressToSupabase(data.current);
-      }
-    }
+        async function loadProgressFromSupabase(childName) {
+            if (!supabaseEnabled || !childName) return;
 
-    // ===============================
-    // 4. Работа с UI
-    // ===============================
+            try {
+                const { data: rows, error } = await supabaseClient
+                    .from('tasks_progress')
+                    .select('progress')
+                    .eq('child_name', childName)
+                    .maybeSingle();
 
-    function renderChildSelect() {
-      const sel = document.getElementById('childSelect');
-      sel.innerHTML = '';
-      if (data.children.length === 0) {
-        sel.innerHTML = '<option value="">— Нет детей —</option>';
-        return;
-      }
-      data.children.forEach(name => {
-        const opt = document.createElement('option');
-        opt.value = name;
-        opt.textContent = name;
-        if (name === data.current) opt.selected = true;
-        sel.appendChild(opt);
-      });
-    }
+                if (error) {
+                    console.error('Supabase select error:', error);
+                    return;
+                }
 
-    function renderGrid() {
-      const grid = document.getElementById('grid');
-      grid.innerHTML = '';
-      if (!data.current) {
-        grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#718096;">Добавьте ребёнка, чтобы начать</div>';
-        updateStats();
-        return;
-      }
-      const childProgress = data.progress[data.current] || {};
-
-      for (let v = 1; v <= VARIANTS; v++) {
-        const card = document.createElement('div');
-        card.className = 'variant-card';
-        let done = 0;
-        for (let t = 1; t <= TASKS; t++) {
-          if (childProgress[`${v}-${t}`]) done++;
+                if (rows && rows.progress) {
+                    data.progress[childName] = rows.progress;
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+                } else {
+                    if (!data.progress[childName]) {
+                        data.progress[childName] = {};
+                    }
+                }
+            } catch (e) {
+                console.error('Ошибка при загрузке из Supabase:', e);
+            }
         }
-        if (done === TASKS) card.classList.add('completed');
 
-        const header = document.createElement('div');
-        header.className = 'variant-header';
-        header.innerHTML = `
-          <div class="variant-title">Вариант ${v}</div>
-          <div class="variant-progress">${done}/${TASKS}</div>
-        `;
-        card.appendChild(header);
-
-        const tasks = document.createElement('div');
-        tasks.className = 'tasks';
-        for (let t = 1; t <= TASKS; t++) {
-          const task = document.createElement('div');
-          task.className = 'task';
-          const key = `${v}-${t}`;
-          if (childProgress[key]) task.classList.add('done');
-          task.textContent = t;
-          task.onclick = () => toggleTask(v, t);
-          tasks.appendChild(task);
+        async function saveData() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+            if (supabaseEnabled && data.current) {
+                await saveProgressToSupabase(data.current);
+            }
         }
-        card.appendChild(tasks);
 
-        const bar = document.createElement('div');
-        bar.className = 'variant-bar';
-        bar.innerHTML = `<div class="variant-bar-fill" style="width:${done/TASKS*100}%"></div>`;
-        card.appendChild(bar);
+        // ===============================
+        // 4. Работа с UI
+        // ===============================
 
-        grid.appendChild(card);
-      }
-      updateStats();
-    }
-
-    // Переключение задания
-    async function toggleTask(v, t) {
-      if (!data.current) return;
-      if (!data.progress[data.current]) data.progress[data.current] = {};
-      const key = `${v}-${t}`;
-      if (data.progress[data.current][key]) {
-        delete data.progress[data.current][key];
-      } else {
-        data.progress[data.current][key] = true;
-      }
-      await saveData();
-      renderGrid();
-    }
-
-    // Обновление статистики
-    function updateStats() {
-      const total = VARIANTS * TASKS;
-      const prog = data.progress[data.current] || {};
-      const done = Object.keys(prog).length;
-      let variantsDone = 0;
-      for (let v = 1; v <= VARIANTS; v++) {
-        let count = 0;
-        for (let t = 1; t <= TASKS; t++) {
-          if (prog[`${v}-${t}`]) count++;
+        function renderChildSelect() {
+            const sel = document.getElementById('childSelect');
+            sel.innerHTML = '';
+            if (data.children.length === 0) {
+                sel.innerHTML = '<option value="">— Нет детей —</option>';
+                return;
+            }
+            data.children.forEach(name => {
+                const opt = document.createElement('option');
+                opt.value = name;
+                opt.textContent = name;
+                if (name === data.current) opt.selected = true;
+                sel.appendChild(opt);
+            });
         }
-        if (count === TASKS) variantsDone++;
-      }
-      const percent = total ? Math.round(done / total * 100) : 0;
-      document.getElementById('statTotal').textContent = total;
-      document.getElementById('statDone').textContent = done;
-      document.getElementById('statVariants').textContent = `${variantsDone} / ${VARIANTS}`;
-      document.getElementById('statPercent').textContent = percent + '%';
-      document.getElementById('statBar').style.width = percent + '%';
-    }
 
-    // ===============================
-    // 5. Действия (добавление/удаление детей, сброс, импорт/экспорт)
-    // ===============================
+        function renderGrid() {
+            const grid = document.getElementById('grid');
+            grid.innerHTML = '';
+            if (!data.current) {
+                grid.innerHTML =
+                    '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#718096;">Добавьте ребёнка, чтобы начать</div>';
+                updateStats();
+                return;
+            }
+            const childProgress = data.progress[data.current] || {};
 
-    window.openAddModal = function() {
-      document.getElementById('modal').classList.add('active');
-      document.getElementById('childName').value = '';
-      setTimeout(() => document.getElementById('childName').focus(), 50);
-    };
+            for (let v = 1; v <= VARIANTS; v++) {
+                const card = document.createElement('div');
+                card.className = 'variant-card';
+                let done = 0;
+                let attention = 0;
+                for (let t = 1; t <= TASKS; t++) {
+                    const key = `${v}-${t}`;
+                    const status = childProgress[key] || 'none';
+                    if (status === 'done') done++;
+                    if (status === 'attention') attention++;
+                }
+                if (done === TASKS) card.classList.add('completed');
 
-    window.closeModal = function() {
-      document.getElementById('modal').classList.remove('active');
-    };
+                const header = document.createElement('div');
+                header.className = 'variant-header';
+                header.innerHTML = `
+              <div class="variant-title">Вариант ${v}</div>
+              <div class="variant-progress">${done + attention}/${TASKS}</div>
+            `;
+                card.appendChild(header);
 
-    window.addChild = async function() {
-      const name = document.getElementById('childName').value.trim();
-      if (!name) return alert('Введите имя');
-      if (data.children.includes(name)) return alert('Такой ребёнок уже есть');
+                const tasks = document.createElement('div');
+                tasks.className = 'tasks';
+                for (let t = 1; t <= TASKS; t++) {
+                    const task = document.createElement('div');
+                    task.className = 'task';
+                    const key = `${v}-${t}`;
+                    const status = childProgress[key] || 'none';
 
-      data.children.push(name);
-      data.current = name;
-      data.progress[name] = {};
-      await saveData();
-      renderChildSelect();
-      renderGrid();
-      window.closeModal();
-    };
+                    if (status === 'done') task.classList.add('done');
+                    else if (status === 'attention') task.classList.add('needs-attention');
 
-    window.deleteChild = async function() {
-      if (!data.current) return;
-      if (!confirm(`Удалить ребёнка "${data.current}" и весь его прогресс?`)) return;
+                    // Проверяем наличие комментария
+                    const comment = childProgress[`${key}_comment`];
+                    if (comment) task.classList.add('has-comment');
 
-      // удаляем из Supabase
-      if (supabaseEnabled) {
-        try {
-          const { error } = await supabaseClient
-            .from('tasks_progress')
-            .delete()
-            .eq('child_name', data.current);
-          if (error) {
-            console.error('Supabase delete error:', error);
-          }
-        } catch (e) {
-          console.error('Ошибка при удалении из Supabase:', e);
+                    task.textContent = t;
+
+                    // Левый клик - переключение статуса
+                    task.onclick = () => cycleTaskStatus(v, t);
+
+                    // Правый клик - открыть модалку с комментарием
+                    task.oncontextmenu = (e) => {
+                        e.preventDefault();
+                        openCommentModal(v, t);
+                    };
+
+                    // Добавляем всплывающую подсказку с комментарием
+                    if (comment) {
+                        const tooltip = document.createElement('div');
+                        tooltip.className = 'task-tooltip';
+                        tooltip.textContent = comment;
+                        task.appendChild(tooltip);
+                    }
+
+                    tasks.appendChild(task);
+                }
+                card.appendChild(tasks);
+
+                const bar = document.createElement('div');
+                bar.className = 'variant-bar';
+                const progressPercent = ((done + attention) / TASKS) * 100;
+                bar.innerHTML = `<div class="variant-bar-fill" style="width:${progressPercent}%"></div>`;
+                card.appendChild(bar);
+
+                grid.appendChild(card);
+            }
+            updateStats();
         }
-      }
 
-      delete data.progress[data.current];
-      data.children = data.children.filter(c => c !== data.current);
-      data.current = data.children[0] || null;
-      await saveData();
-      renderChildSelect();
-      renderGrid();
-    };
+        function cycleTaskStatus(v, t) {
+            if (!data.current) return;
+            if (!data.progress[data.current]) data.progress[data.current] = {};
+            const key = `${v}-${t}`;
+            const currentStatus = data.progress[data.current][key] || 'none';
 
-    window.resetProgress = async function() {
-      if (!data.current) return;
-      if (!confirm(`Сбросить весь прогресс у "${data.current}"?`)) return;
+            let newStatus;
+            if (currentStatus === 'none') newStatus = 'done';
+            else if (currentStatus === 'done') newStatus = 'attention';
+            else newStatus = 'none';
 
-      data.progress[data.current] = {};
-      await saveData();
-      renderGrid();
-    };
-
-    // ===============================
-    // 6. Импорт / Экспорт (JSON)
-    // ===============================
-
-    window.exportData = function() {
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `tasks-backup-${new Date().toISOString().slice(0, 10)}.json`;
-      a.click();
-      URL.revokeObjectURL(url);
-    };
-
-    window.importData = async function(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = async (ev) => {
-        try {
-          const imported = JSON.parse(ev.target.result);
-          if (!imported.children || !imported.progress) throw new Error();
-          if (!confirm('Заменить текущие данные импортированными?')) return;
-
-          data = imported;
-          await saveData();
-          renderChildSelect();
-          renderGrid();
-          alert('Импорт успешен!');
-        } catch (err) {
-          alert('Ошибка: неверный формат файла');
+            data.progress[data.current][key] = newStatus;
+            saveData();
+            renderGrid();
         }
-      };
-      reader.readAsText(file);
-      e.target.value = '';
-    };
 
-    // ===============================
-    // 7. Обработчики событий
-    // ===============================
+        function updateStats() {
+            const total = VARIANTS * TASKS;
+            const prog = data.progress[data.current] || {};
+            let done = 0;
+            let attention = 0;
+            let variantsDone = 0;
 
-    document.getElementById('childSelect').addEventListener('change', async (e) => {
-      const newChild = e.target.value || null;
-      if (newChild !== data.current) {
-        data.current = newChild;
-        if (supabaseEnabled && data.current) {
-          await loadProgressFromSupabase(data.current);
+            for (let v = 1; v <= VARIANTS; v++) {
+                let variantDone = 0;
+                for (let t = 1; t <= TASKS; t++) {
+                    const key = `${v}-${t}`;
+                    const status = prog[key] || 'none';
+                    if (status === 'done') {
+                        done++;
+                        variantDone++;
+                    } else if (status === 'attention') {
+                        attention++;
+                    }
+                }
+                if (variantDone === TASKS) variantsDone++;
+            }
+
+            const percent = total ? Math.round((done + attention) / total * 100) : 0;
+            document.getElementById('statTotal').textContent = total;
+            document.getElementById('statDone').textContent = done;
+            document.getElementById('statAttention').textContent = attention;
+            document.getElementById('statVariants').textContent = `${variantsDone} / ${VARIANTS}`;
+            document.getElementById('statPercent').textContent = percent + '%';
+            document.getElementById('statBar').style.width = percent + '%';
         }
-        await saveData();
-        renderGrid();
-      }
-    });
 
-    document.getElementById('childName').addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') window.addChild();
-      if (e.key === 'Escape') window.closeModal();
-    });
+        // ===============================
+        // 5. Модалка комментария
+        // ===============================
 
-    // ===============================
-    // 8. Запуск
-    // ===============================
+        window.openCommentModal = function(v, t) {
+            currentTaskKey = `${v}-${t}`;
+            const childProgress = data.progress[data.current] || {};
+            const currentStatus = childProgress[currentTaskKey] || 'none';
+            currentComment = childProgress[`${currentTaskKey}_comment`] || '';
 
-    loadData();
+            document.getElementById('commentModalTitle').textContent =
+                `Комментарий к заданию ${v}-${t}`;
+            document.getElementById('commentText').value = currentComment;
 
-    // ===============================
-    // 9. (Опционально) Создание таблицы в Supabase
-    //    Если таблицы ещё нет – выполните этот SQL в SQL-редакторе Supabase:
-    //
-    //    CREATE TABLE tasks_progress (
-    //      child_name TEXT PRIMARY KEY,
-    //      progress JSONB NOT NULL DEFAULT '{}',
-    //      updated_at TIMESTAMPTZ DEFAULT NOW()
-    //    );
-    // ===============================
-  </script>
+            // Обновляем активную кнопку статуса
+            document.querySelectorAll('.task-status-buttons button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            if (currentStatus === 'done') {
+                document.querySelector('.status-done').classList.add('active');
+            } else if (currentStatus === 'attention') {
+                document.querySelector('.status-attention').classList.add('active');
+            } else {
+                document.querySelector('.status-none').classList.add('active');
+            }
+
+            document.getElementById('commentModal').classList.add('active');
+        };
+
+        window.closeCommentModal = function() {
+            document.getElementById('commentModal').classList.remove('active');
+            currentTaskKey = null;
+        };
+
+        window.setTaskStatus = function(status) {
+            if (!currentTaskKey || !data.current) return;
+            if (!data.progress[data.current]) data.progress[data.current] = {};
+
+            data.progress[data.current][currentTaskKey] = status;
+
+            // Обновляем активную кнопку
+            document.querySelectorAll('.task-status-buttons button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            if (status === 'done') {
+                document.querySelector('.status-done').classList.add('active');
+            } else if (status === 'attention') {
+                document.querySelector('.status-attention').classList.add('active');
+            } else {
+                document.querySelector('.status-none').classList.add('active');
+            }
+        };
+
+        window.saveComment = function() {
+            if (!currentTaskKey || !data.current) return;
+            if (!data.progress[data.current]) data.progress[data.current] = {};
+
+            const comment = document.getElementById('commentText').value.trim();
+            if (comment) {
+                data.progress[data.current][`${currentTaskKey}_comment`] = comment;
+            } else {
+                delete data.progress[data.current][`${currentTaskKey}_comment`];
+            }
+
+            saveData();
+            renderGrid();
+            window.closeCommentModal();
+        };
+
+        // ===============================
+        // 6. Действия
+        // ===============================
+
+        window.openAddModal = function() {
+            document.getElementById('modal').classList.add('active');
+            document.getElementById('childName').value = '';
+            setTimeout(() => document.getElementById('childName').focus(), 50);
+        };
+
+        window.closeModal = function() {
+            document.getElementById('modal').classList.remove('active');
+        };
+
+        window.addChild = async function() {
+            const name = document.getElementById('childName').value.trim();
+            if (!name) return alert('Введите имя');
+            if (data.children.includes(name)) return alert('Такой ребёнок уже есть');
+
+            data.children.push(name);
+            data.current = name;
+            data.progress[name] = {};
+            await saveData();
+            renderChildSelect();
+            renderGrid();
+            window.closeModal();
+        };
+
+        window.deleteChild = async function() {
+            if (!data.current) return;
+            if (!confirm(`Удалить ребёнка "${data.current}" и весь его прогресс?`)) return;
+
+            if (supabaseEnabled) {
+                try {
+                    const { error } = await supabaseClient
+                        .from('tasks_progress')
+                        .delete()
+                        .eq('child_name', data.current);
+                    if (error) {
+                        console.error('Supabase delete error:', error);
+                    }
+                } catch (e) {
+                    console.error('Ошибка при удалении из Supabase:', e);
+                }
+            }
+
+            delete data.progress[data.current];
+            data.children = data.children.filter(c => c !== data.current);
+            data.current = data.children[0] || null;
+            await saveData();
+            renderChildSelect();
+            renderGrid();
+        };
+
+        window.resetProgress = async function() {
+            if (!data.current) return;
+            if (!confirm(`Сбросить весь прогресс у "${data.current}"?`)) return;
+
+            data.progress[data.current] = {};
+            await saveData();
+            renderGrid();
+        };
+
+        // ===============================
+        // 7. Экспорт/Импорт
+        // ===============================
+
+        window.exportJSON = function() {
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `tasks-backup-${new Date().toISOString().slice(0, 10)}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        };
+
+        window.importJSON = async function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = async (ev) => {
+                try {
+                    const imported = JSON.parse(ev.target.result);
+                    if (!imported.children || !imported.progress) throw new Error();
+                    if (!confirm('Заменить текущие данные импортированными?')) return;
+
+                    data = imported;
+                    await saveData();
+                    renderChildSelect();
+                    renderGrid();
+                    alert('Импорт JSON успешен!');
+                } catch (err) {
+                    alert('Ошибка: неверный формат файла');
+                }
+            };
+            reader.readAsText(file);
+            e.target.value = '';
+        };
+
+        window.exportExcel = function() {
+            const excelData = [];
+            const header = ['Ребёнок', 'Вариант', 'Задание'];
+            for (let t = 1; t <= TASKS; t++) {
+                header.push(`Задание ${t}`);
+            }
+            header.push('Статус', 'Комментарий');
+            excelData.push(header);
+
+            data.children.forEach(childName => {
+                const progress = data.progress[childName] || {};
+
+                for (let v = 1; v <= VARIANTS; v++) {
+                    const row = [childName, v];
+                    let statusCount = 0;
+
+                    for (let t = 1; t <= TASKS; t++) {
+                        const key = `${v}-${t}`;
+                        const status = progress[key] || 'none';
+                        let display = '⬜';
+                        if (status === 'done') { display = '✅';
+                            statusCount++; } else if (status === 'attention') { display = '⚠️';
+                            statusCount++; }
+                        row.push(display);
+                    }
+
+                    // Статус варианта
+                    let variantStatus = 'Не завершен';
+                    if (statusCount === TASKS) variantStatus = '✅ Завершен';
+                    else if (statusCount > 0) variantStatus = '⚠️ В процессе';
+                    row.push(variantStatus);
+
+                    // Комментарий (берем первый комментарий в варианте)
+                    let comment = '';
+                    for (let t = 1; t <= TASKS; t++) {
+                        const key = `${v}-${t}`;
+                        const commentKey = `${key}_comment`;
+                        if (progress[commentKey]) {
+                            comment = progress[commentKey];
+                            break;
+                        }
+                    }
+                    row.push(comment);
+                    excelData.push(row);
+                }
+            });
+
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.aoa_to_sheet(excelData);
+            ws['!cols'] = [
+                { wch: 15 }, { wch: 10 }, { wch: 10 },
+                ...Array(TASKS).fill({ wch: 12 }),
+                { wch: 15 }, { wch: 30 }
+            ];
+            XLSX.utils.book_append_sheet(wb, ws, 'Прогресс');
+
+            const fileName = `progress-${new Date().toISOString().slice(0, 10)}.xlsx`;
+            XLSX.writeFile(wb, fileName);
+        };
+
+        window.importExcel = async function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = async (ev) => {
+                try {
+                    const data = new Uint8Array(ev.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+
+                    if (rows.length < 2) {
+                        alert('Файл пуст или имеет неверный формат');
+                        return;
+                    }
+
+                    const headerRow = rows[0];
+                    if (!headerRow.includes('Ребёнок') || !headerRow.includes('Вариант')) {
+                        alert('Неверный формат файла. Ожидается экспорт из этой программы.');
+                        return;
+                    }
+
+                    if (!confirm('Импортировать данные из Excel? Это заменит текущие данные.')) return;
+
+                    const importedProgress = {};
+                    const importedChildren = [];
+
+                    for (let i = 1; i < rows.length; i++) {
+                        const row = rows[i];
+                        if (!row || row.length < 3) continue;
+
+                        const childName = String(row[0]).trim();
+                        const variant = parseInt(row[1]);
+                        if (!childName || isNaN(variant) || variant < 1 || variant > VARIANTS) continue;
+
+                        if (!importedChildren.includes(childName)) {
+                            importedChildren.push(childName);
+                        }
+
+                        if (!importedProgress[childName]) {
+                            importedProgress[childName] = {};
+                        }
+
+                        for (let t = 0; t < TASKS; t++) {
+                            const colIndex = 2 + t;
+                            if (colIndex < row.length) {
+                                const value = String(row[colIndex] || '').trim();
+                                const key = `${variant}-${t + 1}`;
+                                if (value === '✅') {
+                                    importedProgress[childName][key] = 'done';
+                                } else if (value === '⚠️') {
+                                    importedProgress[childName][key] = 'attention';
+                                } else {
+                                    importedProgress[childName][key] = 'none';
+                                }
+                            }
+                        }
+
+                        // Импортируем комментарий
+                        const commentIndex = 2 + TASKS + 1;
+                        if (commentIndex < row.length && row[commentIndex]) {
+                            const comment = String(row[commentIndex]).trim();
+                            if (comment) {
+                                // Добавляем комментарий к первому заданию варианта
+                                const firstKey = `${variant}-1`;
+                                importedProgress[childName][`${firstKey}_comment`] = comment;
+                            }
+                        }
+                    }
+
+                    if (importedChildren.length === 0) {
+                        alert('Не найдено данных для импорта');
+                        return;
+                    }
+
+                    data.children = importedChildren;
+                    data.progress = importedProgress;
+                    data.current = importedChildren[0] || null;
+
+                    await saveData();
+                    renderChildSelect();
+                    renderGrid();
+                    alert(`Импорт успешен! Загружено детей: ${importedChildren.length}`);
+
+                } catch (err) {
+                    console.error('Ошибка импорта:', err);
+                    alert('Ошибка при импорте файла. Проверьте формат.');
+                }
+            };
+            reader.readAsArrayBuffer(file);
+            e.target.value = '';
+        };
+
+        // ===============================
+        // 8. Обработчики событий
+        // ===============================
+
+        document.getElementById('childSelect').addEventListener('change', async (e) => {
+            const newChild = e.target.value || null;
+            if (newChild !== data.current) {
+                data.current = newChild;
+                if (supabaseEnabled && data.current) {
+                    await loadProgressFromSupabase(data.current);
+                }
+                await saveData();
+                renderGrid();
+            }
+        });
+
+        document.getElementById('childName').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') window.addChild();
+            if (e.key === 'Escape') window.closeModal();
+        });
+
+        // Закрытие модалки по клику вне её
+        document.getElementById('commentModal').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) {
+                window.closeCommentModal();
+            }
+        });
+
+        // ===============================
+        // 9. Запуск
+        // ===============================
+
+        loadData();
+
+        // Инструкция по созданию таблицы в Supabase:
+        // CREATE TABLE tasks_progress (
+        //   child_name TEXT PRIMARY KEY,
+        //   progress JSONB NOT NULL DEFAULT '{}',
+        //   updated_at TIMESTAMPTZ DEFAULT NOW()
+        // );
+    </script>
 </body>
 </html>
