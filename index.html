@@ -340,7 +340,7 @@
             transition: width 0.3s;
         }
 
-        /* ----- модалка ----- */
+        /* ----- модалки ----- */
         .modal-overlay {
             position: fixed;
             inset: 0;
@@ -503,6 +503,18 @@
         <div class="variants-grid" id="grid"></div>
     </div>
 
+    <!-- Модалка для добавления ребёнка -->
+    <div class="modal-overlay" id="addChildModal">
+        <div class="modal">
+            <h2>Добавить ребёнка</h2>
+            <input type="text" id="childName" placeholder="Имя ребёнка" maxlength="30" />
+            <div class="modal-actions">
+                <button class="secondary" onclick="window.closeAddModal()">Отмена</button>
+                <button onclick="window.addChild()">Добавить</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Модалка для комментария -->
     <div class="modal-overlay" id="commentModal">
         <div class="modal">
@@ -530,7 +542,7 @@
         // ===============================
         // 1. Конфигурация Supabase
         // ===============================
-        const SUPABASE_URL = 'https://fuflttwdnwntljyblgeh.supabase.co'; // Замените на свой URL
+           const SUPABASE_URL = 'https://fuflttwdnwntljyblgeh.supabase.co'; // Замените на свой URL
     const SUPABASE_KEY = 'sb_publishable_CGYKGrbepaKLK5mBpfdypA_OHgJSPK4'; // Замените на свой anon/public ключ
 
         let supabaseClient = null;
@@ -796,10 +808,38 @@
         }
 
         // ===============================
-        // 5. Модалка комментария
+        // 5. Модалка добавления ребенка
         // ===============================
 
-        window.openCommentModal = function(v, t) {
+        window.openAddModal = function() {
+            document.getElementById('addChildModal').classList.add('active');
+            document.getElementById('childName').value = '';
+            setTimeout(() => document.getElementById('childName').focus(), 50);
+        };
+
+        window.closeAddModal = function() {
+            document.getElementById('addChildModal').classList.remove('active');
+        };
+
+        window.addChild = async function() {
+            const name = document.getElementById('childName').value.trim();
+            if (!name) return alert('Введите имя');
+            if (data.children.includes(name)) return alert('Такой ребёнок уже есть');
+
+            data.children.push(name);
+            data.current = name;
+            data.progress[name] = {};
+            await saveData();
+            renderChildSelect();
+            renderGrid();
+            window.closeAddModal();
+        };
+
+        // ===============================
+        // 6. Модалка комментария
+        // ===============================
+
+        function openCommentModal(v, t) {
             currentTaskKey = `${v}-${t}`;
             const childProgress = data.progress[data.current] || {};
             const currentStatus = childProgress[currentTaskKey] || 'none';
@@ -822,7 +862,7 @@
             }
 
             document.getElementById('commentModal').classList.add('active');
-        };
+        }
 
         window.closeCommentModal = function() {
             document.getElementById('commentModal').classList.remove('active');
@@ -865,32 +905,8 @@
         };
 
         // ===============================
-        // 6. Действия
+        // 7. Действия
         // ===============================
-
-        window.openAddModal = function() {
-            document.getElementById('modal').classList.add('active');
-            document.getElementById('childName').value = '';
-            setTimeout(() => document.getElementById('childName').focus(), 50);
-        };
-
-        window.closeModal = function() {
-            document.getElementById('modal').classList.remove('active');
-        };
-
-        window.addChild = async function() {
-            const name = document.getElementById('childName').value.trim();
-            if (!name) return alert('Введите имя');
-            if (data.children.includes(name)) return alert('Такой ребёнок уже есть');
-
-            data.children.push(name);
-            data.current = name;
-            data.progress[name] = {};
-            await saveData();
-            renderChildSelect();
-            renderGrid();
-            window.closeModal();
-        };
 
         window.deleteChild = async function() {
             if (!data.current) return;
@@ -928,7 +944,7 @@
         };
 
         // ===============================
-        // 7. Экспорт/Импорт
+        // 8. Экспорт/Импорт
         // ===============================
 
         window.exportJSON = function() {
@@ -1119,7 +1135,7 @@
         };
 
         // ===============================
-        // 8. Обработчики событий
+        // 9. Обработчики событий
         // ===============================
 
         document.getElementById('childSelect').addEventListener('change', async (e) => {
@@ -1136,10 +1152,16 @@
 
         document.getElementById('childName').addEventListener('keydown', (e) => {
             if (e.key === 'Enter') window.addChild();
-            if (e.key === 'Escape') window.closeModal();
+            if (e.key === 'Escape') window.closeAddModal();
         });
 
-        // Закрытие модалки по клику вне её
+        // Закрытие модалок по клику вне их
+        document.getElementById('addChildModal').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) {
+                window.closeAddModal();
+            }
+        });
+
         document.getElementById('commentModal').addEventListener('click', (e) => {
             if (e.target === e.currentTarget) {
                 window.closeCommentModal();
@@ -1147,7 +1169,7 @@
         });
 
         // ===============================
-        // 9. Запуск
+        // 10. Запуск
         // ===============================
 
         loadData();
