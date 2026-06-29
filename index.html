@@ -53,7 +53,7 @@
             background: rgba(255,255,255,0.15);
             padding: 8px 16px;
             border-radius: 10px;
-            font-size: 14px;
+            font-size: 24px;
         }
         .user-info .role {
             font-size: 11px;
@@ -554,16 +554,16 @@
                     <span class="dot" id="statusDot"></span>
                     <span id="statusText">Подключение...</span>
                 </div>
-                <button onclick="window.logout()" class="logout-btn">🚪 Выйти</button>
+                <button onclick="window.logout()" class="logout-btn"> Выйти</button>
             </div>
         </header>
 
         <div id="adminPanel" style="padding: 15px 30px; background: #f7fafc; border-bottom: 1px solid #e2e8f0; display: flex; gap: 15px; flex-wrap: wrap; align-items: center;">
             <div class="child-selector" id="childSelector">
-                <label style="font-weight: 600; color: #2d3748;">👨‍🎓 Ученик:</label>
+                <label style="font-weight: 600; color: #2d3748;"> Ученик:</label>
                 <select id="childSelect"></select>
-                <button onclick="window.openAddModal()" class="add-child-btn">➕ Добавить</button>
-                <button onclick="window.deleteChild()" class="delete-child-btn">🗑 Удалить</button>
+                <button onclick="window.openAddModal()" class="add-child-btn">Добавить</button>
+                <button onclick="window.deleteChild()" class="delete-child-btn">Удалить</button>
             </div>
             <button onclick="window.syncData()" class="secondary2" title="Синхронизировать с облаком">🔄 Синхр.</button>
         </div>
@@ -1709,11 +1709,7 @@
                 if (pwd) pwd.focus();
             }, 500);
 
-            console.log('👑 Для входа как администратор:');
-            console.log('   Имя: admin');
-            console.log('   Пароль: 210847');
-            console.log('📊 Данные пользователей в localStorage:', localStorage.getItem(USERS_KEY));
-            console.log('🔄 Real-time будет активирован после входа');
+           
         });
     </script>
 </body>
