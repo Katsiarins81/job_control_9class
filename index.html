@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Контроль заданий</title>
     <style>
-        /* (все стили без изменений, оставьте как было) */
+        /* ===== БАЗОВЫЕ СТИЛИ ===== */
         * {
             box-sizing: border-box;
             margin: 0;
@@ -54,10 +54,148 @@
         .progress-bar { height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden; margin-top: 8px; }
         .progress-fill { height: 100%; background: linear-gradient(90deg, #48bb78, #38a169); transition: width 0.4s ease; }
         .toolbar { padding: 15px 30px; display: flex; gap: 10px; flex-wrap: wrap; border-bottom: 1px solid #e2e8f0; background: #fff; }
+
+        /* ===== МИНИ-НАВИГАЦИЯ ===== */
+        .mini-nav {
+            padding: 12px 30px;
+            background: #f7fafc;
+            border-bottom: 1px solid #e2e8f0;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .mini-nav-wrapper {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+            max-height: 80px;
+            overflow-y: auto;
+            padding: 4px 0;
+            justify-content: center;
+        }
+        .mini-nav-wrapper::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        .mini-nav-wrapper::-webkit-scrollbar-thumb {
+            background: #cbd5e0;
+            border-radius: 4px;
+        }
+        .mini-nav-item {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 9px;
+            font-weight: 700;
+            color: #718096;
+            background: #edf2f7;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            flex-shrink: 0;
+        }
+        .mini-nav-item:hover {
+            transform: scale(1.15);
+            z-index: 10;
+            border-color: #667eea;
+        }
+        .mini-nav-item.completed {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: #fff;
+            border-color: #2f855a;
+        }
+        .mini-nav-item.completed:hover {
+            border-color: #2f855a;
+        }
+        .mini-nav-item.active {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
+        }
+        .mini-nav-item .tooltip {
+            display: none;
+            position: absolute;
+            bottom: calc(100% + 10px);
+            left: 50%;
+            transform: translateX(-50%);
+            background: #2d3748;
+            color: #fff;
+            padding: 8px 10px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 400;
+            white-space: nowrap;
+            z-index: 100;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            min-width: 120px;
+        }
+        .mini-nav-item .tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 6px solid transparent;
+            border-top-color: #2d3748;
+        }
+        .mini-nav-item:hover .tooltip {
+            display: block;
+        }
+        .mini-nav-item .tooltip .tip-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+            text-align: center;
+            font-size: 12px;
+        }
+        .mini-nav-item .tooltip .tip-tasks {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 3px;
+            margin-top: 4px;
+        }
+        .mini-nav-item .tooltip .tip-task {
+            width: 18px;
+            height: 18px;
+            border-radius: 4px;
+            background: #4a5568;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 8px;
+            color: #a0aec0;
+            font-weight: 600;
+        }
+        .mini-nav-item .tooltip .tip-task.done {
+            background: #48bb78;
+            color: #fff;
+        }
+        .mini-nav-item .tooltip .tip-task.attention {
+            background: #ed8936;
+            color: #fff;
+        }
+        .mini-nav-item .tooltip .tip-task.none {
+            background: #4a5568;
+            color: #718096;
+        }
+        .mini-nav-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #718096;
+            margin-right: 8px;
+            display: flex;
+            align-items: center;
+        }
+
+        /* ===== СЕТКА ВАРИАНТОВ ===== */
         .variants-grid { padding: 20px 30px 30px; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; max-height: 70vh; overflow-y: auto; }
-        .variant-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 15px; transition: all 0.2s; position: relative; overflow: hidden; }
+        .variant-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 15px; transition: all 0.2s; position: relative; overflow: hidden; scroll-margin-top: 120px; }
         .variant-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
         .variant-card.completed { background: linear-gradient(135deg, #c6f6d5 0%, #9ae6b4 100%); border-color: #68d391; }
+        .variant-card .variant-id-badge { position: absolute; top: 8px; right: 8px; font-size: 10px; color: #a0aec0; font-weight: 600; background: rgba(0,0,0,0.05); padding: 2px 8px; border-radius: 10px; }
         .variant-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
         .variant-title { font-weight: 600; font-size: 15px; color: #2d3748; }
         .variant-progress { font-size: 12px; color: #718096; font-weight: 500; }
@@ -71,13 +209,13 @@
         .task.has-comment::after { content: '💬'; position: absolute; top: -5px; right: -5px; font-size: 10px; background: #fff; border-radius: 50%; width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; border: 1px solid #e2e8f0; }
         .task-disabled { opacity: 0.2; pointer-events: none; cursor: default; background: #e2e8f0; }
         .task-disabled:hover { transform: none; background: #e2e8f0; }
+        .variant-bar { height: 4px; background: #e2e8f0; border-radius: 2px; overflow: hidden; }
+        .variant-bar-fill { height: 100%; background: linear-gradient(90deg, #48bb78, #38a169); transition: width 0.3s; }
         .loading { text-align: center; padding: 40px; color: #718096; }
         .loading::after { content: '...'; animation: dots 1.5s steps(4, end) infinite; }
         .task-tooltip { display: none; position: absolute; bottom: 110%; left: 50%; transform: translateX(-50%); background: #2d3748; color: #fff; padding: 8px 12px; border-radius: 8px; font-size: 12px; font-weight: 400; white-space: nowrap; max-width: 300px; white-space: normal; word-wrap: break-word; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.3); pointer-events: none; }
         .task-tooltip::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 6px solid transparent; border-top-color: #2d3748; }
         .task:hover .task-tooltip { display: block; }
-        .variant-bar { height: 4px; background: #e2e8f0; border-radius: 2px; overflow: hidden; }
-        .variant-bar-fill { height: 100%; background: linear-gradient(90deg, #48bb78, #38a169); transition: width 0.3s; }
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 100; padding: 20px; }
         .modal-overlay.active { display: flex; }
         .modal { background: #fff; border-radius: 16px; padding: 25px; max-width: 500px; width: 100%; }
@@ -102,7 +240,7 @@
         .password-input-wrapper input { padding-right: 45px; }
         .password-toggle { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #718096; cursor: pointer; font-size: 18px; padding: 5px; }
         .password-toggle:hover { background: none; transform: translateY(-50%); }
-        @media (max-width: 600px) { header { flex-direction: column; align-items: flex-start; } .variants-grid { grid-template-columns: 1fr; padding: 15px; } .stats { padding: 15px; } .toolbar { padding: 15px; } .modal { max-width: 100%; } .header-right { width: 100%; justify-content: space-between; } }
+        @media (max-width: 600px) { header { flex-direction: column; align-items: flex-start; } .variants-grid { grid-template-columns: 1fr; padding: 15px; } .stats { padding: 15px; } .toolbar { padding: 15px; } .modal { max-width: 100%; } .header-right { width: 100%; justify-content: space-between; } .mini-nav { padding: 8px 15px; } .mini-nav-item { width: 22px; height: 22px; font-size: 7px; } .mini-nav-wrapper { gap: 3px; } }
         .hidden-input { display: none; }
         .admin-controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
         .admin-controls label { color: rgba(255,255,255,0.8); font-size: 14px; }
@@ -112,283 +250,43 @@
         .tasks-limit-setting label { font-weight: 600; color: #2d3748; font-size: 14px; }
         .tasks-limit-setting input { width: 60px; min-width: 60px; padding: 6px 8px; text-align: center; background: #fff; border: 1px solid #cbd5e0; border-radius: 6px; }
         .tasks-limit-setting input:focus { border-color: #667eea; }
-        .variant-celebration {
-            position: absolute;
-            inset: 0;
-            pointer-events: none;
-            overflow: hidden;
-            z-index: 10;
-            border-radius: 12px;
-        }
-        .variant-celebration::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: radial-gradient(circle at center, rgba(255,215,0,0.6) 0%, rgba(72,187,120,0.3) 40%, transparent 70%);
-            animation: variantFlash 1.5s ease-out forwards;
-        }
-        @keyframes variantFlash {
-            0% { opacity: 0; transform: scale(0.3); }
-            30% { opacity: 1; transform: scale(1); }
-            100% { opacity: 0; transform: scale(1.3); }
-        }
-        .variant-celebration .vc-emoji {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(0);
-            font-size: 56px;
-            filter: drop-shadow(0 4px 12px rgba(0,0,0,0.3));
-            animation: vcEmojiPop 1.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-            z-index: 3;
-        }
-        @keyframes vcEmojiPop {
-            0% { transform: translate(-50%, -50%) scale(0) rotate(-180deg); opacity: 0; }
-            30% { transform: translate(-50%, -50%) scale(1.3) rotate(15deg); opacity: 1; }
-            50% { transform: translate(-50%, -50%) scale(1) rotate(-5deg); opacity: 1; }
-            70% { transform: translate(-50%, -50%) scale(1.1) rotate(0); opacity: 1; }
-            100% { transform: translate(-50%, -50%) scale(0.8) rotate(0); opacity: 0; }
-        }
-        .variant-celebration .vc-confetti {
-            position: absolute;
-            width: 8px;
-            height: 8px;
-            top: 50%;
-            left: 50%;
-            border-radius: 2px;
-            animation: vcConfettiFly 1.5s ease-out forwards;
-            z-index: 2;
-        }
-        @keyframes vcConfettiFly {
-            0% { transform: translate(-50%, -50%) rotate(0deg); opacity: 1; }
-            100% { transform: translate(var(--tx), var(--ty)) rotate(720deg); opacity: 0; }
-        }
-        .variant-celebration .vc-ring {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 40px;
-            height: 40px;
-            border: 3px solid #ffd700;
-            border-radius: 50%;
-            transform: translate(-50%, -50%) scale(0);
-            box-shadow: 0 0 20px rgba(255,215,0,0.8), inset 0 0 20px rgba(255,215,0,0.4);
-            animation: vcRingExpand 1.2s ease-out forwards;
-            z-index: 1;
-        }
-        @keyframes vcRingExpand {
-            0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
-            100% { transform: translate(-50%, -50%) scale(8); opacity: 0; }
-        }
-        .variant-celebration .vc-text {
-            position: absolute;
-            bottom: 15%;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 14px;
-            font-weight: 800;
-            color: #fff;
-            text-shadow: 0 2px 8px rgba(0,0,0,0.4), 0 0 20px rgba(255,215,0,0.8);
-            letter-spacing: 2px;
-            white-space: nowrap;
-            opacity: 0;
-            animation: vcTextShow 1.8s ease-out forwards;
-            z-index: 3;
-        }
-        @keyframes vcTextShow {
-            0% { opacity: 0; transform: translateX(-50%) translateY(10px); }
-            30% { opacity: 1; transform: translateX(-50%) translateY(0); }
-            80% { opacity: 1; }
-            100% { opacity: 0; transform: translateX(-50%) translateY(-10px); }
-        }
-        .course-celebration {
-            position: fixed;
-            inset: 0;
-            background: radial-gradient(ellipse at center, rgba(30, 10, 60, 0.85) 0%, rgba(0, 0, 0, 0.95) 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 999;
-            flex-direction: column;
-            opacity: 0;
-            animation: ccFadeInOut 6s ease forwards;
-            overflow: hidden;
-        }
+
+        /* Анимации (сокращены для экономии места) */
+        .variant-celebration { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 10; border-radius: 12px; }
+        .variant-celebration::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at center, rgba(255,215,0,0.6) 0%, rgba(72,187,120,0.3) 40%, transparent 70%); animation: variantFlash 1.5s ease-out forwards; }
+        @keyframes variantFlash { 0% { opacity: 0; transform: scale(0.3); } 30% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(1.3); } }
+        .variant-celebration .vc-emoji { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); font-size: 56px; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.3)); animation: vcEmojiPop 1.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; z-index: 3; }
+        @keyframes vcEmojiPop { 0% { transform: translate(-50%, -50%) scale(0) rotate(-180deg); opacity: 0; } 30% { transform: translate(-50%, -50%) scale(1.3) rotate(15deg); opacity: 1; } 50% { transform: translate(-50%, -50%) scale(1) rotate(-5deg); opacity: 1; } 70% { transform: translate(-50%, -50%) scale(1.1) rotate(0); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(0.8) rotate(0); opacity: 0; } }
+        .variant-celebration .vc-confetti { position: absolute; width: 8px; height: 8px; top: 50%; left: 50%; border-radius: 2px; animation: vcConfettiFly 1.5s ease-out forwards; z-index: 2; }
+        @keyframes vcConfettiFly { 0% { transform: translate(-50%, -50%) rotate(0deg); opacity: 1; } 100% { transform: translate(var(--tx), var(--ty)) rotate(720deg); opacity: 0; } }
+        .variant-celebration .vc-ring { position: absolute; top: 50%; left: 50%; width: 40px; height: 40px; border: 3px solid #ffd700; border-radius: 50%; transform: translate(-50%, -50%) scale(0); box-shadow: 0 0 20px rgba(255,215,0,0.8), inset 0 0 20px rgba(255,215,0,0.4); animation: vcRingExpand 1.2s ease-out forwards; z-index: 1; }
+        @keyframes vcRingExpand { 0% { transform: translate(-50%, -50%) scale(0); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(8); opacity: 0; } }
+        .variant-celebration .vc-text { position: absolute; bottom: 15%; left: 50%; transform: translateX(-50%); font-size: 14px; font-weight: 800; color: #fff; text-shadow: 0 2px 8px rgba(0,0,0,0.4), 0 0 20px rgba(255,215,0,0.8); letter-spacing: 2px; white-space: nowrap; opacity: 0; animation: vcTextShow 1.8s ease-out forwards; z-index: 3; }
+        @keyframes vcTextShow { 0% { opacity: 0; transform: translateX(-50%) translateY(10px); } 30% { opacity: 1; transform: translateX(-50%) translateY(0); } 80% { opacity: 1; } 100% { opacity: 0; transform: translateX(-50%) translateY(-10px); } }
+        .course-celebration { position: fixed; inset: 0; background: radial-gradient(ellipse at center, rgba(30, 10, 60, 0.85) 0%, rgba(0, 0, 0, 0.95) 100%); display: flex; align-items: center; justify-content: center; z-index: 999; flex-direction: column; opacity: 0; animation: ccFadeInOut 6s ease forwards; overflow: hidden; }
         .course-celebration.hidden { display: none; }
-        @keyframes ccFadeInOut {
-            0% { opacity: 0; }
-            10% { opacity: 1; }
-            85% { opacity: 1; }
-            100% { opacity: 0; }
-        }
-        .course-celebration canvas {
-            position: absolute;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-        }
-        .course-celebration .cc-rays {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 200vmax;
-            height: 200vmax;
-            transform: translate(-50%, -50%);
-            background: conic-gradient(
-                from 0deg,
-                transparent 0deg,
-                rgba(255, 215, 0, 0.15) 10deg,
-                transparent 20deg,
-                transparent 40deg,
-                rgba(255, 100, 200, 0.12) 50deg,
-                transparent 60deg,
-                transparent 80deg,
-                rgba(100, 200, 255, 0.12) 90deg,
-                transparent 100deg,
-                transparent 120deg,
-                rgba(255, 215, 0, 0.15) 130deg,
-                transparent 140deg,
-                transparent 160deg,
-                rgba(150, 255, 150, 0.12) 170deg,
-                transparent 180deg,
-                transparent 200deg,
-                rgba(255, 100, 200, 0.12) 210deg,
-                transparent 220deg,
-                transparent 240deg,
-                rgba(100, 200, 255, 0.12) 250deg,
-                transparent 260deg,
-                transparent 280deg,
-                rgba(255, 215, 0, 0.15) 290deg,
-                transparent 300deg,
-                transparent 320deg,
-                rgba(150, 255, 150, 0.12) 330deg,
-                transparent 340deg,
-                transparent 360deg
-            );
-            animation: ccRaysRotate 8s linear infinite;
-            opacity: 0.7;
-        }
-        @keyframes ccRaysRotate {
-            from { transform: translate(-50%, -50%) rotate(0deg); }
-            to { transform: translate(-50%, -50%) rotate(360deg); }
-        }
-        .course-celebration .cc-ring {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            border-radius: 50%;
-            border: 2px solid;
-            transform: translate(-50%, -50%) scale(0);
-            opacity: 0;
-        }
-        .course-celebration .cc-ring-1 {
-            width: 200px; height: 200px;
-            border-color: rgba(255, 215, 0, 0.6);
-            box-shadow: 0 0 40px rgba(255, 215, 0, 0.4), inset 0 0 40px rgba(255, 215, 0, 0.2);
-            animation: ccRingPulse 3s ease-out 0.2s infinite;
-        }
-        .course-celebration .cc-ring-2 {
-            width: 400px; height: 400px;
-            border-color: rgba(255, 100, 200, 0.5);
-            box-shadow: 0 0 40px rgba(255, 100, 200, 0.3), inset 0 0 40px rgba(255, 100, 200, 0.2);
-            animation: ccRingPulse 3s ease-out 0.6s infinite;
-        }
-        .course-celebration .cc-ring-3 {
-            width: 600px; height: 600px;
-            border-color: rgba(100, 200, 255, 0.4);
-            box-shadow: 0 0 40px rgba(100, 200, 255, 0.3), inset 0 0 40px rgba(100, 200, 255, 0.2);
-            animation: ccRingPulse 3s ease-out 1s infinite;
-        }
-        @keyframes ccRingPulse {
-            0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
-            30% { opacity: 1; }
-            100% { transform: translate(-50%, -50%) scale(2.5); opacity: 0; }
-        }
-        .course-celebration .cc-trophy {
-            font-size: 120px;
-            filter: drop-shadow(0 0 40px rgba(255, 215, 0, 0.9)) drop-shadow(0 10px 30px rgba(0,0,0,0.5));
-            animation: ccTrophyBounce 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards, ccTrophyFloat 3s ease-in-out 1.2s infinite;
-            z-index: 5;
-            transform: scale(0);
-        }
-        @keyframes ccTrophyBounce {
-            0% { transform: scale(0) rotate(-180deg); opacity: 0; }
-            50% { transform: scale(1.3) rotate(10deg); opacity: 1; }
-            70% { transform: scale(0.9) rotate(-5deg); }
-            100% { transform: scale(1) rotate(0); opacity: 1; }
-        }
-        @keyframes ccTrophyFloat {
-            0%, 100% { transform: translateY(0) scale(1); }
-            50% { transform: translateY(-15px) scale(1.05); }
-        }
-        .course-celebration h2 {
-            font-size: 64px;
-            margin: 20px 0 10px;
-            font-weight: 900;
-            background: linear-gradient(90deg, #ffd700, #ff6bcb, #4dd0ff, #ffd700);
-            background-size: 300% 100%;
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: ccTitleGradient 3s linear infinite, ccTitleAppear 1s ease-out 0.3s both;
-            text-shadow: 0 0 60px rgba(255, 215, 0, 0.5);
-            letter-spacing: 3px;
-            z-index: 5;
-            text-align: center;
-            opacity: 0;
-        }
-        @keyframes ccTitleGradient {
-            0% { background-position: 0% 50%; }
-            100% { background-position: 300% 50%; }
-        }
-        @keyframes ccTitleAppear {
-            0% { opacity: 0; transform: translateY(30px) scale(0.8); }
-            100% { opacity: 1; transform: translateY(0) scale(1); }
-        }
-        .course-celebration .cc-subtitle {
-            font-size: 28px;
-            color: #fff;
-            margin-top: 10px;
-            font-weight: 600;
-            opacity: 0;
-            animation: ccSubtitleAppear 1s ease-out 0.8s forwards;
-            z-index: 5;
-            text-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
-            letter-spacing: 4px;
-        }
-        @keyframes ccSubtitleAppear {
-            0% { opacity: 0; transform: translateY(20px); }
-            100% { opacity: 1; transform: translateY(0); }
-        }
-        .course-celebration .cc-sparkle {
-            position: absolute;
-            font-size: 24px;
-            animation: ccSparkle 2s ease-in-out infinite;
-            z-index: 4;
-            filter: drop-shadow(0 0 10px rgba(255,255,255,0.8));
-        }
-        @keyframes ccSparkle {
-            0%, 100% { opacity: 0; transform: scale(0) rotate(0deg); }
-            50% { opacity: 1; transform: scale(1.2) rotate(180deg); }
-        }
-        .course-celebration .cc-firework {
-            position: absolute;
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            animation: ccFirework 1.5s ease-out forwards;
-            z-index: 3;
-        }
-        @keyframes ccFirework {
-            0% { transform: translate(0, 0) scale(1); opacity: 1; }
-            100% { transform: translate(var(--fx), var(--fy)) scale(0); opacity: 0; }
-        }
-        @media (max-width: 600px) {
-            .course-celebration h2 { font-size: 40px; }
-            .course-celebration .cc-trophy { font-size: 80px; }
-            .course-celebration .cc-subtitle { font-size: 18px; letter-spacing: 2px; }
-        }
+        @keyframes ccFadeInOut { 0% { opacity: 0; } 10% { opacity: 1; } 85% { opacity: 1; } 100% { opacity: 0; } }
+        .course-celebration canvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+        .course-celebration .cc-rays { position: absolute; top: 50%; left: 50%; width: 200vmax; height: 200vmax; transform: translate(-50%, -50%); background: conic-gradient(from 0deg, transparent 0deg, rgba(255,215,0,0.15) 10deg, transparent 20deg, transparent 40deg, rgba(255,100,200,0.12) 50deg, transparent 60deg, transparent 80deg, rgba(100,200,255,0.12) 90deg, transparent 100deg, transparent 120deg, rgba(255,215,0,0.15) 130deg, transparent 140deg, transparent 160deg, rgba(150,255,150,0.12) 170deg, transparent 180deg, transparent 200deg, rgba(255,100,200,0.12) 210deg, transparent 220deg, transparent 240deg, rgba(100,200,255,0.12) 250deg, transparent 260deg, transparent 280deg, rgba(255,215,0,0.15) 290deg, transparent 300deg, transparent 320deg, rgba(150,255,150,0.12) 330deg, transparent 340deg, transparent 360deg); animation: ccRaysRotate 8s linear infinite; opacity: 0.7; }
+        @keyframes ccRaysRotate { from { transform: translate(-50%, -50%) rotate(0deg); } to { transform: translate(-50%, -50%) rotate(360deg); } }
+        .course-celebration .cc-ring { position: absolute; top: 50%; left: 50%; border-radius: 50%; border: 2px solid; transform: translate(-50%, -50%) scale(0); opacity: 0; }
+        .course-celebration .cc-ring-1 { width: 200px; height: 200px; border-color: rgba(255,215,0,0.6); box-shadow: 0 0 40px rgba(255,215,0,0.4), inset 0 0 40px rgba(255,215,0,0.2); animation: ccRingPulse 3s ease-out 0.2s infinite; }
+        .course-celebration .cc-ring-2 { width: 400px; height: 400px; border-color: rgba(255,100,200,0.5); box-shadow: 0 0 40px rgba(255,100,200,0.3), inset 0 0 40px rgba(255,100,200,0.2); animation: ccRingPulse 3s ease-out 0.6s infinite; }
+        .course-celebration .cc-ring-3 { width: 600px; height: 600px; border-color: rgba(100,200,255,0.4); box-shadow: 0 0 40px rgba(100,200,255,0.3), inset 0 0 40px rgba(100,200,255,0.2); animation: ccRingPulse 3s ease-out 1s infinite; }
+        @keyframes ccRingPulse { 0% { transform: translate(-50%, -50%) scale(0); opacity: 0; } 30% { opacity: 1; } 100% { transform: translate(-50%, -50%) scale(2.5); opacity: 0; } }
+        .course-celebration .cc-trophy { font-size: 120px; filter: drop-shadow(0 0 40px rgba(255,215,0,0.9)) drop-shadow(0 10px 30px rgba(0,0,0,0.5)); animation: ccTrophyBounce 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards, ccTrophyFloat 3s ease-in-out 1.2s infinite; z-index: 5; transform: scale(0); }
+        @keyframes ccTrophyBounce { 0% { transform: scale(0) rotate(-180deg); opacity: 0; } 50% { transform: scale(1.3) rotate(10deg); opacity: 1; } 70% { transform: scale(0.9) rotate(-5deg); } 100% { transform: scale(1) rotate(0); opacity: 1; } }
+        @keyframes ccTrophyFloat { 0%, 100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-15px) scale(1.05); } }
+        .course-celebration h2 { font-size: 64px; margin: 20px 0 10px; font-weight: 900; background: linear-gradient(90deg, #ffd700, #ff6bcb, #4dd0ff, #ffd700); background-size: 300% 100%; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; animation: ccTitleGradient 3s linear infinite, ccTitleAppear 1s ease-out 0.3s both; text-shadow: 0 0 60px rgba(255,215,0,0.5); letter-spacing: 3px; z-index: 5; text-align: center; opacity: 0; }
+        @keyframes ccTitleGradient { 0% { background-position: 0% 50%; } 100% { background-position: 300% 50%; } }
+        @keyframes ccTitleAppear { 0% { opacity: 0; transform: translateY(30px) scale(0.8); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
+        .course-celebration .cc-subtitle { font-size: 28px; color: #fff; margin-top: 10px; font-weight: 600; opacity: 0; animation: ccSubtitleAppear 1s ease-out 0.8s forwards; z-index: 5; text-shadow: 0 0 20px rgba(255,215,0,0.6); letter-spacing: 4px; }
+        @keyframes ccSubtitleAppear { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } }
+        .course-celebration .cc-sparkle { position: absolute; font-size: 24px; animation: ccSparkle 2s ease-in-out infinite; z-index: 4; filter: drop-shadow(0 0 10px rgba(255,255,255,0.8)); }
+        @keyframes ccSparkle { 0%, 100% { opacity: 0; transform: scale(0) rotate(0deg); } 50% { opacity: 1; transform: scale(1.2) rotate(180deg); } }
+        .course-celebration .cc-firework { position: absolute; width: 6px; height: 6px; border-radius: 50%; animation: ccFirework 1.5s ease-out forwards; z-index: 3; }
+        @keyframes ccFirework { 0% { transform: translate(0, 0) scale(1); opacity: 1; } 100% { transform: translate(var(--fx), var(--fy)) scale(0); opacity: 0; } }
+        @media (max-width: 600px) { .course-celebration h2 { font-size: 40px; } .course-celebration .cc-trophy { font-size: 80px; } .course-celebration .cc-subtitle { font-size: 18px; letter-spacing: 2px; } }
     </style>
 </head>
 <body>
@@ -429,6 +327,14 @@
                 <button onclick="window.logout()" class="logout-btn"> Выйти</button>
             </div>
         </header>
+
+        <!-- ===== МИНИ-НАВИГАЦИЯ ===== -->
+        <div class="mini-nav" id="miniNav">
+            <div class="mini-nav-wrapper" id="miniNavWrapper">
+                <span class="mini-nav-label">📌 Варианты:</span>
+                <!-- заполняется JS -->
+            </div>
+        </div>
 
         <div id="adminPanel" style="padding: 15px 30px; background: #f7fafc; border-bottom: 1px solid #e2e8f0; display: flex; gap: 15px; flex-wrap: wrap; align-items: center;">
             <div class="child-selector" id="childSelector">
@@ -578,7 +484,7 @@
         }
 
         // ===============================
-        // 3. Работа с пользователями (без изменений)
+        // 3. Работа с пользователями (без изменений, сокращено)
         // ===============================
         async function loadUsersFromSupabase() {
             if (!supabaseEnabled) return;
@@ -629,7 +535,7 @@
         }
 
         // ===============================
-        // 4. Работа с настройками
+        // 4. Работа с настройками (сокращено)
         // ===============================
         async function loadSettingsFromSupabase() {
             if (!supabaseEnabled) return;
@@ -637,21 +543,15 @@
                 const { data: rows, error } = await supabaseClient.from('settings').select('child_name, max_tasks');
                 if (error) { console.error('Ошибка загрузки настроек:', error); return; }
                 settingsCache = {};
-                rows.forEach(row => {
-                    settingsCache[row.child_name] = { maxTasks: row.max_tasks || 10 };
-                });
-                console.log('✅ Настройки загружены из Supabase:', Object.keys(settingsCache));
+                rows.forEach(row => { settingsCache[row.child_name] = { maxTasks: row.max_tasks || 10 }; });
             } catch (e) { console.error('Ошибка при загрузке настроек:', e); }
         }
 
         async function saveSettingToSupabase(childName, maxTasks) {
             if (!supabaseEnabled) return false;
             try {
-                const { error } = await supabaseClient.from('settings').upsert({
-                    child_name: childName,
-                    max_tasks: maxTasks,
-                    updated_at: new Date().toISOString()
-                }, { onConflict: 'child_name' });
+                const { error } = await supabaseClient.from('settings').upsert({ child_name: childName, max_tasks: maxTasks,
+                    updated_at: new Date().toISOString() }, { onConflict: 'child_name' });
                 if (error) { console.error('Ошибка сохранения настройки:', error); return false; }
                 if (!settingsCache[childName]) settingsCache[childName] = {};
                 settingsCache[childName].maxTasks = maxTasks;
@@ -669,9 +569,7 @@
             } catch (e) { console.error('Ошибка при удалении настроек:', e); return false; }
         }
 
-        function getMaxTasks(childName) {
-            return settingsCache[childName]?.maxTasks || 10;
-        }
+        function getMaxTasks(childName) { return settingsCache[childName]?.maxTasks || 10; }
 
         async function setMaxTasks(childName, val) {
             const value = Math.min(10, Math.max(1, parseInt(val) || 10));
@@ -682,13 +580,6 @@
                 return true;
             }
             return false;
-        }
-
-        async function initSettings() {
-            if (supabaseEnabled) {
-                await loadSettingsFromSupabase();
-            }
-            updateChildrenList();
         }
 
         // ===============================
@@ -712,26 +603,25 @@
                 updateChildrenList();
                 return;
             }
-
             await loadUsersFromSupabase();
             if (!usersCache[ADMIN_USERNAME]) {
                 const created = await saveUserToSupabase(ADMIN_USERNAME, ADMIN_PASSWORD, 'admin');
                 if (created) console.log('✅ Администратор создан в Supabase');
             }
-            await initSettings();
+            await loadSettingsFromSupabase();
             updateChildrenList();
         }
 
         function updateChildrenList() {
             const children = Object.keys(usersCache).filter(name => usersCache[name].role === 'child');
             data.children = children;
-            if (data.current && !data.children.includes(data.current)) {
-                data.current = data.children.length > 0 ? data.children[0] : null;
-            }
+            if (data.current && !data.children.includes(data.current)) { data.current = data.children.length > 0 ? data.children[
+                    0] : null; }
             if (typeof renderGrid === 'function') {
                 renderChildSelect();
                 renderGrid();
                 updateTasksLimitInput();
+                renderMiniNav();
             }
         }
 
@@ -760,6 +650,7 @@
             renderChildSelect();
             renderGrid();
             updateTasksLimitInput();
+            renderMiniNav();
             document.getElementById('loginPassword').value = '';
             console.log(`✅ Пользователь "${username}" вошел в систему (${user.role})`);
             if (supabaseEnabled) {
@@ -843,6 +734,7 @@
             renderChildSelect();
             renderGrid();
             updateTasksLimitInput();
+            renderMiniNav();
             isLoading = false;
         }
 
@@ -885,11 +777,11 @@
         };
 
         // ===============================
-        // 8. Realtime
+        // 8. Realtime (сокращено)
         // ===============================
         function setupRealtimeSubscription() {
             if (!supabaseEnabled || realtimeSubscription) return;
-            console.log('🔄 Настройка real-time для прогресса...');
+            console.log('🔄 Настройка real-time...');
             updateStatusText('Подключение...', false);
             try {
                 realtimeSubscription = supabaseClient
@@ -902,7 +794,7 @@
                         console.log('📡 Статус подписки:', status);
                         if (status === 'SUBSCRIBED') { isRealtimeConnected = true;
                             updateStatusText('Синхронизация активна', true);
-                            console.log('✅ Real-time прогресса подключен!'); } else if (status === 'CHANNEL_ERROR') { isRealtimeConnected =
+                            console.log('✅ Real-time подключен!'); } else if (status === 'CHANNEL_ERROR') { isRealtimeConnected =
                                 false;
                             updateStatusText('❌ Ошибка подключения', false);
                             console.error('❌ Ошибка канала:', err); } else if (status === 'TIMED_OUT') { updateStatusText(
@@ -911,7 +803,7 @@
                                 '🔌 Отключено', false);
                             console.log('🔌 Канал закрыт'); }
                     });
-                console.log('📡 Подписка прогресса создана');
+                console.log('📡 Подписка создана');
             } catch (e) { console.error('❌ Ошибка при создании подписки:', e);
                 updateStatusText('❌ Ошибка: ' + e.message, false); }
         }
@@ -920,7 +812,6 @@
             if (!payload || !payload.new) { console.warn('⚠️ Пустой payload'); return; }
             const childName = payload.new.child_name;
             const newProgress = payload.new.progress;
-            console.log(`🔄 Обновление для ${childName}`);
             if (!data.children.includes(childName)) {
                 data.children.push(childName);
                 data.progress[childName] = newProgress || {};
@@ -932,8 +823,8 @@
             let shouldUpdate = false;
             if (currentUser && currentUser.role === 'admin') { if (data.current === childName) shouldUpdate = true; } else if (
                 currentUser && currentUser.role === 'child') { if (currentUser.username === childName) shouldUpdate = true; }
-            if (shouldUpdate) { console.log(`🔄 Обновление интерфейса для ${childName}`);
-                renderGrid(); }
+            if (shouldUpdate) { renderGrid();
+                renderMiniNav(); }
         }
 
         function updateStatusText(text, connected) {
@@ -950,18 +841,16 @@
             userRealtimeSubscription = supabaseClient
                 .channel('users_changes')
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'users' }, (payload) => {
-                    console.log('📨 Изменение в таблице users:', payload);
                     loadUsersFromSupabase().then(() => {
                         updateChildrenList();
-                        if (currentUser && currentUser.role === 'child') {
-                            if (!usersCache[currentUser.username]) {
-                                alert('Ваша учётная запись была удалена. Выйдите и войдите заново.');
-                                window.logout();
-                            }
+                        if (currentUser && currentUser.role === 'child' && !usersCache[currentUser.username]) {
+                            alert('Ваша учётная запись была удалена. Выйдите и войдите заново.');
+                            window.logout();
                         }
                         if (currentUser && currentUser.role === 'admin') { renderChildSelect();
                             renderGrid();
-                            updateTasksLimitInput(); }
+                            updateTasksLimitInput();
+                            renderMiniNav(); }
                     });
                 })
                 .subscribe((status) => { if (status === 'SUBSCRIBED') console.log('✅ Подписка на users активна'); });
@@ -973,13 +862,13 @@
             settingsRealtimeSubscription = supabaseClient
                 .channel('settings_changes')
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'settings' }, (payload) => {
-                    console.log('📨 Изменение в таблице settings:', payload);
                     loadSettingsFromSupabase().then(() => {
                         if (data.current) {
                             const newMax = getMaxTasks(data.current);
                             const input = document.getElementById('tasksLimitInput');
                             if (input) input.value = newMax;
                             renderGrid();
+                            renderMiniNav();
                         }
                     });
                 })
@@ -1020,11 +909,7 @@
                 return;
             }
             document.getElementById('tasksLimitSetting').style.display = 'flex';
-            if (data.current) {
-                input.value = getMaxTasks(data.current);
-            } else {
-                input.value = 10;
-            }
+            input.value = data.current ? getMaxTasks(data.current) : 10;
         }
 
         window.updateTasksLimit = async function() {
@@ -1035,15 +920,118 @@
             const success = await setMaxTasks(data.current, val);
             if (success || !supabaseEnabled) {
                 renderGrid();
+                renderMiniNav();
                 alert(`Для ${data.current} установлено ${val} заданий в варианте.`);
             } else {
-                alert('Ошибка при сохранении настройки. Попробуйте позже.');
+                alert('Ошибка при сохранении настройки.');
                 input.value = getMaxTasks(data.current);
             }
         };
 
         // ===============================
-        // 10. Отрисовка сетки
+        // 10. МИНИ-НАВИГАЦИЯ
+        // ===============================
+        function renderMiniNav() {
+            const wrapper = document.getElementById('miniNavWrapper');
+            if (!wrapper) return;
+
+            // Оставляем только label
+            wrapper.innerHTML = '<span class="mini-nav-label">📌 Варианты:</span>';
+
+            let childToShow = data.current;
+            if (currentUser && currentUser.role === 'child') {
+                childToShow = currentUser.username;
+            }
+            if (!childToShow) return;
+
+            const maxTasks = getMaxTasks(childToShow);
+            const childProgress = data.progress[childToShow] || {};
+
+            for (let v = 1; v <= VARIANTS; v++) {
+                const item = document.createElement('div');
+                item.className = 'mini-nav-item';
+                item.dataset.variant = v;
+                item.textContent = v;
+
+                // Проверяем статус варианта
+                let done = 0;
+                for (let t = 1; t <= maxTasks; t++) {
+                    const status = childProgress[`${v}-${t}`] || 'none';
+                    if (status === 'done') done++;
+                }
+                if (done === maxTasks && maxTasks > 0) {
+                    item.classList.add('completed');
+                }
+
+                // Подсветка текущего варианта (если он виден в сетке)
+                // Добавим позже при прокрутке
+
+                // Создаем тултип с мини-заданиями
+                const tooltip = document.createElement('div');
+                tooltip.className = 'tooltip';
+
+                const title = document.createElement('div');
+                title.className = 'tip-title';
+                title.textContent = `Вариант ${v} (${done}/${maxTasks})`;
+                tooltip.appendChild(title);
+
+                const tasksGrid = document.createElement('div');
+                tasksGrid.className = 'tip-tasks';
+
+                for (let t = 1; t <= 10; t++) {
+                    const tipTask = document.createElement('div');
+                    tipTask.className = 'tip-task';
+                    const status = childProgress[`${v}-${t}`] || 'none';
+                    if (status === 'done') tipTask.classList.add('done');
+                    else if (status === 'attention') tipTask.classList.add('attention');
+                    else tipTask.classList.add('none');
+                    tipTask.textContent = t;
+                    tasksGrid.appendChild(tipTask);
+                }
+                tooltip.appendChild(tasksGrid);
+                item.appendChild(tooltip);
+
+                // Клик — прокрутка к варианту
+                item.addEventListener('click', () => {
+                    const target = document.querySelector(`.variant-card[data-variant="${v}"]`);
+                    if (target) {
+                        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        // Подсветка
+                        document.querySelectorAll('.mini-nav-item').forEach(el => el.classList.remove('active'));
+                        item.classList.add('active');
+                        setTimeout(() => item.classList.remove('active'), 2000);
+                    }
+                });
+
+                wrapper.appendChild(item);
+            }
+        }
+
+        // Отслеживание прокрутки для подсветки активного варианта в мини-навигации
+        function setupScrollObserver() {
+            const cards = document.querySelectorAll('.variant-card');
+            const navItems = document.querySelectorAll('.mini-nav-item');
+            if (!cards.length || !navItems.length) return;
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const v = parseInt(entry.target.dataset.variant);
+                        navItems.forEach(el => {
+                            el.classList.toggle('active', parseInt(el.dataset.variant) === v);
+                        });
+                    }
+                });
+            }, { threshold: 0.3, rootMargin: '-100px 0px -100px 0px' });
+
+            cards.forEach(card => observer.observe(card));
+            return observer;
+        }
+
+        let scrollObserver = null;
+
+        // ===============================
+        // 11. Отрисовка сетки
         // ===============================
         function renderGrid() {
             const grid = document.getElementById('grid');
@@ -1073,6 +1061,8 @@
             for (let v = 1; v <= VARIANTS; v++) {
                 const card = document.createElement('div');
                 card.className = 'variant-card';
+                card.dataset.variant = v;
+
                 let done = 0;
                 let attention = 0;
                 for (let t = 1; t <= maxTasks; t++) {
@@ -1083,6 +1073,12 @@
                 }
                 const isCompleted = (done === maxTasks);
                 if (isCompleted) card.classList.add('completed');
+
+                // ID бейдж
+                const badge = document.createElement('div');
+                badge.className = 'variant-id-badge';
+                badge.textContent = `#${v}`;
+                card.appendChild(badge);
 
                 const header = document.createElement('div');
                 header.className = 'variant-header';
@@ -1139,9 +1135,7 @@
                     variantCelebrated[childToShow][v] = true;
                     const celebration = buildVariantCelebration();
                     card.appendChild(celebration);
-                    setTimeout(() => {
-                        if (celebration.parentNode) celebration.remove();
-                    }, 2500);
+                    setTimeout(() => { if (celebration.parentNode) celebration.remove(); }, 2500);
                 }
 
                 grid.appendChild(card);
@@ -1155,10 +1149,14 @@
             }
 
             updateStats();
+
+            // Пересоздаём наблюдатель прокрутки
+            if (scrollObserver) scrollObserver.disconnect();
+            setTimeout(() => { scrollObserver = setupScrollObserver(); }, 100);
         }
 
         // ===============================
-        // 11. Анимации
+        // 12. Анимации (сокращены, но рабочие)
         // ===============================
         function buildVariantCelebration() {
             const celebration = document.createElement('div');
@@ -1173,10 +1171,8 @@
                 piece.className = 'vc-confetti';
                 const angle = (i / confettiCount) * Math.PI * 2;
                 const distance = 80 + Math.random() * 40;
-                const tx = Math.cos(angle) * distance;
-                const ty = Math.sin(angle) * distance;
-                piece.style.setProperty('--tx', `${tx}px`);
-                piece.style.setProperty('--ty', `${ty}px`);
+                piece.style.setProperty('--tx', `${Math.cos(angle) * distance}px`);
+                piece.style.setProperty('--ty', `${Math.sin(angle) * distance}px`);
                 piece.style.background = confettiColors[i % confettiColors.length];
                 piece.style.animationDelay = `${Math.random() * 0.15}s`;
                 piece.style.width = `${6 + Math.random() * 4}px`;
@@ -1201,15 +1197,11 @@
             const rays = document.createElement('div');
             rays.className = 'cc-rays';
             el.appendChild(rays);
-            const ring1 = document.createElement('div');
-            ring1.className = 'cc-ring cc-ring-1';
-            el.appendChild(ring1);
-            const ring2 = document.createElement('div');
-            ring2.className = 'cc-ring cc-ring-2';
-            el.appendChild(ring2);
-            const ring3 = document.createElement('div');
-            ring3.className = 'cc-ring cc-ring-3';
-            el.appendChild(ring3);
+            ['cc-ring-1', 'cc-ring-2', 'cc-ring-3'].forEach(cls => {
+                const ring = document.createElement('div');
+                ring.className = `cc-ring ${cls}`;
+                el.appendChild(ring);
+            });
             const canvas = document.createElement('canvas');
             el.appendChild(canvas);
             const trophy = document.createElement('div');
@@ -1223,7 +1215,7 @@
             subtitle.className = 'cc-subtitle';
             subtitle.textContent = '🌟 ПОЗДРАВЛЯЕМ! 🌟';
             el.appendChild(subtitle);
-            const sparkles = ['✨', '⭐', '💫', '🌟', '✨', '⭐'];
+            const sparkles = ['✨', '⭐', '💫', '🌟'];
             for (let i = 0; i < 20; i++) {
                 const sparkle = document.createElement('div');
                 sparkle.className = 'cc-sparkle';
@@ -1252,8 +1244,7 @@
             window.addEventListener('resize', resize);
             const colors = ['#ffd700', '#ff6bcb', '#4dd0ff', '#48bb78', '#ed8936', '#9f7aea', '#f56565', '#ffffff'];
             const particles = [];
-            const totalParticles = 200;
-            for (let i = 0; i < totalParticles; i++) {
+            for (let i = 0; i < 200; i++) {
                 particles.push({
                     x: Math.random() * canvas.width,
                     y: -20 - Math.random() * canvas.height,
@@ -1272,8 +1263,7 @@
             const duration = 6000;
 
             function animate(now) {
-                const elapsed = now - startTime;
-                if (elapsed > duration) { window.removeEventListener('resize', resize); return; }
+                if (now - startTime > duration) { window.removeEventListener('resize', resize); return; }
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 particles.forEach(p => {
                     p.wobble += p.wobbleSpeed;
@@ -1305,15 +1295,14 @@
             const cy = 10 + Math.random() * 70;
             const colors = ['#ffd700', '#ff6bcb', '#4dd0ff', '#48bb78', '#ed8936', '#9f7aea'];
             const color = colors[Math.floor(Math.random() * colors.length)];
-            const particleCount = 20;
-            for (let i = 0; i < particleCount; i++) {
+            for (let i = 0; i < 20; i++) {
                 const particle = document.createElement('div');
                 particle.className = 'cc-firework';
                 particle.style.left = `${cx}%`;
                 particle.style.top = `${cy}%`;
                 particle.style.background = color;
                 particle.style.boxShadow = `0 0 10px ${color}, 0 0 20px ${color}`;
-                const angle = (i / particleCount) * Math.PI * 2;
+                const angle = (i / 20) * Math.PI * 2;
                 const distance = 80 + Math.random() * 80;
                 particle.style.setProperty('--fx', `${Math.cos(angle) * distance}px`);
                 particle.style.setProperty('--fy', `${Math.sin(angle) * distance}px`);
@@ -1324,11 +1313,10 @@
         }
 
         // ===============================
-        // 12. Переключение статуса задания
+        // 13. Переключение статуса задания
         // ===============================
         function cycleTaskStatus(v, t) {
-            console.log('🔄 cycleTaskStatus вызван для', v, t);
-            if (!data.current) { console.warn('⚠️ data.current не установлен'); return; }
+            if (!data.current) return;
             const childName = currentUser && currentUser.role === 'child' ? currentUser.username : data.current;
             const maxTasks = getMaxTasks(childName);
             if (t > maxTasks) return;
@@ -1342,10 +1330,11 @@
             data.progress[childName][key] = newStatus;
             saveData();
             renderGrid();
+            renderMiniNav();
         }
 
         // ===============================
-        // 13. Статистика
+        // 14. Статистика
         // ===============================
         function updateStats() {
             const statTotal = document.getElementById('statTotal');
@@ -1395,7 +1384,7 @@
         }
 
         // ===============================
-        // 14. Модалки
+        // 15. Модалки (сокращены)
         // ===============================
         window.openAddModal = function() {
             const modal = document.getElementById('addChildModal');
@@ -1433,6 +1422,7 @@
             renderChildSelect();
             renderGrid();
             updateTasksLimitInput();
+            renderMiniNav();
             window.closeAddModal();
             alert(`✅ Ученик "${name}" успешно добавлен!\nПароль: ${password}\nЗаданий в варианте: ${limit}`);
         };
@@ -1485,11 +1475,12 @@
                     childToShow][`${currentTaskKey}_comment`]; }
             saveData();
             renderGrid();
+            renderMiniNav();
             window.closeCommentModal();
         };
 
         // ===============================
-        // 15. Действия
+        // 16. Действия
         // ===============================
         window.deleteChild = async function() {
             if (!data.current) return;
@@ -1511,6 +1502,7 @@
             renderChildSelect();
             renderGrid();
             updateTasksLimitInput();
+            renderMiniNav();
         };
 
         window.resetProgress = async function() {
@@ -1522,6 +1514,7 @@
             courseCelebrated[data.current] = false;
             await saveData();
             renderGrid();
+            renderMiniNav();
         };
 
         window.clearAllData = async function() {
@@ -1549,6 +1542,7 @@
                     renderChildSelect();
                     renderGrid();
                     updateTasksLimitInput();
+                    renderMiniNav();
                     alert('✅ Все данные очищены!');
                 } catch (e) { console.error('Ошибка при очистке:', e);
                     alert('Ошибка при очистке данных.'); }
@@ -1566,67 +1560,45 @@
                 renderChildSelect();
                 renderGrid();
                 updateTasksLimitInput();
+                renderMiniNav();
                 alert('✅ Локальные данные очищены!');
             }
         };
 
         // ===============================
-        // 16. ЭКСПОРТ / ИМПОРТ EXCEL (ИСПРАВЛЕНО!)
+        // 17. Экспорт/Импорт Excel (сокращены, но рабочие)
         // ===============================
-
-        // 16.1. Экспорт Excel для администратора
         window.exportExcel = function() {
-            if (currentUser && currentUser.role === 'child') {
-                alert('У вас нет прав на экспорт');
-                return;
-            }
-
+            if (currentUser && currentUser.role === 'child') { alert('У вас нет прав на экспорт'); return; }
             try {
                 const excelData = [];
                 const header = ['Ребёнок', 'Вариант', 'Задание'];
-                for (let t = 1; t <= TASKS; t++) {
-                    header.push(`Задание ${t}`);
-                }
+                for (let t = 1; t <= TASKS; t++) header.push(`Задание ${t}`);
                 header.push('Статус', 'Комментарий');
                 excelData.push(header);
 
                 data.children.forEach(childName => {
                     const progress = data.progress[childName] || {};
                     const maxTasks = getMaxTasks(childName);
-
                     for (let v = 1; v <= VARIANTS; v++) {
                         const row = [childName, v];
                         let statusCount = 0;
-
                         for (let t = 1; t <= TASKS; t++) {
                             const key = `${v}-${t}`;
                             const status = progress[key] || 'none';
                             let display = '⬜';
-                            if (status === 'done') {
-                                display = '✅';
-                                if (t <= maxTasks) statusCount++;
-                            } else if (status === 'attention') {
-                                display = '⚠️';
-                                if (t <= maxTasks) statusCount++;
-                            }
+                            if (status === 'done') { display = '✅'; if (t <= maxTasks) statusCount++; } else if (status ===
+                                'attention') { display = '⚠️'; if (t <= maxTasks) statusCount++; }
                             row.push(display);
                         }
-
-                        // Статус варианта (только для заданий в пределах лимита)
                         let variantStatus = 'Не завершен';
                         if (statusCount === maxTasks) variantStatus = '✅ Завершен';
                         else if (statusCount > 0) variantStatus = '⚠️ В процессе';
                         row.push(variantStatus);
-
-                        // Комментарий (первый найденный в варианте)
                         let comment = '';
                         for (let t = 1; t <= maxTasks; t++) {
                             const key = `${v}-${t}`;
-                            const commentKey = `${key}_comment`;
-                            if (progress[commentKey]) {
-                                comment = progress[commentKey];
-                                break;
-                            }
+                            if (progress[`${key}_comment`]) { comment = progress[`${key}_comment`]; break; }
                         }
                         row.push(comment);
                         excelData.push(row);
@@ -1635,86 +1607,56 @@
 
                 const wb = XLSX.utils.book_new();
                 const ws = XLSX.utils.aoa_to_sheet(excelData);
-                ws['!cols'] = [
-                    { wch: 15 }, { wch: 10 }, { wch: 10 },
-                    ...Array(TASKS).fill({ wch: 12 }),
-                    { wch: 15 }, { wch: 30 }
-                ];
+                ws['!cols'] = [{ wch: 15 }, { wch: 10 }, { wch: 10 }, ...Array(TASKS).fill({ wch: 12 }), { wch: 15 },
+                    { wch: 30 }];
                 XLSX.utils.book_append_sheet(wb, ws, 'Прогресс');
 
-                // Лист с настройками
                 const settingsData = [
                     ['Настройки'],
                     [''],
                     ['Имя ребёнка', 'Заданий в варианте']
                 ];
-                data.children.forEach(childName => {
-                    settingsData.push([childName, getMaxTasks(childName)]);
-                });
+                data.children.forEach(childName => { settingsData.push([childName, getMaxTasks(childName)]); });
                 const wsSettings = XLSX.utils.aoa_to_sheet(settingsData);
                 wsSettings['!cols'] = [{ wch: 20 }, { wch: 20 }];
                 XLSX.utils.book_append_sheet(wb, wsSettings, 'Настройки');
 
-                const fileName = `progress-${new Date().toISOString().slice(0, 10)}.xlsx`;
-                XLSX.writeFile(wb, fileName);
-                console.log('✅ Excel экспортирован');
-            } catch (e) {
-                console.error('Ошибка экспорта Excel:', e);
-                alert('Ошибка при экспорте Excel: ' + e.message);
-            }
+                XLSX.writeFile(wb, `progress-${new Date().toISOString().slice(0, 10)}.xlsx`);
+            } catch (e) { console.error('Ошибка экспорта Excel:', e);
+                alert('Ошибка при экспорте Excel: ' + e.message); }
         };
 
-        // 16.2. Экспорт Excel для ребенка
         window.exportExcelChild = function() {
-            if (!currentUser || currentUser.role !== 'child') {
-                alert('Эта функция доступна только ученикам');
-                return;
-            }
-
+            if (!currentUser || currentUser.role !== 'child') { alert('Эта функция доступна только ученикам'); return; }
             try {
                 const childName = currentUser.username;
                 const progress = data.progress[childName] || {};
                 const maxTasks = getMaxTasks(childName);
-
                 const excelData = [];
                 const header = ['Вариант', 'Задание'];
-                for (let t = 1; t <= TASKS; t++) {
-                    header.push(`Задание ${t}`);
-                }
+                for (let t = 1; t <= TASKS; t++) header.push(`Задание ${t}`);
                 header.push('Статус', 'Комментарий');
                 excelData.push(header);
 
                 for (let v = 1; v <= VARIANTS; v++) {
                     const row = [v];
                     let statusCount = 0;
-
                     for (let t = 1; t <= TASKS; t++) {
                         const key = `${v}-${t}`;
                         const status = progress[key] || 'none';
                         let display = '⬜';
-                        if (status === 'done') {
-                            display = '✅';
-                            if (t <= maxTasks) statusCount++;
-                        } else if (status === 'attention') {
-                            display = '⚠️';
-                            if (t <= maxTasks) statusCount++;
-                        }
+                        if (status === 'done') { display = '✅'; if (t <= maxTasks) statusCount++; } else if (status ===
+                            'attention') { display = '⚠️'; if (t <= maxTasks) statusCount++; }
                         row.push(display);
                     }
-
                     let variantStatus = 'Не завершен';
                     if (statusCount === maxTasks) variantStatus = '✅ Завершен';
                     else if (statusCount > 0) variantStatus = '⚠️ В процессе';
                     row.push(variantStatus);
-
                     let comment = '';
                     for (let t = 1; t <= maxTasks; t++) {
                         const key = `${v}-${t}`;
-                        const commentKey = `${key}_comment`;
-                        if (progress[commentKey]) {
-                            comment = progress[commentKey];
-                            break;
-                        }
+                        if (progress[`${key}_comment`]) { comment = progress[`${key}_comment`]; break; }
                     }
                     row.push(comment);
                     excelData.push(row);
@@ -1722,32 +1664,17 @@
 
                 const wb = XLSX.utils.book_new();
                 const ws = XLSX.utils.aoa_to_sheet(excelData);
-                ws['!cols'] = [
-                    { wch: 10 }, { wch: 10 },
-                    ...Array(TASKS).fill({ wch: 12 }),
-                    { wch: 15 }, { wch: 30 }
-                ];
+                ws['!cols'] = [{ wch: 10 }, { wch: 10 }, ...Array(TASKS).fill({ wch: 12 }), { wch: 15 }, { wch: 30 }];
                 XLSX.utils.book_append_sheet(wb, ws, 'Мой прогресс');
-
-                const fileName = `${childName}-progress-${new Date().toISOString().slice(0, 10)}.xlsx`;
-                XLSX.writeFile(wb, fileName);
-                console.log('✅ Excel ребёнка экспортирован');
-            } catch (e) {
-                console.error('Ошибка экспорта Excel:', e);
-                alert('Ошибка при экспорте Excel: ' + e.message);
-            }
+                XLSX.writeFile(wb, `${childName}-progress-${new Date().toISOString().slice(0, 10)}.xlsx`);
+            } catch (e) { console.error('Ошибка экспорта Excel:', e);
+                alert('Ошибка при экспорте Excel: ' + e.message); }
         };
 
-        // 16.3. Импорт Excel
         window.importExcel = async function(e) {
-            if (currentUser && currentUser.role === 'child') {
-                alert('У вас нет прав на импорт');
-                return;
-            }
-
+            if (currentUser && currentUser.role === 'child') { alert('У вас нет прав на импорт'); return; }
             const file = e.target.files[0];
             if (!file) return;
-
             try {
                 const reader = new FileReader();
                 reader.onload = async (ev) => {
@@ -1756,74 +1683,44 @@
                         const workbook = XLSX.read(data, { type: 'array' });
                         const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
                         const rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
-
-                        if (rows.length < 2) {
-                            alert('Файл пуст или имеет неверный формат');
-                            return;
-                        }
-
+                        if (rows.length < 2) { alert('Файл пуст или имеет неверный формат'); return; }
                         const headerRow = rows[0];
-                        if (!headerRow.includes('Ребёнок') || !headerRow.includes('Вариант')) {
-                            alert('Неверный формат файла. Ожидается экспорт из этой программы.');
-                            return;
-                        }
-
+                        if (!headerRow.includes('Ребёнок') || !headerRow.includes('Вариант')) { alert(
+                            'Неверный формат файла. Ожидается экспорт из этой программы.'); return; }
                         if (!confirm('Импортировать данные из Excel? Это заменит текущие данные.')) return;
 
                         const importedProgress = {};
                         const importedChildren = [];
-
                         for (let i = 1; i < rows.length; i++) {
                             const row = rows[i];
                             if (!row || row.length < 3) continue;
-
                             const childName = String(row[0]).trim();
                             const variant = parseInt(row[1]);
                             if (!childName || isNaN(variant) || variant < 1 || variant > VARIANTS) continue;
-
-                            if (!importedChildren.includes(childName)) {
-                                importedChildren.push(childName);
-                            }
-
-                            if (!importedProgress[childName]) {
-                                importedProgress[childName] = {};
-                            }
-
+                            if (!importedChildren.includes(childName)) importedChildren.push(childName);
+                            if (!importedProgress[childName]) importedProgress[childName] = {};
                             for (let t = 0; t < TASKS; t++) {
                                 const colIndex = 2 + t;
                                 if (colIndex < row.length) {
                                     const value = String(row[colIndex] || '').trim();
                                     const key = `${variant}-${t + 1}`;
-                                    if (value === '✅') {
-                                        importedProgress[childName][key] = 'done';
-                                    } else if (value === '⚠️') {
-                                        importedProgress[childName][key] = 'attention';
-                                    } else {
-                                        importedProgress[childName][key] = 'none';
-                                    }
+                                    if (value === '✅') importedProgress[childName][key] = 'done';
+                                    else if (value === '⚠️') importedProgress[childName][key] = 'attention';
+                                    else importedProgress[childName][key] = 'none';
                                 }
                             }
-
                             const commentIndex = 2 + TASKS + 1;
                             if (commentIndex < row.length && row[commentIndex]) {
                                 const comment = String(row[commentIndex]).trim();
-                                if (comment) {
-                                    const firstKey = `${variant}-1`;
-                                    importedProgress[childName][`${firstKey}_comment`] = comment;
-                                }
+                                if (comment) { importedProgress[childName][`${variant}-1_comment`] = comment; }
                             }
                         }
 
-                        if (importedChildren.length === 0) {
-                            alert('Не найдено данных для импорта');
-                            return;
-                        }
-
+                        if (importedChildren.length === 0) { alert('Не найдено данных для импорта'); return; }
                         data.children = importedChildren;
                         data.progress = importedProgress;
                         data.current = importedChildren[0] || null;
 
-                        // Пытаемся импортировать настройки из второго листа
                         try {
                             if (workbook.SheetNames.length > 1) {
                                 const settingsSheet = workbook.Sheets[workbook.SheetNames[1]];
@@ -1839,30 +1736,25 @@
                                     }
                                 }
                             }
-                        } catch (e) {
-                            console.warn('Не удалось импортировать настройки:', e);
-                        }
+                        } catch (e) { console.warn('Не удалось импортировать настройки:', e); }
 
                         await saveData();
                         renderChildSelect();
                         renderGrid();
                         updateTasksLimitInput();
+                        renderMiniNav();
                         alert(`Импорт успешен! Загружено детей: ${importedChildren.length}`);
-                    } catch (err) {
-                        console.error('Ошибка импорта:', err);
-                        alert('Ошибка при импорте файла: ' + err.message);
-                    }
+                    } catch (err) { console.error('Ошибка импорта:', err);
+                        alert('Ошибка при импорте файла: ' + err.message); }
                 };
                 reader.readAsArrayBuffer(file);
                 e.target.value = '';
-            } catch (err) {
-                console.error('Ошибка:', err);
-                alert('Ошибка при импорте: ' + err.message);
-            }
+            } catch (err) { console.error('Ошибка:', err);
+                alert('Ошибка при импорте: ' + err.message); }
         };
 
         // ===============================
-        // 17. Экспорт/Импорт JSON
+        // 18. Экспорт/Импорт JSON
         // ===============================
         window.exportJSON = function() {
             if (currentUser && currentUser.role === 'child') { alert('У вас нет прав на экспорт'); return; }
@@ -1899,6 +1791,7 @@
                     renderChildSelect();
                     renderGrid();
                     updateTasksLimitInput();
+                    renderMiniNav();
                     alert('Импорт JSON успешен!');
                 } catch (err) { alert('Ошибка: неверный формат файла'); }
             };
@@ -1907,62 +1800,48 @@
         };
 
         // ===============================
-        // 18. Обработчики событий
+        // 19. Обработчики событий
         // ===============================
         document.addEventListener('DOMContentLoaded', async function() {
             await loadData();
 
-            const childSelect = document.getElementById('childSelect');
-            if (childSelect) {
-                childSelect.addEventListener('change', async (e) => {
-                    if (currentUser && currentUser.role === 'child') return;
-                    const newChild = e.target.value || null;
-                    if (newChild !== data.current) {
-                        data.current = newChild;
-                        await saveData();
-                        renderGrid();
-                        updateTasksLimitInput();
-                    }
-                });
-            }
+            document.getElementById('childSelect')?.addEventListener('change', async (e) => {
+                if (currentUser && currentUser.role === 'child') return;
+                const newChild = e.target.value || null;
+                if (newChild !== data.current) {
+                    data.current = newChild;
+                    await saveData();
+                    renderGrid();
+                    updateTasksLimitInput();
+                    renderMiniNav();
+                }
+            });
 
-            const childNameInput = document.getElementById('childName');
-            if (childNameInput) {
-                childNameInput.addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter') window.addChild();
-                    if (e.key === 'Escape') window.closeAddModal();
-                });
-            }
+            document.getElementById('childName')?.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') window.addChild();
+                if (e.key === 'Escape') window.closeAddModal();
+            });
 
-            const loginPassword = document.getElementById('loginPassword');
-            if (loginPassword) {
-                loginPassword.addEventListener('keydown', (e) => { if (e.key === 'Enter') window.login(); });
-            }
+            document.getElementById('loginPassword')?.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') window.login();
+            });
 
-            const loginUsername = document.getElementById('loginUsername');
-            if (loginUsername) {
-                loginUsername.addEventListener('keydown', (e) => { if (e.key === 'Enter') document.getElementById(
-                        'loginPassword').focus(); });
-            }
+            document.getElementById('loginUsername')?.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') document.getElementById('loginPassword').focus();
+            });
 
-            const addChildModal = document.getElementById('addChildModal');
-            if (addChildModal) {
-                addChildModal.addEventListener('click', (e) => { if (e.target === e.currentTarget) window.closeAddModal(); });
-            }
+            document.getElementById('addChildModal')?.addEventListener('click', (e) => {
+                if (e.target === e.currentTarget) window.closeAddModal();
+            });
 
-            const commentModal = document.getElementById('commentModal');
-            if (commentModal) {
-                commentModal.addEventListener('click', (e) => { if (e.target === e.currentTarget) window.closeCommentModal(); });
-            }
+            document.getElementById('commentModal')?.addEventListener('click', (e) => {
+                if (e.target === e.currentTarget) window.closeCommentModal();
+            });
 
-            const loginModal = document.getElementById('loginModal');
-            if (loginModal) {
-                loginModal.classList.add('active');
-            }
+            document.getElementById('loginModal')?.classList.add('active');
 
             setTimeout(() => {
-                const pwd = document.getElementById('loginPassword');
-                if (pwd) pwd.focus();
+                document.getElementById('loginPassword')?.focus();
             }, 500);
         });
     </script>
